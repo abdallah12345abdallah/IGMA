@@ -203,7 +203,7 @@ function viewFor(stop: number, mobile: boolean, aspect: number): View {
 /** How far the picture slides to make room for the text. */
 function shiftFor(layout: View['layout'], mobile: boolean): [number, number] {
   if (mobile) return [0, layout === 'hero' ? 0.28 : 0.2]
-  if (layout === 'hero') return [0, -0.17]
+  if (layout === 'hero') return [0, -0.24]
   if (layout === 'a') return [0.17, 0]
   if (layout === 'b') return [-0.17, 0]
   return [0, 0.25]
@@ -211,7 +211,7 @@ function shiftFor(layout: View['layout'], mobile: boolean): [number, number] {
 
 const ease = (t: number) => t * t * (3 - 2 * t)
 /** Seconds a system takes to gather (or scatter) in the opening view. */
-const SWAP_S = 0.9
+const SWAP_S = 1.5
 /** How much bigger the single system is in the opening view than at its stop. */
 const HERO_SCALE = 2.7
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { tour } from '../three/tourState'
 
 /** How long each system holds in the opening view; the 3D swap follows the same beat. */
-export const ROTATE_MS = 3600
+export const ROTATE_MS = 5200
 
 /**
  * A headline word that changes every couple of seconds, each in its own colour.
