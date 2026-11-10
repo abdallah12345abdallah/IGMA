@@ -263,6 +263,33 @@ function useLamp(scenes: Record<string, THREE.Object3D>) {
   }, [scenes])
 }
 
+/** The lamp swings as a real pendulum hung from a point above it. */
+const PEND = {
+  above: 2.6, // the pivot sits this far above the top of the shade
+  damping: 0.32, // how quickly a swing dies away
+  carry: 1, // how strongly travelling between systems sets it swinging
+  air: 0.000035, // how much a quick pointer movement pushes it
+  nudge: 0.07, // the kick when the opening system scatters
+  max: 0.32, // never swings further than this (radians)
+}
+const pend = { x: 0, z: 0, vx: 0, vz: 0, px: NaN, pz: NaN, svx: 0, svz: 0, air: 0, hero: -1 }
+if (typeof window !== 'undefined') {
+  let last = 0
+  let lt = 0
+  window.addEventListener(
+    'pointermove',
+    (e) => {
+      const now = performance.now()
+      if (lt) pend.air += ((e.clientX - last) / Math.max(8, now - lt)) * 1000
+      last = e.clientX
+      lt = now
+    },
+    { passive: true },
+  )
+}
+const DOWN = new THREE.Vector3()
+const TILT = new THREE.Euler()
+
 const BEAM_OPACITY = 0.016
 const SPOT_GAIN = 0.8
 const BULB_ON = new THREE.Color('#fff1d6')
@@ -367,20 +394,69 @@ function CameraRig({ fixedStop, reduced, mobile, centered, sun, hemi, lamp, intr
       const lz = la.z + (lb.z - la.z) * t
       const h = la.h + (lb.h - la.h) * t
       const ang = la.ang + (lb.ang - la.ang) * t
-      lamp.rig.position.set(lx, h + (1 - io.drop) * 11, lz)
-      lamp.rig.rotation.z = (reduced ? 0 : Math.sin(time * 0.6) * 0.012) + io.swing
-      const y = h + lamp.bottom
-      lamp.spot.position.set(lx, y, lz)
-      lamp.spot.target.position.set(lx, 0, lz)
+      // --- pendulum ---
+      const len = PEND.above - lamp.bottom // pivot to bulb
+      if (reduced) {
+        pend.x = pend.z = pend.vx = pend.vz = 0
+      } else {
+        // the pivot's acceleration while the lamp travels between systems
+        if (Number.isNaN(pend.px)) {
+          pend.px = lx
+          pend.pz = lz
+        }
+        const vx = (lx - pend.px) / dt
+        const vz = (lz - pend.pz) / dt
+        const ax = (vx - pend.svx) / dt
+        const az = (vz - pend.svz) / dt
+        pend.px = lx
+        pend.pz = lz
+        pend.svx = vx
+        pend.svz = vz
+        const g = 9.8 / len
+        let fz = -g * Math.sin(pend.z) - PEND.damping * pend.vz - (THREE.MathUtils.clamp(ax, -40, 40) * PEND.carry) / len
+        let fx = -g * Math.sin(pend.x) - PEND.damping * pend.vx + (THREE.MathUtils.clamp(az, -40, 40) * PEND.carry) / len
+        // a quick pointer movement pushes the air; a faint draught keeps it alive
+        fz += THREE.MathUtils.clamp(pend.air, -3000, 3000) * PEND.air
+        pend.air *= Math.exp(-dt * 10)
+        fz += Math.sin(time * 0.53) * 0.012 + Math.sin(time * 1.31) * 0.006
+        fx += Math.sin(time * 0.71 + 1.3) * 0.008
+        // each time the opening system scatters, the lamp gets a small knock
+        if (a === 0 && t < 0.05 && tour.heroIdx !== pend.hero) {
+          if (pend.hero !== -1) {
+            pend.vz += PEND.nudge * (Math.random() < 0.5 ? -1 : 1)
+            pend.vx += PEND.nudge * 0.6 * (Math.random() - 0.5)
+          }
+          pend.hero = tour.heroIdx
+        }
+        pend.vz += fz * dt
+        pend.vx += fx * dt
+        pend.z = THREE.MathUtils.clamp(pend.z + pend.vz * dt, -PEND.max, PEND.max)
+        pend.x = THREE.MathUtils.clamp(pend.x + pend.vx * dt, -PEND.max, PEND.max)
+      }
+      TILT.set(pend.x, 0, pend.z + io.swing)
+      DOWN.set(0, -1, 0).applyEuler(TILT)
+      // the lamp hangs from a pivot above it and swings around that point
+      const pivotY = h + PEND.above + (1 - io.drop) * 11
+      lamp.rig.position.set(lx + DOWN.x * PEND.above, pivotY + DOWN.y * PEND.above, lz + DOWN.z * PEND.above)
+      lamp.rig.rotation.copy(TILT)
+      const bx = lx + DOWN.x * len
+      const by = pivotY + DOWN.y * len
+      const bz = lz + DOWN.z * len
+      const y = by
+      // the light and its beam follow the swing across the floor
+      const reach = Math.max(0.5, by / Math.max(0.3, -DOWN.y))
+      lamp.spot.position.set(bx, by, bz)
+      lamp.spot.target.position.set(bx + DOWN.x * reach, by + DOWN.y * reach, bz + DOWN.z * reach)
       lamp.spot.target.updateMatrixWorld()
       lamp.spot.angle = ang
       lamp.spot.intensity = SPOT_GAIN * Math.pow(Math.max(1, y), 1.6) * io.spot
       lamp.bulbMat.color.copy(BULB_OFF).lerp(BULB_ON, io.spot)
       ;const overview = a === 0 ? 1 - t : 0
       ;(lamp.beam.material as THREE.MeshBasicMaterial).opacity = BEAM_OPACITY * io.spot * (1 - overview * 0.6)
-      const r = Math.tan(ang) * y * 0.92
-      lamp.beam.scale.set(r, y, r)
-      lamp.beam.position.set(lx, y / 2, lz)
+      const r = Math.tan(ang) * reach * 0.92
+      lamp.beam.scale.set(r, reach, r)
+      lamp.beam.rotation.copy(TILT)
+      lamp.beam.position.set(bx + (DOWN.x * reach) / 2, by + (DOWN.y * reach) / 2, bz + (DOWN.z * reach) / 2)
     }
   })
   return null
