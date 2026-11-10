@@ -203,7 +203,7 @@ function viewFor(stop: number, mobile: boolean, aspect: number): View {
 /** How far the picture slides to make room for the text. */
 function shiftFor(layout: View['layout'], mobile: boolean): [number, number] {
   if (mobile) return [0, layout === 'hero' ? 0.28 : 0.2]
-  if (layout === 'hero') return [0, -0.08]
+  if (layout === 'hero') return [0, -0.17]
   if (layout === 'a') return [0.17, 0]
   if (layout === 'b') return [-0.17, 0]
   return [0, 0.25]
