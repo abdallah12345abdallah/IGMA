@@ -7,7 +7,6 @@ import { requestDemo } from '../demoEvents'
 import { scrollToY, startSmoothScroll } from '../smoothScroll'
 import { Words } from './Words'
 import { Rotator } from './Rotator'
-import { HeroTicks } from './HeroExtras'
 import { StopArt, StopScene } from './StopArt'
 
 const Showroom = lazy(() => import('../three/Showroom'))
@@ -190,7 +189,6 @@ export function Tour() {
                 <path d="M2 9 C 60 3, 120 12, 180 6 S 270 4, 298 8" pathLength={1} />
               </svg>
             </span>
-            <HeroTicks colors={systems.map((s) => s.color)} run={active === 0 && heroIn && !reduced} />
           </h1>
           <div className="s-side">
             <div className="s-copy">

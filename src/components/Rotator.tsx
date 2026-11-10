@@ -18,7 +18,6 @@ export function Rotator({ words, colors, run, reduced }: { words: string[]; colo
   // the 3D scene shows the same system as the word
   useEffect(() => {
     tour.heroIdx = i
-    window.dispatchEvent(new CustomEvent('hero-rotate', { detail: i }))
   }, [i])
   const prev = (i - 1 + words.length) % words.length
   return (
