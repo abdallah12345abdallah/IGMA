@@ -1033,7 +1033,7 @@
 }
 .pl__card.is-main {
   padding-block: 40px;
-  background: rgba(10, 25, 22, 0.86);
+  background: rgba(15, 59, 52, 0.9); /* the site's pine */
   color: #eef1eb;
   border-color: rgba(255, 255, 255, 0.15);
 }
