@@ -132,12 +132,7 @@ export function StopArt({ id, flow }: { id: string; flow: string[] }) {
     // the course page: progress and lessons
     return (
       <div className="art course">
-        <div className="course__pct deco" aria-hidden="true">
-          <span>25%</span>
-          <span>50%</span>
-          <span>75%</span>
-          <span>100%</span>
-        </div>
+        <div className="course__pct deco" aria-hidden="true" />
         <div className="course__bar deco">
           <i />
         </div>
