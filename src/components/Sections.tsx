@@ -247,50 +247,125 @@ export function Clients() {
   )
 }
 
-/** Phrases the split-flap board cycles through. */
-const BOARD = ['IGMA', 'أنظمة تدير شركتك', 'مصر والسعودية', 'نبني نظامك']
-const FLAPS = 16
-/** Office hours used for the "open now" state, in each office's own time zone. */
-const OPEN_FROM = 9
-const OPEN_TO = 18
 const OFFICES = [
-  { id: 'egypt' as const, code: 'CAI', city: 'الجيزة', tz: 'Africa/Cairo' },
-  { id: 'saudi' as const, code: 'RUH', city: 'الرياض', tz: 'Asia/Riyadh' },
+  { id: 'egypt' as const, tz: 'Africa/Cairo' },
+  { id: 'saudi' as const, tz: 'Asia/Riyadh' },
 ]
+const officeTime = (tz: string) => new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit', timeZone: tz }).format(new Date())
 
-function officeNow(tz: string) {
-  const now = new Date()
-  const h = +new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: tz }).format(now)
-  return {
-    time: new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit', timeZone: tz }).format(now),
-    open: h >= OPEN_FROM && h < OPEN_TO,
-  }
-}
-
-/** A departure board whose letters flip from one phrase to the next. */
-function FlapBoard() {
-  const [i, setI] = useState(0)
-  const [flipKey, setFlipKey] = useState(0)
+/**
+ * The IGMA wordmark drawn from thousands of points. They scatter away from the cursor and
+ * gather back, like the systems in the opening view. Runs only while the footer is on screen.
+ */
+function ParticleMark() {
+  const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const id = window.setInterval(() => {
-      setI((n) => (n + 1) % BOARD.length)
-      setFlipKey((k) => k + 1)
-    }, 3600)
-    return () => window.clearInterval(id)
+    const cv = ref.current
+    if (!cv) return
+    const ctx = cv.getContext('2d')!
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    type P = { x: number; y: number; vx: number; vy: number; tx: number; ty: number; s: number }
+    let pts: P[] = []
+    let W = 0
+    let H = 0
+    let raf = 0
+    let running = false
+    const m = { x: -9999, y: -9999 }
+
+    const build = () => {
+      const r = cv.getBoundingClientRect()
+      if (!r.width) return
+      const dpr = Math.min(2, window.devicePixelRatio || 1)
+      W = Math.round(r.width)
+      H = Math.round(r.height)
+      cv.width = W * dpr
+      cv.height = H * dpr
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      const o = document.createElement('canvas')
+      o.width = W
+      o.height = H
+      const x = o.getContext('2d')!
+      const fs = Math.min(H * 0.92, W * 0.3)
+      x.font = `900 ${fs}px "Readex Pro", Alexandria, sans-serif`
+      x.textAlign = 'center'
+      x.textBaseline = 'middle'
+      x.fillText('IGMA', W / 2, H / 2 + fs * 0.04)
+      const d = x.getImageData(0, 0, W, H).data
+      const step = W < 500 ? 3 : 4
+      const next: P[] = []
+      for (let yy = 0; yy < H; yy += step)
+        for (let xx = 0; xx < W; xx += step)
+          if (d[(yy * W + xx) * 4 + 3] > 128) next.push({ x: Math.random() * W, y: Math.random() * H, vx: 0, vy: 0, tx: xx, ty: yy, s: 1.3 + Math.random() * 1.3 })
+      pts = next
+      if (reduced) {
+        pts.forEach((p) => {
+          p.x = p.tx
+          p.y = p.ty
+        })
+        draw()
+      }
+    }
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H)
+      for (const p of pts) {
+        const sp = Math.min(1, Math.hypot(p.vx, p.vy) / 6)
+        ctx.fillStyle = sp > 0.15 ? `rgba(255, 214, 140, ${0.65 + sp * 0.35})` : 'rgba(246, 226, 196, 0.6)'
+        ctx.fillRect(p.x, p.y, p.s, p.s)
+      }
+    }
+    const frame = () => {
+      raf = requestAnimationFrame(frame)
+      for (const p of pts) {
+        const dx = p.x - m.x
+        const dy = p.y - m.y
+        const d2 = dx * dx + dy * dy
+        if (d2 < 12000) {
+          const f = (12000 - d2) / 12000
+          const dd = Math.sqrt(d2 + 1)
+          p.vx += (dx / dd) * f * 5
+          p.vy += (dy / dd) * f * 5
+        }
+        p.vx = (p.vx + (p.tx - p.x) * 0.05) * 0.82
+        p.vy = (p.vy + (p.ty - p.y) * 0.05) * 0.82
+        p.x += p.vx
+        p.y += p.vy
+      }
+      draw()
+    }
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !running && !reduced) {
+        running = true
+        frame()
+      } else if (!e.isIntersecting && running) {
+        running = false
+        cancelAnimationFrame(raf)
+      }
+    })
+    const move = (e: PointerEvent) => {
+      const r = cv.getBoundingClientRect()
+      m.x = e.clientX - r.left
+      m.y = e.clientY - r.top
+    }
+    const leave = () => {
+      m.x = m.y = -9999
+    }
+    const ro = new ResizeObserver(build)
+    document.fonts.ready.then(() => {
+      build()
+      ro.observe(cv)
+      io.observe(cv)
+    })
+    cv.addEventListener('pointermove', move)
+    cv.addEventListener('pointerleave', leave)
+    return () => {
+      cancelAnimationFrame(raf)
+      io.disconnect()
+      ro.disconnect()
+      cv.removeEventListener('pointermove', move)
+      cv.removeEventListener('pointerleave', leave)
+    }
   }, [])
-  const text = BOARD[i]
-  const chars = [...text.padEnd(FLAPS, ' ')].slice(0, FLAPS)
-  const rtl = /[\u0600-\u06FF]/.test(text)
-  return (
-    <div className="ft__flaps" dir={rtl ? 'rtl' : 'ltr'} role="img" aria-label={text}>
-      {chars.map((ch, k) => (
-        <span key={`${flipKey}-${k}`} className="ft__flap" style={{ ['--k' as string]: k }} aria-hidden="true">
-          {ch}
-        </span>
-      ))}
-    </div>
-  )
+  return <canvas ref={ref} className="ft__mark" role="img" aria-label="IGMA" />
 }
 
 export function Footer() {
@@ -302,42 +377,25 @@ export function Footer() {
   }, [])
   return (
     <footer className="ft" id="contact">
-      <div className="container">
-        <div className="ft__head">
-          <p className="ft__mark" dir="ltr">
-            {company.name}
-          </p>
+      <div className="container ft__grid">
+        <div className="ft__info">
           <p className="ft__statement">{footer.statement}</p>
-        </div>
-        <FlapBoard />
-        <div className="ft__rows" role="table" aria-label="مكاتبنا">
-          <div className="ft__row ft__row--head" role="row">
-            <span role="columnheader">المكتب</span>
-            <span role="columnheader">العنوان</span>
-            <span role="columnheader">واتساب</span>
-            <span role="columnheader">الحالة</span>
+          <div className="ft__offices">
+            {OFFICES.map((o) => {
+              const c = contact[o.id]
+              return (
+                <div key={o.id}>
+                  <b>{c.label}</b>
+                  <span>{c.address}</span>
+                  <a href={`https://wa.me/${c.whatsapp}`} target="_blank" rel="noopener noreferrer" dir="ltr">
+                    {c.phone}
+                  </a>
+                  <small>{officeTime(o.tz)} الآن</small>
+                </div>
+              )
+            })}
           </div>
-          {OFFICES.map((o) => {
-            const c = contact[o.id]
-            const now = officeNow(o.tz)
-            return (
-              <div className="ft__row" role="row" key={o.id}>
-                <b role="cell">
-                  <span dir="ltr">{o.code}</span> · {o.city}
-                </b>
-                <span role="cell">{c.address}</span>
-                <a role="cell" href={`https://wa.me/${c.whatsapp}`} target="_blank" rel="noopener noreferrer" dir="ltr">
-                  {c.phone}
-                </a>
-                <span role="cell" className={now.open ? 'is-open' : ''}>
-                  {now.time} · {now.open ? 'مفتوح الآن' : 'مغلق الآن'}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-        <div className="ft__foot">
-          <nav aria-label={footer.sections}>
+          <nav className="ft__nav" aria-label={footer.sections}>
             {nav.map((n) => (
               <a key={n.href} href={n.href}>
                 {n.label}
@@ -347,10 +405,11 @@ export function Footer() {
               {footer.social}
             </a>
           </nav>
-          <p>
+          <p className="ft__legal">
             © {year} {company.name} · <span dir="ltr">{company.descriptor}</span>
           </p>
         </div>
+        <ParticleMark />
       </div>
     </footer>
   )

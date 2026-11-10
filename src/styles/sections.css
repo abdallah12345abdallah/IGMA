@@ -1471,146 +1471,87 @@ button.sm__tag:hover {
   color: var(--ink-2);
 }
 
-/* ========== FOOTER: a split-flap departure board in burnt brown ========== */
+/* ========== FOOTER: burnt brown, with the IGMA wordmark drawn from points ========== */
 .ft {
-  --fbg: #5a2a0c;
-  --amber: #ffd27a;
-  background: var(--fbg);
+  background: #5a2a0c;
   color: #f6eadc;
-  padding-block: 32px 24px;
+  padding-block: 30px 24px;
 }
-.ft__head {
+.ft__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 24px 40px;
+  align-items: stretch;
+}
+.ft__info {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px 20px;
-}
-.ft__mark {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 30px;
-  line-height: 1;
+  flex-direction: column;
+  gap: 18px;
 }
 .ft__statement {
-  font-size: 15px;
-  color: rgba(246, 234, 220, 0.72);
-}
-.ft__flaps {
-  margin-top: 18px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  perspective: 400px;
-}
-.ft__flap {
-  position: relative;
-  width: clamp(24px, 3.1vw, 44px);
-  height: clamp(38px, 4.4vw, 62px);
-  border-radius: 6px;
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--fbg) 80%, #fff 8%);
-  color: var(--amber);
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(18px, 2.3vw, 32px);
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.35);
-  overflow: hidden;
-  animation: ft-flip 0.34s var(--ease-out) both;
-  animation-delay: calc(var(--k) * 45ms);
+  font-size: clamp(20px, 2.1vw, 28px);
+  line-height: 1.35;
+  max-width: 20ch;
 }
-.ft__flap::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
-  background: rgba(0, 0, 0, 0.45);
-}
-@keyframes ft-flip {
-  0% {
-    transform: rotateX(-90deg);
-    filter: brightness(0.6);
-  }
-  100% {
-    transform: none;
-  }
-}
-.ft__rows {
-  margin-top: 16px;
-  display: grid;
-  gap: 4px;
+.ft__offices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 34px;
   font-size: 14px;
+  color: rgba(246, 234, 220, 0.7);
 }
-.ft__row {
+.ft__offices div {
   display: grid;
-  grid-template-columns: 140px minmax(0, 1fr) 180px 150px;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--fbg) 88%, #fff 7%);
+  gap: 1px;
 }
-.ft__row--head {
-  background: none;
-  padding-block: 2px;
-  font-size: 12px;
-  color: rgba(246, 234, 220, 0.6);
-}
-.ft__row b {
+.ft__offices b {
+  color: #fff3e2;
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 16px;
-  color: var(--amber);
+  font-weight: 700;
+  font-size: 15px;
 }
-.ft__row a {
-  direction: ltr;
-  text-align: right;
+.ft__offices a {
   font-family: ui-monospace, Consolas, monospace;
-  color: #fff;
+  color: #fff3e2;
 }
-.ft__row a:hover {
-  color: var(--amber);
+.ft__offices a:hover {
+  color: #ffd68c;
 }
-.ft__row .is-open {
-  color: #8ff0b8;
-  font-weight: 600;
+.ft__offices small {
+  font-size: 12.5px;
+  color: #ffd68c;
 }
-.ft__foot {
-  margin-top: 16px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 10px 22px;
-  font-size: 13.5px;
-  color: rgba(246, 234, 220, 0.66);
-}
-.ft__foot nav {
+.ft__nav {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 16px;
+  font-size: 14px;
+  color: rgba(246, 234, 220, 0.75);
 }
-.ft__foot nav a:hover {
-  color: var(--amber);
+.ft__nav a:hover {
+  color: #ffd68c;
 }
-@media (max-width: 760px) {
-  .ft__row {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-  .ft__row > :nth-child(2) {
-    grid-column: 1 / -1;
-    order: 3;
-    color: rgba(246, 234, 220, 0.7);
-  }
-  .ft__row--head {
-    display: none;
-  }
+.ft__legal {
+  margin-top: auto;
+  font-size: 12.5px;
+  color: rgba(246, 234, 220, 0.6);
 }
-@media (prefers-reduced-motion: reduce) {
-  .ft__flap {
-    animation: none;
+.ft__mark {
+  width: 100%;
+  height: 100%;
+  min-height: 250px;
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+@media (max-width: 860px) {
+  .ft__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ft__mark {
+    order: -1;
+    min-height: 150px;
   }
 }
 
