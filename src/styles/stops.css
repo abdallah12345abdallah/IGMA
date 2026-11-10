@@ -923,3 +923,127 @@
     animation: none;
   }
 }
+
+/* learning: the course coming to life around the desk, one card per step */
+.tour .stop > .scene-learn {
+  top: calc(var(--nav-h) + 3vh);
+  bottom: 84px;
+  right: var(--gutter);
+  width: min(46vw, 780px);
+}
+.lc {
+  position: absolute;
+  display: grid;
+  gap: 4px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 250, 242, 0.95);
+  color: #4a2204;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 14px 30px rgba(60, 20, 0, 0.28);
+  opacity: 0.35;
+  transform: translateY(10px) scale(0.95);
+  transition:
+    opacity 0.5s,
+    transform 0.6s var(--ease-out);
+}
+.lc b {
+  font-family: var(--font-display);
+}
+.lc--upload {
+  top: 6%;
+  left: 2%;
+  width: 210px;
+}
+.lc__bar {
+  display: block;
+  height: 6px;
+  border-radius: 6px;
+  background: #f0e2d2;
+  overflow: hidden;
+}
+.lc__bar i {
+  display: block;
+  height: 100%;
+  width: 18%;
+  background: var(--c);
+  transition: width 1.2s var(--ease-out);
+}
+.lc--students {
+  top: 2%;
+  right: 2%;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+.lc__faces {
+  display: flex;
+}
+.lc__faces i {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #fffaf2;
+  margin-inline-start: -9px;
+  background: linear-gradient(135deg, #f2c29b, #c9773d);
+}
+.lc__faces i:first-child {
+  margin-inline-start: 0;
+}
+.lc__faces i:nth-child(2) { background: linear-gradient(135deg, #b9d3c4, #4f8a72); }
+.lc__faces i:nth-child(3) { background: linear-gradient(135deg, #c5cbe6, #3b4f9b); }
+.lc__faces i:nth-child(4) { background: linear-gradient(135deg, #f1d58a, #b98a12); }
+.lc--students b {
+  color: var(--c);
+}
+.lc--quiz {
+  bottom: 14%;
+  left: 0;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+.lc--quiz > b {
+  font-size: 30px;
+  line-height: 1;
+  color: var(--c);
+}
+.lc--quiz small {
+  display: block;
+  opacity: 0.6;
+}
+.lc--cert {
+  bottom: 4%;
+  right: 4%;
+  width: 200px;
+  padding: 16px 18px;
+  text-align: center;
+  justify-items: center;
+  border: 2px solid color-mix(in srgb, var(--c) 40%, #fff);
+  outline: 1px solid color-mix(in srgb, var(--c) 25%, #fff);
+  outline-offset: -7px;
+}
+.lc__seal {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--c);
+  color: #fff;
+  font-weight: 700;
+}
+.stop--learning:has(.stop-steps li:nth-child(1).is-lit) .lc--upload,
+.stop--learning:has(.stop-steps li:nth-child(2).is-lit) .lc--students,
+.stop--learning:has(.stop-steps li:nth-child(3).is-lit) .lc--quiz,
+.stop--learning:has(.stop-steps li:nth-child(4).is-lit) .lc--cert {
+  opacity: 1;
+  transform: none;
+}
+.stop--learning:has(.stop-steps li:nth-child(1).is-lit) .lc__bar i {
+  width: 100%;
+}
+.stop--learning:has(.stop-steps li:nth-child(4).is-lit) .lc--cert {
+  transform: rotate(-3deg);
+}

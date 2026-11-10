@@ -212,5 +212,40 @@ export function StopScene({ id, reduced }: { id: string; reduced: boolean }) {
       </div>
     )
   }
+  if (id === 'learning')
+    return (
+      <div className="s-scene scene-learn" aria-hidden="true">
+        <div className="lc lc--upload">
+          <b>رفع المحتوى</b>
+          <span>الدرس 4 · فيديو</span>
+          <i className="lc__bar">
+            <i />
+          </i>
+        </div>
+        <div className="lc lc--students">
+          <span className="lc__faces">
+            <i />
+            <i />
+            <i />
+            <i />
+          </span>
+          <span>
+            <b>+12</b> طالب جديد هذا الأسبوع
+          </span>
+        </div>
+        <div className="lc lc--quiz">
+          <b>92%</b>
+          <span>
+            نتيجة الاختبار
+            <small>الوحدة الثالثة</small>
+          </span>
+        </div>
+        <div className="lc lc--cert">
+          <span className="lc__seal">✓</span>
+          <b>شهادة إتمام</b>
+          <span>أساسيات التصميم</span>
+        </div>
+      </div>
+    )
   return null
 }
