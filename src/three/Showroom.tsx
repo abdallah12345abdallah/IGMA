@@ -210,6 +210,10 @@ function shiftFor(layout: View['layout'], mobile: boolean): [number, number] {
 }
 
 const ease = (t: number) => t * t * (3 - 2 * t)
+/** Seconds a system takes to gather (or scatter) in the opening view. */
+const SWAP_S = 0.9
+/** How much bigger the single system is in the opening view than at its stop. */
+const HERO_SCALE = 2.7
 
 /* ---------- the lamp that hangs over the gallery and follows the visitor ---------- */
 function useLamp(scenes: Record<string, THREE.Object3D>) {
@@ -466,7 +470,7 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
   const lamp = useLamp(scenes)
   useEffect(() => onLamp(lamp), [lamp, onLamp])
 
-  const { groups, outers } = useMemo(() => {
+  const { groups, outers, parts } = useMemo(() => {
     const groups: THREE.Group[] = []
     const outers = STATIONS.map((_, i) => {
       const g = buildStation(i, scenes)
@@ -478,23 +482,62 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
       outer.add(ground(tourStops[i].color), g)
       return outer
     })
-    return { groups, outers }
+    // every piece of every station remembers its resting place, so it can fly off and come back
+    const parts = groups.map((g) =>
+      g.children[0].children.map((o, k, all) => {
+        const a = k * 2.399 + 0.7
+        return {
+          o,
+          p: o.position.clone(),
+          r: o.rotation.clone(),
+          s: o.scale.clone(),
+          dir: new THREE.Vector3(Math.sin(a), 0.55 + (k % 3) * 0.25, Math.cos(a)).multiplyScalar(1.1 + (k % 2) * 0.5),
+          spin: (k % 2 ? 1 : -1) * (1.6 + k * 0.35),
+          d: all.length > 1 ? k / (all.length - 1) : 0,
+        }
+      }),
+    )
+    return { groups, outers, parts }
   }, [scenes])
   const shown = useRef(STATIONS.map(() => 1))
+  // 1 = assembled, 0 = scattered
+  const built = useRef<number[]>(STATIONS.map((_, i) => (i === 0 ? 1 : 0)))
 
   useFrame((state, delta) => {
     const dt = Math.min(0.05, delta)
     const k = 1 - Math.exp(-dt * 9)
     const pos = fixedStop ?? tour.pos
     const time = reduced ? 0 : state.clock.elapsedTime
+    const inHero = pos < 0.5
+    // the next system waits until the previous one has mostly scattered
+    const leaving = built.current.some((v, j) => j !== tour.heroIdx && v > 0.35)
     groups.forEach((g, i) => {
-      // In the overview every system shows; on a stop only the one in view stays.
-      const want = Math.max(Math.min(1, Math.max(0, 1 - pos)), Math.max(0, 1 - Math.abs(pos - (i + 1)) * 1.4))
+      const atStop = Math.max(0, 1 - Math.abs(pos - (i + 1)) * 1.4)
+      const isHero = i === tour.heroIdx
+      // Opening view: one system at a time, centred under the lamp. It scatters and the next gathers in its place.
+      const aim = inHero ? (isHero ? (leaving && !reduced ? built.current[i] : 1) : 0) : atStop > 0 ? 1 : 0
+      const step = dt / SWAP_S
+      built.current[i] = reduced ? aim : built.current[i] + Math.max(-step, Math.min(step, aim - built.current[i]))
+      const a = built.current[i]
+      const centred = pos < 1 && (isHero || (inHero && a > 0.01))
+      const b = centred ? ease(Math.min(1, Math.max(0, 1 - pos))) : 0
+      const want = Math.max(centred ? Math.max(0, 1 - pos) : 0, atStop)
       shown.current[i] = reduced ? want : shown.current[i] + (want - shown.current[i]) * (1 - Math.exp(-dt * 5))
       const v = shown.current[i]
       const e = v * v * (3 - 2 * v)
-      outers[i].scale.setScalar(Math.max(0.001, e))
-      outers[i].visible = e > 0.01
+      const sp = spotPos(i)
+      outers[i].position.set(sp.x * (1 - b), 0, sp.z * (1 - b))
+      outers[i].scale.setScalar(Math.max(0.001, e * (1 + (HERO_SCALE - 1) * b)))
+      outers[i].visible = e > 0.01 && a > 0.001
+      outers[i].children[0].scale.setScalar(Math.max(0.001, a))
+      for (const q of parts[i]) {
+        const lp = Math.min(1, Math.max(0, (a - 0.4 * q.d) / 0.6))
+        const f = 1 - lp
+        const ee = 1 - f * f * f
+        q.o.position.copy(q.p).addScaledVector(q.dir, 1 - ee)
+        q.o.rotation.set(q.r.x + q.spin * 0.4 * (1 - ee), q.r.y + q.spin * (1 - ee), q.r.z)
+        q.o.scale.copy(q.s).multiplyScalar(Math.max(0.001, ee))
+      }
       const lift = interactive && hover === i && tour.pos < 0.3 ? 0.22 : 0
       g.position.y += (lift - g.position.y) * k
       const focus = Math.max(0, 1 - Math.abs(pos - (i + 1)))

@@ -12,5 +12,7 @@ export const tour = {
   /** Set by the page so a click on a pedestal in the overview can jump to that system. */
   /** When the opening (lamp drops in and switches on) started, in performance.now() ms. null = not yet */
   introAt: null as null | number,
+  /** Which system the opening view shows; follows the rotating word in the headline. */
+  heroIdx: 0,
   onPick: null as null | ((index: number) => void),
 }

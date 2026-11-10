@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react'
+import { tour } from '../three/tourState'
+
+/** How long each system holds in the opening view; the 3D swap follows the same beat. */
+export const ROTATE_MS = 3600
 
 /**
  * A headline word that changes every couple of seconds, each in its own colour.
@@ -8,9 +12,13 @@ export function Rotator({ words, colors, run, reduced }: { words: string[]; colo
   const [i, setI] = useState(0)
   useEffect(() => {
     if (!run || reduced) return
-    const id = window.setInterval(() => setI((n) => (n + 1) % words.length), 2200)
+    const id = window.setInterval(() => setI((n) => (n + 1) % words.length), ROTATE_MS)
     return () => window.clearInterval(id)
   }, [run, reduced, words.length])
+  // the 3D scene shows the same system as the word
+  useEffect(() => {
+    tour.heroIdx = i
+  }, [i])
   const prev = (i - 1 + words.length) % words.length
   return (
     <span className="w rot-wrap" style={{ ['--i' as string]: 2 }}>
