@@ -831,6 +831,207 @@
 .demo .head__body {
   color: var(--ink-2);
 }
+/* demo, smart line: one big box with a slowly turning gradient frame; tags show what was understood */
+.sm {
+  background: radial-gradient(70% 60% at 50% 0%, #ffffff, #e4dfd5);
+  text-align: center;
+}
+.sm__head h2 {
+  margin: 10px auto 0;
+  max-width: 18ch;
+  font-weight: 800;
+  font-size: clamp(32px, 4.2vw, 56px);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+@property --sm-a {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+.sm__box {
+  max-width: 860px;
+  margin: 36px auto 0;
+  padding: 3px;
+  border-radius: 28px;
+  background: conic-gradient(from var(--sm-a), #8fd3b6, #c9d6f5, #f6d2bd, #8fd3b6);
+  animation: sm-spin 6s linear infinite;
+  box-shadow: 0 30px 60px -40px rgba(10, 25, 22, 0.5);
+}
+@keyframes sm-spin {
+  to {
+    --sm-a: 360deg;
+  }
+}
+.sm__in {
+  border-radius: 25px;
+  background: #fff;
+  padding: 18px 20px 14px;
+  text-align: right;
+}
+.sm__in textarea {
+  width: 100%;
+  min-height: 72px;
+  border: 0;
+  resize: none;
+  font-size: clamp(18px, 2vw, 22px);
+  line-height: 1.6;
+  color: var(--ink);
+  background: transparent;
+}
+.sm__in textarea:focus {
+  outline: none;
+}
+.sm__tags {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(10, 25, 22, 0.12);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.sm__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--c, var(--green)) 12%, #fff);
+  color: var(--c, var(--green));
+  animation: sm-tag 0.45s var(--ease-out);
+}
+button.sm__tag {
+  cursor: pointer;
+}
+button.sm__tag:hover {
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+.sm__tag small {
+  font-weight: 500;
+  opacity: 0.7;
+}
+.sm__tag.is-set {
+  --c: #3b4945;
+}
+.sm__tag.is-empty {
+  background: transparent;
+  border: 1px dashed rgba(10, 25, 22, 0.25);
+  color: var(--ink-2);
+  animation: none;
+}
+@keyframes sm-tag {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+}
+.sm__send {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 20px;
+  border-radius: 14px;
+  background: #25d366;
+  color: #06311b;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  transition:
+    transform 0.2s var(--ease-out),
+    opacity 0.3s;
+}
+.sm__send::before {
+  content: '✆';
+  font-size: 18px;
+}
+.sm__send:hover {
+  transform: translateY(-2px);
+}
+.sm__send[aria-disabled='true'] {
+  opacity: 0.5;
+}
+.sm__prompts {
+  margin: 18px auto 0;
+  max-width: 900px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.sm__prompts button {
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(10, 25, 22, 0.16);
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+.sm__prompts button:hover {
+  border-color: var(--green);
+}
+.sm__who {
+  max-width: 860px;
+  margin: 24px auto 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  text-align: right;
+}
+.sm__fine {
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.sm__done {
+  max-width: 640px;
+  margin: 32px auto 0;
+  padding: 28px;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 30px 50px -40px rgba(10, 25, 22, 0.5);
+}
+.sm__done h3 {
+  font-weight: 800;
+  font-size: 26px;
+}
+.sm__done p {
+  margin-top: 6px;
+  color: var(--ink-2);
+}
+.sm__actions {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.sm__actions .sm__send {
+  margin: 0;
+}
+.sm__again {
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(10, 25, 22, 0.25);
+  font-weight: 600;
+}
+@media (max-width: 700px) {
+  .sm__who {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sm__box,
+  .sm__tag {
+    animation: none;
+  }
+}
+
 .bk {
   margin-top: 32px;
   display: grid;

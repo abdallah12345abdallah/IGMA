@@ -1,50 +1,59 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { contact, demo, markets, systems, type SystemId } from '../content/site'
 import { onDemoRequest } from '../demoEvents'
 
 type Market = 'egypt' | 'saudi'
 const OTHER = 'other'
 
-/** Times we offer for a demo (about 45 minutes each), in the office's own time zone. */
-const SLOTS = ['١٠:٠٠ ص', '١١:٣٠ ص', '١:٠٠ م', '٢:٣٠ م', '٤:٠٠ م', '٥:٣٠ م', '٧:٠٠ م', '٨:٣٠ م']
-
-/** The next five working days: Friday is off in both markets, Saturday too in Egypt. */
-function workdays(market: Market) {
-  const out: Date[] = []
-  const d = new Date()
-  d.setDate(d.getDate() + 1)
-  while (out.length < 5) {
-    const wd = d.getDay()
-    if (!(wd === 5 || (market === 'egypt' && wd === 6))) out.push(new Date(d))
-    d.setDate(d.getDate() + 1)
-  }
-  return out
-}
-const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('ar-EG', o)
-const dayShort = fmt({ weekday: 'short' })
-const dayNum = fmt({ day: 'numeric' })
-const dayLong = fmt({ weekday: 'long', day: 'numeric', month: 'long' })
+/** Words that point to each system or market in what the visitor writes. Checked in this order. */
+const SYSTEM_WORDS: [string, RegExp][] = [
+  ['restaurant', /مطعم|مطاعم|كافيه|كافي|مقهى|مطبخ|طاولة|طاولات|كاشير|منيو/i],
+  ['logistics', /شحن|شحنات|توصيل|سائق|سواق|لوجست|مندوب/i],
+  ['gym', /جيم|نادي|صالة رياض|رياضي|أعضاء|اشتراكات الأعضاء/i],
+  ['hr', /موظف|رواتب|حضور|انصراف|إجاز|اجاز|توظيف|\bhr\b/i],
+  ['learning', /تعليم|دورات|كورس|طلاب|طالب|أكاديم|اكاديم|محتوى/i],
+  ['erp', /erp|حسابات|محاسب|مخزن|مخزون|مشتريات|فواتير|أتمت|اتمت|موافق|مصنع|توزيع|excel|إكسل|اكسل/i],
+  [OTHER, /نظام خاص|خاص فينا|خاص بنا|موقع|تطبيق|ربط/i],
+]
+const MARKET_WORDS: [Market, RegExp][] = [
+  ['egypt', /مصر|القاهرة|الجيزة|إسكندرية|اسكندرية|المنصورة/],
+  ['saudi', /السعودية|الرياض|جدة|الدمام|مكة|المدينة|الخبر/],
+]
+const PROMPTS = ['عندي مطعمين في الرياض والطلبات بتضيع', 'شركة شحن في السعودية وبدنا نتابع السائقين', 'مصنع في مصر والمخزون كله على Excel', 'بدنا نظام خاص لطريقة شغلنا']
 
 /**
- * Demo request as a booking: the visitor picks a day and a time, and the form prepares a
- * WhatsApp message to the right office with that suggested slot. There is no server.
+ * Demo request in one smart line: the visitor describes the business in their own words,
+ * the page picks up the system and the market from them (both can be changed with a tap),
+ * and a WhatsApp message is prepared for the right office. There is no server.
  */
 export function Demo({ initial, title }: { initial?: SystemId; title?: string }) {
+  const [story, setStory] = useState('')
   const [name, setName] = useState('')
   const [company, setCompany] = useState('')
   const [system, setSystem] = useState<string>(initial ?? systems[0].id)
   const [market, setMarket] = useState<Market>('egypt')
-  const [message, setMessage] = useState('')
-  const [day, setDay] = useState(0)
-  const [slot, setSlot] = useState(SLOTS[2])
   const [errors, setErrors] = useState<{ name?: string; company?: string }>({})
   const [link, setLink] = useState<string | null>(null)
 
   useEffect(() => onDemoRequest((id) => setSystem(id)), [])
 
-  const days = useMemo(() => workdays(market), [market])
+  const read = (text: string) => {
+    setStory(text)
+    const sys = SYSTEM_WORDS.find(([, re]) => re.test(text))
+    if (sys) setSystem(sys[0])
+    const mk = MARKET_WORDS.find(([, re]) => re.test(text))
+    if (mk) setMarket(mk[0])
+  }
+
+  const sys = systems.find((s) => s.id === system)
+  const sysLabel = sys?.name ?? demo.other
   const office = markets.regions.find((r) => r.id === market)?.name ?? ''
-  const when = `${dayLong.format(days[day])}، ${slot} (بتوقيت ${office})`
+  const ready = !!name.trim() && !!company.trim()
+
+  const cycleSystem = () => {
+    const ids = [...systems.map((s) => s.id as string), OTHER]
+    setSystem(ids[(ids.indexOf(system) + 1) % ids.length])
+  }
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,8 +65,7 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
       document.getElementById(next.name ? 'demo-name' : 'demo-company')?.focus()
       return
     }
-    const sysLabel = systems.find((s) => s.id === system)?.name ?? demo.other
-    const text = [`طلب عرض توضيحي: ${sysLabel}`, `الاسم: ${name.trim()}`, `الشركة: ${company.trim()}`, `الموعد المقترح: ${when}`, message.trim() ? `التفاصيل: ${message.trim()}` : '']
+    const text = [`طلب عرض توضيحي: ${sysLabel}`, `الاسم: ${name.trim()}`, `الشركة: ${company.trim()}`, story.trim() ? `التفاصيل: ${story.trim()}` : '']
       .filter(Boolean)
       .join('\n')
     const url = `https://wa.me/${contact[market].whatsapp}?text=${encodeURIComponent(text)}`
@@ -66,74 +74,59 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
   }
 
   return (
-    <section className="demo" id="demo" data-nav="light" aria-labelledby="demo-title">
+    <section className="demo sm" id="demo" data-nav="light" aria-labelledby="demo-title">
       <div className="container">
-        <header className="head">
+        <header className="sm__head">
           <p className="kicker">{demo.kicker}</p>
-          <h2 id="demo-title">{title ?? 'اختر موعدًا يناسبك، ونتواصل لتأكيده.'}</h2>
-          <p className="head__body">{demo.body}</p>
+          <h2 id="demo-title">{title ?? 'احكِ لنا عن شركتك بكلماتك.'}</h2>
         </header>
 
         {link ? (
-          <div className="bk__panel bk__done" role="status">
+          <div className="sm__done" role="status">
             <h3>{demo.sentTitle}</h3>
             <p>{demo.sentBody}</p>
-            <p className="bk__when">
-              <small>الموعد المقترح</small>
-              <b>{when}</b>
-            </p>
-            <div className="bk__actions">
-              <a className="bk__send" href={link} target="_blank" rel="noreferrer">
+            <div className="sm__actions">
+              <a className="sm__send" href={link} target="_blank" rel="noreferrer">
                 {demo.sentLink}
               </a>
-              <button type="button" className="bk__again" onClick={() => setLink(null)}>
+              <button type="button" className="sm__again" onClick={() => setLink(null)}>
                 {demo.again}
               </button>
             </div>
           </div>
         ) : (
-          <form className="bk" onSubmit={submit} noValidate>
-            <div className="bk__panel">
-              <h3 id="bk-day">اليوم</h3>
-              <p className="bk__sub">أيام العمل القادمة</p>
-              <div className="bk__days" role="group" aria-labelledby="bk-day">
-                {days.map((d, i) => (
-                  <button key={d.toDateString()} type="button" aria-pressed={i === day} aria-label={dayLong.format(d)} onClick={() => setDay(i)}>
-                    <small>{dayShort.format(d)}</small>
-                    <b>{dayNum.format(d)}</b>
+          <form onSubmit={submit} noValidate>
+            <div className="sm__box">
+              <div className="sm__in">
+                <label className="sr-only" htmlFor="demo-story">
+                  احكِ لنا عن شركتك وما الذي تريد تحسينه
+                </label>
+                <textarea id="demo-story" rows={2} value={story} onChange={(e) => read(e.target.value)} placeholder="مثلًا: عندي مطعمين في الرياض والطلبات بتضيع بين الصالة والمطبخ" />
+                <div className="sm__tags">
+                  <button type="button" className="sm__tag" style={{ ['--c' as string]: sys?.color ?? '#0a1916' }} onClick={cycleSystem} aria-label={`النظام: ${sysLabel}. اضغط للتغيير`}>
+                    <small>النظام</small> {sys?.short ?? 'نظام خاص'}
                   </button>
-                ))}
-              </div>
-              <h3 id="bk-time" className="bk__gap">
-                الوقت
-              </h3>
-              <p className="bk__sub">مدة العرض حوالي ٤٥ دقيقة</p>
-              <div className="bk__slots" role="group" aria-labelledby="bk-time">
-                {SLOTS.map((t) => (
-                  <button key={t} type="button" aria-pressed={t === slot} onClick={() => setSlot(t)}>
-                    {t}
+                  <button type="button" className="sm__tag" onClick={() => setMarket(market === 'egypt' ? 'saudi' : 'egypt')} aria-label={`المكتب: ${office}. اضغط للتغيير`}>
+                    <small>المكتب</small> {office}
                   </button>
-                ))}
-              </div>
-              <div className="bk__tz" role="group" aria-label={demo.fields.market}>
-                {markets.regions.map((r) => (
-                  <button
-                    key={r.id}
-                    type="button"
-                    aria-pressed={r.id === market}
-                    onClick={() => {
-                      setMarket(r.id)
-                      setDay(0)
-                    }}
-                  >
-                    بتوقيت {r.name}
+                  <span className={`sm__tag ${name.trim() ? 'is-set' : 'is-empty'}`}>{name.trim() ? <><small>الاسم</small> {name.trim()}</> : 'اسمك؟'}</span>
+                  <span className={`sm__tag ${company.trim() ? 'is-set' : 'is-empty'}`}>{company.trim() ? <><small>الشركة</small> {company.trim()}</> : 'شركتك؟'}</span>
+                  <button className="sm__send" type="submit" aria-disabled={!ready}>
+                    أرسل
                   </button>
-                ))}
+                </div>
               </div>
             </div>
 
-            <div className="bk__panel bk__summary">
-              <h3>تفاصيلك</h3>
+            <div className="sm__prompts">
+              {PROMPTS.map((p) => (
+                <button key={p} type="button" onClick={() => read(p)}>
+                  {p}
+                </button>
+              ))}
+            </div>
+
+            <div className="sm__who">
               <div className="field">
                 <label htmlFor="demo-name">{demo.fields.name}</label>
                 <input
@@ -174,30 +167,8 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
                   </p>
                 )}
               </div>
-              <div className="field">
-                <label htmlFor="demo-system">{demo.fields.system}</label>
-                <select id="demo-system" name="system" value={system} onChange={(e) => setSystem(e.target.value)}>
-                  {systems.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                  <option value={OTHER}>{demo.other}</option>
-                </select>
-              </div>
-              <div className="field">
-                <label htmlFor="demo-message">{demo.fields.message}</label>
-                <textarea id="demo-message" name="message" rows={2} value={message} onChange={(e) => setMessage(e.target.value)} />
-              </div>
-              <p className="bk__when" aria-live="polite">
-                <small>الموعد المقترح</small>
-                <b key={when}>{when}</b>
-              </p>
-              <button className="bk__send" type="submit">
-                احجز عبر واتساب
-              </button>
-              <p className="bk__legal">الموعد اقتراح منك، ونؤكده معك على واتساب.</p>
             </div>
+            <p className="sm__fine">نفهم من كلامك النظام والبلد، وتقدر تغيّرهم بالضغط على الوسم.</p>
           </form>
         )}
       </div>
