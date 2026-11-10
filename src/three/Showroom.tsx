@@ -216,7 +216,7 @@ const ease = (t: number) => t * t * (3 - 2 * t)
 /** Seconds a system takes to gather (or scatter) in the opening view. */
 const SWAP_S = 1.5
 /** How much bigger the single system is in the opening view than at its stop. */
-const HERO_SCALE = 2.2 // size of the system shown alone in the opening view
+const HERO_SCALE = 2.7 // size of the system shown alone in the opening view
 
 /* ---------- the lamp that hangs over the gallery and follows the visitor ---------- */
 function useLamp(scenes: Record<string, THREE.Object3D>) {
