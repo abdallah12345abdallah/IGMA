@@ -963,18 +963,18 @@
   animation: pl-drift 18s ease-in-out infinite alternate;
 }
 .pl__aurora i:nth-child(1) {
-  background: radial-gradient(closest-side, rgba(143, 211, 182, 0.75), rgba(143, 211, 182, 0) 100%);
+  background: radial-gradient(closest-side, rgba(196, 138, 146, 0.55), rgba(196, 138, 146, 0) 100%);
   top: 0;
   right: 2%;
 }
 .pl__aurora i:nth-child(2) {
-  background: radial-gradient(closest-side, rgba(170, 190, 240, 0.7), rgba(170, 190, 240, 0) 100%);
+  background: radial-gradient(closest-side, rgba(240, 194, 122, 0.5), rgba(240, 194, 122, 0) 100%);
   top: 30%;
   left: 0;
   animation-delay: -6s;
 }
 .pl__aurora i:nth-child(3) {
-  background: radial-gradient(closest-side, rgba(244, 190, 160, 0.7), rgba(244, 190, 160, 0) 100%);
+  background: radial-gradient(closest-side, rgba(122, 42, 62, 0.28), rgba(122, 42, 62, 0) 100%);
   bottom: 0;
   right: 30%;
   animation-delay: -12s;
