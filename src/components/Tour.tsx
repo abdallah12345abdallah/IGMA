@@ -27,6 +27,11 @@ const smooth = (v: number) => {
   return c * c * (3 - 2 * c)
 }
 const SAND = '#C6C0B2'
+const fillFrom = (e: React.PointerEvent<HTMLElement>) => {
+  const r = e.currentTarget.getBoundingClientRect()
+  e.currentTarget.style.setProperty('--fx', `${e.clientX - r.left}px`)
+  e.currentTarget.style.setProperty('--fy', `${e.clientY - r.top}px`)
+}
 const SCROLL_BROWN = '#7a3a12' // the scrollbar outside the tour
 
 export function Tour() {
@@ -180,8 +185,11 @@ export function Tour() {
               <p>{hero.lede}</p>
             </div>
             <div className="s-actions">
-              <a className="btn btn--solid btn--roll" href="#demo" data-text={hero.primary}>
+              <a className="btn btn--solid btn--roll" href="#demo" onPointerEnter={fillFrom} onPointerLeave={fillFrom}>
                 <span>{hero.primary}</span>
+                <i className="btn__arrow" aria-hidden="true">
+                  ←
+                </i>
               </a>
               <a className="btn btn--line btn--rise" href="#systems" onClick={(e) => (e.preventDefault(), goTo(STOPS - 1))}>
                 <span>{hero.secondary}</span>

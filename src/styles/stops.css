@@ -1318,30 +1318,59 @@
   display: inline-block;
   transition: transform 0.5s cubic-bezier(0.7, 0, 0.2, 1);
 }
-/* main: burnt orange wipes in from the right while the words roll up and come back from below */
+/* main: burnt orange spreads in a circle from where the pointer enters; an arrow slides in after the words */
 .tour__pin[data-tone='light'] .stop--hero .btn--roll,
 .tour__pin[data-tone='light'] .stop--hero .btn--roll:hover {
-  background: linear-gradient(#a5370a, #a5370a) right / 0% 100% no-repeat, #5a2a0c;
+  background: #5a2a0c;
   border-color: #5a2a0c;
   color: #fff3e2;
 }
-.tour__pin[data-tone='light'] .stop--hero .btn--roll:hover {
-  background-size: 100% 100%;
-  border-color: #a5370a;
+.stop--hero .btn--roll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  transition:
+    gap 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    scale 0.15s;
 }
 .stop--hero .btn--roll::after {
-  content: attr(data-text);
+  content: '';
   position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  transform: translateY(110%);
-  transition: transform 0.5s cubic-bezier(0.7, 0, 0.2, 1);
-}
-.stop--hero .btn--roll:hover span {
-  transform: translateY(-160%);
+  left: var(--fx, 50%);
+  top: var(--fy, 50%);
+  width: 320px;
+  height: 320px;
+  margin: -160px 0 0 -160px;
+  border-radius: 50%;
+  background: #a5370a;
+  transform: scale(0);
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: -1;
 }
 .stop--hero .btn--roll:hover::after {
+  transform: scale(1);
+}
+.stop--hero .btn--roll span {
+  position: relative;
+}
+.stop--hero .btn__arrow {
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  font-style: normal;
+  opacity: 0;
+  transform: translateX(10px);
+  transition:
+    width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.3s,
+    transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.stop--hero .btn--roll:hover {
+  gap: 10px;
+}
+.stop--hero .btn--roll:hover .btn__arrow {
+  width: 1em;
+  opacity: 1;
   transform: none;
 }
 /* a soft band of light passes over it now and then */
