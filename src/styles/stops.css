@@ -1263,7 +1263,7 @@
   .stop.stop--hero > .s-side {
     grid-area: side;
     align-self: end;
-    margin-bottom: 12vh; /* a little above the bottom line */
+    margin-bottom: 20vh; /* well above the bottom line */
   }
   .stop--hero .s-side .s-copy {
     font-size: clamp(16px, 1.15vw, 19px);
