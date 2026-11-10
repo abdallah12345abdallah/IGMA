@@ -216,7 +216,9 @@ const ease = (t: number) => t * t * (3 - 2 * t)
 /** Seconds a system takes to gather (or scatter) in the opening view. */
 const SWAP_S = 1.5
 /** How much bigger the single system is in the opening view than at its stop. */
-const HERO_SCALE = 2.7 // size of the system shown alone in the opening view
+const HERO_SCALE = 3 // size of the system shown alone in the opening view
+/** Every system sits on the same tinted ground, in the site's main colour. */
+const GROUND_COLOR = '#5e1a2c'
 
 /* ---------- the lamp that hangs over the gallery and follows the visitor ---------- */
 function useLamp(scenes: Record<string, THREE.Object3D>) {
@@ -259,7 +261,7 @@ function useLamp(scenes: Record<string, THREE.Object3D>) {
     spot.shadow.mapSize.set(2048, 2048)
     spot.shadow.bias = -0.0003
     spot.shadow.normalBias = 0.03
-    spot.shadow.intensity = 0.5 // softer shadows under the objects
+    spot.shadow.intensity = 0.3 // softer shadows under the objects
     return { rig, beam, spot, bottom, bulbMat }
   }, [scenes])
 }
@@ -499,10 +501,10 @@ const SHADOW_TEX = (() => {
   c.width = c.height = 256
   const x = c.getContext('2d')!
   const g = x.createRadialGradient(128, 128, 0, 128, 128, 128)
-  g.addColorStop(0, 'rgba(0,0,0,.26)')
-  g.addColorStop(0.35, 'rgba(0,0,0,.17)')
-  g.addColorStop(0.7, 'rgba(0,0,0,.05)')
-  g.addColorStop(1, 'rgba(0,0,0,0)')
+  g.addColorStop(0, 'rgba(255,255,255,.2)')
+  g.addColorStop(0.35, 'rgba(255,255,255,.13)')
+  g.addColorStop(0.7, 'rgba(255,255,255,.04)')
+  g.addColorStop(1, 'rgba(255,255,255,0)')
   x.fillStyle = g
   x.fillRect(0, 0, 256, 256)
   return new THREE.CanvasTexture(c)
@@ -527,12 +529,12 @@ function ground(color: string) {
   const g = new THREE.Group()
   const glow = new THREE.Mesh(
     new THREE.PlaneGeometry(GALLERY.stationSize * 1.5, GALLERY.stationSize * 1.5).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({ color, map: GLOW_TEX, transparent: true, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ color, map: GLOW_TEX, transparent: true, opacity: 0.35, depthWrite: false }),
   )
   glow.position.y = 0.004
   const contact = new THREE.Mesh(
     new THREE.PlaneGeometry(GALLERY.stationSize * 1.05, GALLERY.stationSize * 1.05).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({ map: SHADOW_TEX, transparent: true, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ color, map: SHADOW_TEX, transparent: true, depthWrite: false }),
   )
   contact.position.y = 0.008
   g.add(glow, contact)
@@ -550,7 +552,7 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
   const lamp = useLamp(scenes)
   useEffect(() => onLamp(lamp), [lamp, onLamp])
 
-  const { groups, outers, parts } = useMemo(() => {
+  const { groups, outers, parts, norms } = useMemo(() => {
     const groups: THREE.Group[] = []
     const outers = STATIONS.map((_, i) => {
       const g = buildStation(i, scenes)
@@ -559,9 +561,15 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
       const p = spotPos(i)
       outer.position.set(p.x, 0, p.z)
       outer.rotation.y = p.ry
-      outer.add(ground(tourStops[i].color), g)
+      outer.add(ground(GROUND_COLOR), g)
       return outer
     })
+    const sizes = groups.map((g) => {
+      const v = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3())
+      return Math.max(v.x, v.z, v.y * 1.1)
+    })
+    const avg = sizes.slice(0, tourStops.length - 1).reduce((a, b) => a + b, 0) / (tourStops.length - 1)
+    const norms = sizes.map((sz) => avg / Math.max(0.01, sz))
     // every piece of every station remembers its resting place, so it can fly off and come back
     const parts = groups.map((g) =>
       g.children[0].children.map((o, k, all) => {
@@ -577,7 +585,7 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
         }
       }),
     )
-    return { groups, outers, parts }
+    return { groups, outers, parts, norms }
   }, [scenes])
   const shown = useRef(STATIONS.map(() => 1))
   // 1 = assembled, 0 = scattered
@@ -607,7 +615,7 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
       const e = v * v * (3 - 2 * v)
       const sp = spotPos(i)
       outers[i].position.set(sp.x * (1 - b), 0, sp.z * (1 - b))
-      const hs = HERO_SCALE * (STATIONS[i].heroScale ?? 1)
+      const hs = HERO_SCALE * norms[i]
       outers[i].scale.setScalar(Math.max(0.001, e * (1 + (hs - 1) * b)))
       outers[i].visible = e > 0.01 && a > 0.001
       outers[i].children[0].scale.setScalar(Math.max(0.001, a))
@@ -739,7 +747,7 @@ export default function Showroom({ reduced, mobile, fixedStop, interactive = fal
         shadow-mapSize={[mobile ? 1024 : 2048, mobile ? 1024 : 2048]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.03}
-        shadow-intensity={0.5}
+        shadow-intensity={0.3}
         shadow-camera-left={-12}
         shadow-camera-right={12}
         shadow-camera-top={12}

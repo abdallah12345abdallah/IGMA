@@ -170,7 +170,7 @@ export const GALLERY = {
 }
 
 /** The lamp: how high it hangs over the overview and over each system. */
-export const LAMP = { file: 'modern_ceiling_lamp_01', scale: 1.7, heroHeight: 6.4, stopHeight: 5.4, heroAngle: 1.05, stopAngle: 0.5 }
+export const LAMP = { file: 'modern_ceiling_lamp_01', scale: 1.25, heroHeight: 6.4, stopHeight: 5.4, heroAngle: 1.05, stopAngle: 0.5 }
 
 /** The opening view: the whole line, seen from the front. The distance is fitted to the screen width at runtime. */
 export const HERO_SHOT = { pos: [0, 16, 26] as const, look: [0, 0.6, 0.8] as const }
