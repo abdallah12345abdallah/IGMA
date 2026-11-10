@@ -1,18 +1,32 @@
 import { useState } from 'react'
 import { clients, company, contact, footer, markets, nav, plans, services, systems } from '../content/site'
+import { ServiceVisual, type ServiceKind } from './ServiceVisual'
+
+/** Each service's live illustration and its accent from the system palette. */
+const SVC_LOOK: { kind: ServiceKind; color: string }[] = [
+  { kind: 'flow', color: '#18306F' },
+  { kind: 'code', color: '#A5370A' },
+  { kind: 'nodes', color: '#0B4246' },
+  { kind: 'web', color: '#860F30' },
+]
 
 export function Services() {
   return (
-    <section className="section" id="services" data-nav="light" aria-labelledby="services-title">
+    <section className="section svc" id="services" data-nav="light" aria-labelledby="services-title">
       <div className="container">
-        <header className="head">
-          <p className="kicker">{services.kicker}</p>
-          <h2 id="services-title">{services.title}</h2>
-          <p className="head__body">{company.summary}</p>
+        <header className="svc__head">
+          <div>
+            <p className="kicker">{services.kicker}</p>
+            <h2 id="services-title">{services.title}</h2>
+          </div>
+          <p className="svc__lede">{company.summary}</p>
         </header>
-        <ul className="services">
-          {services.items.map((s) => (
-            <li key={s.title}>
+        <ul className="svc__grid">
+          {services.items.map((s, k) => (
+            <li key={s.title} className="svc__item" style={{ ['--c' as string]: SVC_LOOK[k].color }}>
+              <div className="svc__vis">
+                <ServiceVisual kind={SVC_LOOK[k].kind} />
+              </div>
               <h3>{s.title}</h3>
               <p>{s.body}</p>
             </li>

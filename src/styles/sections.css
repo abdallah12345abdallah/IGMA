@@ -127,26 +127,199 @@
   color: var(--sand-2);
 }
 
-.services {
-  margin-top: clamp(36px, 5vw, 64px);
+/* services: all four always visible, each opening with a small live illustration */
+.svc__head {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 56px;
-  border-top: 2px solid var(--ink);
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 16px 72px;
+  align-items: end;
 }
-.services li {
-  padding-block: 24px 30px;
-  border-bottom: 1px solid var(--line);
-}
-.services h3 {
+.svc__head h2 {
+  margin-top: 10px;
   font-weight: 800;
-  font-size: 25px;
-  line-height: 1.45;
+  font-size: clamp(32px, 3.8vw, 52px);
+  line-height: 1.25;
+  text-wrap: balance;
 }
-.services p {
-  margin-top: 6px;
+.svc__lede {
+  font-size: 18px;
   color: var(--ink-2);
   max-width: 48ch;
+}
+.svc__grid {
+  margin-top: clamp(40px, 5vw, 64px);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 40px 24px;
+}
+.svc__item h3 {
+  margin-top: 20px;
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1.35;
+}
+.svc__item p {
+  margin-top: 8px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+.svc__vis {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--c) 55%, #0a1916), #0a1916 70%);
+  color: #fffbf2;
+  box-shadow: 0 24px 40px -28px rgba(10, 25, 22, 0.7);
+  transition: transform 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out);
+}
+.svc__item:hover .svc__vis {
+  transform: translateY(-6px);
+  box-shadow: 0 34px 50px -30px rgba(10, 25, 22, 0.75);
+}
+@media (max-width: 1100px) {
+  .svc__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .svc__head,
+  .svc__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* the illustrations */
+.sv {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.sv-line {
+  stroke: rgba(255, 251, 242, 0.3);
+  stroke-width: 1.5;
+  fill: none;
+}
+.sv-dot {
+  fill: #8fd3b6;
+}
+.sv-node {
+  fill: #10211d;
+  stroke: rgba(255, 251, 242, 0.45);
+}
+.sv-hub {
+  fill: color-mix(in srgb, var(--c) 70%, #8fd3b6);
+}
+.sv-lbl {
+  font-family: var(--font-body);
+  font-size: 14px;
+  fill: #fffbf2;
+}
+.sv-lbl--b {
+  font-weight: 700;
+}
+.sv-lbl--dim {
+  opacity: 0.55;
+}
+.sv-pulse {
+  fill: #8fd3b6;
+  animation: sv-pulse 2.7s ease-in-out infinite;
+}
+@keyframes sv-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.sv--code {
+  padding: 13% 9%;
+  font: 13px/1.95 ui-monospace, Consolas, monospace;
+  direction: ltr;
+  text-align: left;
+}
+.sv--code i {
+  display: block;
+  font-style: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+  animation: sv-type 7s steps(30) infinite;
+}
+.sv--code i:nth-child(2) { animation-delay: 0.6s; }
+.sv--code i:nth-child(3) { animation-delay: 1.2s; }
+.sv--code i:nth-child(4) { animation-delay: 1.8s; }
+.sv--code i:nth-child(5) { animation-delay: 2.4s; }
+.sv--code b { color: #f0b46b; font-weight: 400; }
+.sv--code em { color: #8fd3b6; font-style: normal; }
+.sv--code u { color: rgba(255, 251, 242, 0.5); text-decoration: none; }
+@keyframes sv-type {
+  0% { width: 0; }
+  30%, 88% { width: 100%; }
+  100% { width: 0; }
+}
+.sv-browser {
+  position: absolute;
+  inset: 13% 11%;
+  background: #fffbf2;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 10px;
+}
+.sv-top {
+  height: 20px;
+  background: #e5e0d4;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding-inline: 9px;
+}
+.sv-top span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #b9b2a2;
+}
+.sv-blk {
+  margin-inline: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: #d9d2c4;
+  transform-origin: right;
+  animation: sv-grow 6s var(--ease-out) infinite;
+}
+.sv-blk--hero {
+  height: 34px;
+  background: var(--c);
+}
+.sv-browser > .sv-blk:nth-of-type(2) { width: 70%; animation-delay: 0.3s; }
+.sv-browser > .sv-blk:nth-of-type(3) { width: 50%; animation-delay: 0.6s; }
+.sv-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-inline: 10px;
+}
+.sv-row .sv-blk {
+  margin: 0;
+  height: 26px;
+  animation-delay: 0.9s;
+}
+@keyframes sv-grow {
+  0% { transform: scaleX(0); }
+  22%, 86% { transform: scaleX(1); }
+  100% { transform: scaleX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sv--code i { width: 100%; animation: none; }
+  .sv-blk, .sv-pulse { animation: none; transform: none; opacity: 1; }
 }
 
 .markets {
