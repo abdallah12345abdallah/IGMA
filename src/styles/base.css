@@ -238,22 +238,31 @@ h3 {
   text-shadow: none;
 }
 
-/* ---------- back to top: burnt-brown glass, its edge fills as the page scrolls ---------- */
+/* ---------- back to top: a slim burnt-brown capsule on the right; its edge and number follow the scroll ---------- */
 .totop {
+  --p: 0;
   position: fixed;
-  left: var(--gutter);
+  right: var(--gutter);
   bottom: 24px;
   z-index: 45;
-  display: flex;
-  align-items: center;
+  width: 50px;
+  padding: 6px 6px 12px;
+  display: grid;
+  justify-items: center;
   gap: 10px;
+  border-radius: 10px;
+  background: rgba(90, 42, 12, 0.84);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
   color: #fff3e2;
+  overflow: hidden;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(24px);
+  transform: translateY(30px);
   transition:
     opacity 0.4s,
     transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 0.3s,
     visibility 0s linear 0.6s;
 }
 .totop.is-shown {
@@ -262,76 +271,46 @@ h3 {
   transform: none;
   transition-delay: 0s;
 }
-.totop__box {
-  position: relative;
+.totop__arrow {
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 10px;
-  background: rgba(90, 42, 12, 0.84);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  width: 38px;
+  height: 38px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 214, 140, 0.45);
   overflow: hidden;
 }
-.totop__box svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.totop__box rect {
-  fill: none;
-  stroke-width: 2;
-}
-.totop__track {
-  stroke: rgba(255, 214, 140, 0.18);
-}
-.totop__ring {
-  stroke: #ffd68c;
-  stroke-linecap: round;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  transition: stroke-dashoffset 0.15s linear;
-}
-.totop__arrow {
+.totop__arrow i {
+  font-style: normal;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
+  color: #ffd68c;
 }
-/* the label slides out from behind the box */
-.totop__label {
-  order: 2;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: rgba(90, 42, 12, 0.84);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  font-size: 14px;
-  opacity: 0;
-  transform: translateX(-12px);
-  transition:
-    opacity 0.3s,
-    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  pointer-events: none;
+.totop__pct {
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: rgba(255, 243, 226, 0.75);
 }
-.totop:hover .totop__label,
-.totop:focus-visible .totop__label {
-  opacity: 1;
-  transform: none;
+/* a thin line along the edge, filling from the bottom */
+.totop__line {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 3px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(#ffd68c, #ffd68c) bottom / 100% calc(var(--p) * 100%) no-repeat, rgba(255, 214, 140, 0.16);
 }
-.totop:hover .totop__arrow {
-  animation: totop-shoot 0.7s cubic-bezier(0.6, 0, 0.3, 1);
-}
-.totop:hover .totop__box,
-.totop:focus-visible .totop__box {
+.totop:hover {
   background: #a5370a;
 }
-.totop:focus-visible {
-  outline: none;
+.totop:hover .totop__arrow i {
+  animation: totop-shoot 0.7s cubic-bezier(0.6, 0, 0.3, 1);
 }
-.totop:focus-visible .totop__box {
+.totop:focus-visible {
   outline: 2px solid #ffd68c;
   outline-offset: 3px;
 }
@@ -340,10 +319,10 @@ h3 {
     transform: none;
   }
   45% {
-    transform: translateY(-34px);
+    transform: translateY(-30px);
   }
   46% {
-    transform: translateY(34px);
+    transform: translateY(30px);
   }
   100% {
     transform: none;
@@ -352,21 +331,18 @@ h3 {
 @media (max-width: 767px) {
   .totop {
     bottom: 16px;
+    width: 44px;
   }
-  .totop__box {
-    width: 46px;
-    height: 46px;
-  }
-  .totop__label {
-    display: none;
+  .totop__arrow {
+    width: 32px;
+    height: 32px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .totop,
-  .totop__label {
+  .totop {
     transition: none;
   }
-  .totop:hover .totop__arrow {
+  .totop:hover .totop__arrow i {
     animation: none;
   }
 }
