@@ -6,7 +6,6 @@ import { useIsMobile, useReducedMotion, useWebGLSupport } from '../hooks/useMedi
 import { requestDemo } from '../demoEvents'
 import { scrollToY, startSmoothScroll } from '../smoothScroll'
 import { Words } from './Words'
-import { IntroLoader } from './IntroLoader'
 import { Rotator } from './Rotator'
 import { StopArt, StopScene } from './StopArt'
 
@@ -18,8 +17,8 @@ const SEGMENT_SVH = 115 // scroll distance per stop: raise it for a slower tour
 const HOLD = 0.5 // share of each stop where the camera rests
 const STEPS_FROM = 0.12 // the steps start lighting after this share of the rest, once the content has settled
 const STEPS_TO = 0.9 // and are all lit by this share
-const HEADLINE_DELAY_MS = 250 // after the loader has gone and the lamp is on
-const MAX_WAIT_MS = 20000 // turn on smooth scrolling after this even if the 3D is still loading
+const HEADLINE_DELAY_MS = 120 // the headline rises right after the first paint
+const IDLE_3D_MS = 1500 // start loading the 3D scene once the page is idle, or after this at the latest
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v))
 const smooth = (v: number) => {
@@ -55,26 +54,38 @@ export function Tour() {
   const onReady = useCallback(() => {
     setReady(true)
   }, [])
-  // The opening headline rises only after the loader hands over to the page.
-  const [introDone, setIntroDone] = useState(false)
-  const onIntroGone = useCallback(() => {
-    // The loader has gone: drop the lamp, switch it on, then bring in the headline.
-    if (tour.introAt == null) tour.introAt = performance.now()
-    const wait = reduced ? 0 : HEADLINE_DELAY_MS
-    window.setTimeout(() => {
-      setIntroDone(true)
-    }, wait)
-  }, [reduced])
-  const heroIn = introDone || webgl === false
-
-  // Native scrolling stays on while the scene loads (it never stutters); the smoother
-  // scrolling joins once the 3D is ready, or straight away when there is no 3D.
+  // No loading screen: the still image and the text are there at once, the headline rises in.
+  const [heroIn, setHeroIn] = useState(false)
   useEffect(() => {
-    if (ready || webgl === false) startSmoothScroll()
-    if (ready || webgl !== true) return
-    const give = window.setTimeout(() => startSmoothScroll(), MAX_WAIT_MS)
-    return () => window.clearTimeout(give)
-  }, [ready, webgl])
+    const t = window.setTimeout(() => setHeroIn(true), reduced ? 0 : HEADLINE_DELAY_MS)
+    return () => window.clearTimeout(t)
+  }, [reduced])
+
+  useEffect(() => {
+    startSmoothScroll()
+  }, [])
+
+  // The 3D scene (code and models, ~3.5 MB) loads only on large screens, and only once the
+  // page has opened and the browser is idle. Until it is ready the still images stand in.
+  const [load3d, setLoad3d] = useState(false)
+  useEffect(() => {
+    if (webgl !== true || mobile) return
+    let idle = 0
+    let timer = 0
+    const start = () => {
+      const ric = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback
+      if (ric) idle = ric(() => setLoad3d(true), { timeout: IDLE_3D_MS })
+      else timer = window.setTimeout(() => setLoad3d(true), 300)
+    }
+    if (document.readyState === 'complete') start()
+    else window.addEventListener('load', start, { once: true })
+    return () => {
+      window.removeEventListener('load', start)
+      const cic = (window as Window & { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback
+      if (idle && cic) cic(idle)
+      window.clearTimeout(timer)
+    }
+  }, [webgl, mobile])
 
   const goTo = useCallback((stop: number) => {
     const root = rootRef.current
@@ -150,19 +161,18 @@ export function Tour() {
   return (
     <div className="tour" id="tour" ref={rootRef} style={{ height: `calc(100svh + ${(STOPS - 1 + TAIL) * SEGMENT_SVH}svh)` }}>
       <span id="systems" className="tour__anchor" style={{ top: `${1.15 * SEGMENT_SVH}svh` }} />
-      {webgl !== false ? <IntroLoader done={ready} reduced={reduced} onGone={onIntroGone} /> : null}
       <div className="tour__pin" ref={pinRef} data-tone="light" data-nav="light" style={{ ['--c' as string]: SAND }}>
-        {webgl !== true || !posterGone ? (
-          <div className={`posters ${webgl === true && ready ? 'is-fading' : ''}`} aria-hidden="true">
+        {!load3d || !posterGone ? (
+          <div className={`posters ${load3d && ready ? 'is-fading' : ''}`} aria-hidden="true">
             {Array.from({ length: STOPS }, (_, i) => (
               <img key={i} src={`/stops/${mobile ? 'm' : 'd'}-${i}.webp`} alt="" className={i === active ? 'is-on' : ''} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
             ))}
           </div>
         ) : null}
         <div className="tour__canvas" aria-hidden="true">
-          {webgl ? (
+          {load3d ? (
             <Suspense fallback={null}>
-              <Showroom reduced={reduced} mobile={mobile} intro interactive paused={!visible && ready} onReady={onReady} />
+              <Showroom reduced={reduced} mobile={mobile} interactive paused={!visible && ready} onReady={onReady} />
             </Suspense>
           ) : null}
         </div>
