@@ -111,52 +111,134 @@
   }
 }
 
-/* ---------- islands: open over the tour, two floating glass islands after it ---------- */
+/* ---------- islands: two pieces of burnt-brown glass, in the same place from the hero to the footer.
+   No shadows; a thin amber light runs along the top edge of each. ---------- */
+.nav {
+  --glass: rgba(90, 42, 12, 0.34);
+  --edge: rgba(255, 214, 140, 0.55);
+  --text: #fff3e2;
+  --amber: #ffd68c;
+  color: var(--text);
+  gap: 12px;
+}
+/* over the light sections the glass gets denser so the text stays readable */
+.nav--ink {
+  --glass: rgba(90, 42, 12, 0.84);
+  color: var(--text);
+}
 .nav__island {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 32px;
-  transition:
-    background-color 0.45s,
-    box-shadow 0.45s,
-    border-color 0.45s,
-    padding 0.45s var(--ease-out),
-    transform 0.55s var(--ease-out);
-  border: 1px solid transparent;
+  height: 54px;
+  padding-inline: 8px;
+  border-radius: 18px;
+  background: var(--glass);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  transition: background-color 0.5s;
+}
+/* the light along the top edge, fading out towards the ends */
+.nav__island::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(90deg, transparent 4%, var(--edge) 50%, transparent 96%) top / 100% 1px no-repeat,
+    linear-gradient(rgba(255, 214, 140, 0.16), rgba(255, 214, 140, 0.06));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
 }
 .nav__island--main {
+  gap: 4px;
   margin-inline-end: auto;
+  padding-inline-start: 20px;
 }
 .nav__island--side {
-  gap: 18px;
+  gap: 10px;
+}
+.nav__brand {
+  font-size: 22px;
+  padding-inline-end: 16px;
+  margin-inline-end: 4px;
+  border-inline-end: 1px solid rgba(255, 214, 140, 0.25);
 }
 .nav__links {
   position: relative;
+  gap: 2px;
+  margin: 0;
 }
 .nav__links a {
   position: relative;
   z-index: 1;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 11px;
+  transition:
+    color 0.3s,
+    background-color 0.25s;
+}
+.nav__links a:hover {
+  background: rgba(255, 243, 226, 0.1);
+}
+.nav__links a[aria-current] {
+  color: var(--amber);
+  font-weight: 700;
+}
+/* the current section: a tile under the link and a dot above it, sliding together */
+.nav__mark {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 38px;
+  margin-top: -19px;
+  border-radius: 11px;
+  background: rgba(255, 214, 140, 0.14);
+  transition:
+    transform 0.5s cubic-bezier(0.3, 1.3, 0.5, 1),
+    width 0.5s cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+.nav__mark::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--amber);
 }
 .nav__talk {
-  display: none;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  padding-inline: 10px 4px;
   font-size: 14.5px;
-  font-weight: 500;
+}
+.nav__talk:hover {
+  color: var(--amber);
 }
 .nav__talk i {
   position: relative;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #1fbf7a;
+  background: #7df5c4;
 }
 .nav__talk i::after {
   content: '';
   position: absolute;
   inset: -4px;
   border-radius: 50%;
-  border: 1.5px solid #1fbf7a;
+  border: 1.5px solid #7df5c4;
   animation: nav-live 1.8s ease-out infinite;
 }
 @keyframes nav-live {
@@ -173,157 +255,54 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-}
-.nav__arrow {
-  display: none;
-  transition: transform 0.35s var(--ease-out);
-}
-.nav__mark {
-  display: none;
-}
-
-.nav--docked {
-  --island: rgba(250, 248, 243, 0.8);
-  --island-line: rgba(10, 25, 22, 0.09);
-  --accent: var(--green);
-  color: var(--ink);
-  height: calc(var(--nav-h) + 6px);
-}
-.nav--docked .nav__island {
-  height: 58px;
-  padding-inline: 10px;
-  border-radius: 20px;
-  background: var(--island);
-  border-color: var(--island-line);
-  box-shadow:
-    0 12px 34px rgba(10, 25, 22, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(18px) saturate(1.4);
-  -webkit-backdrop-filter: blur(18px) saturate(1.4);
-  transform: translateY(8px);
-}
-.nav--docked .nav__island--main {
-  gap: 6px;
-  padding-inline-start: 20px;
-}
-.nav--docked .nav__brand {
-  font-size: 22px;
-  padding-inline-end: 18px;
-  margin-inline-end: 4px;
-  border-inline-end: 1px solid var(--island-line);
-}
-.nav--docked .nav__links {
-  gap: 2px;
-  font-size: 15px;
-}
-.nav--docked .nav__links a {
-  padding: 9px 15px;
+  height: 40px;
+  padding-inline: 18px 8px;
   border: 0;
   border-radius: 12px;
-  transition:
-    color 0.3s,
-    background-color 0.25s,
-    font-weight 0.2s;
+  background: var(--text);
+  color: #5a2a0c;
+  transition: background-color 0.25s;
 }
-.nav--docked .nav__links a:hover {
-  background: color-mix(in srgb, currentColor 7%, transparent);
+.nav__cta:hover {
+  background: var(--amber);
 }
-.nav--docked .nav__links a[aria-current] {
-  color: var(--accent);
-  font-weight: 700;
-}
-/* the current section: a soft tile under the link and a glowing dot above it, sliding together */
-.nav--docked .nav__mark {
-  display: block;
-  position: absolute;
-  top: 50%;
-  left: 0;
-  height: 40px;
-  margin-top: -20px;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--accent) 11%, transparent);
-  transition:
-    transform 0.5s cubic-bezier(0.3, 1.3, 0.5, 1),
-    width 0.5s cubic-bezier(0.3, 1.3, 0.5, 1);
-}
-.nav--docked .nav__mark::before {
-  content: '';
-  position: absolute;
-  top: -9px;
-  left: 50%;
-  width: 7px;
-  height: 7px;
-  margin-left: -3.5px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 10px var(--accent);
-}
-.nav--docked .nav__talk {
-  display: inline-flex;
-  padding-inline: 10px 4px;
-}
-.nav--docked .nav__talk:hover {
-  color: var(--accent);
-}
-.nav--docked .nav__cta {
-  height: 42px;
-  padding-inline: 20px 16px;
-  border-radius: 13px;
-  border-color: var(--accent);
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 35%, transparent);
-}
-.nav--docked .nav__arrow {
+.nav__arrow {
   display: inline-grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.18);
+  background: #5a2a0c;
+  color: var(--text);
+  transition: transform 0.35s var(--ease-out);
 }
-.nav--docked .nav__cta:hover {
-  background: var(--ink);
-  border-color: var(--ink);
-}
-.nav--docked .nav__cta:hover .nav__arrow {
+.nav__cta:hover .nav__arrow {
   transform: translateX(-4px);
 }
-/* on dark sections the islands turn to dark glass */
-.nav--docked:not(.nav--ink) {
-  --island: rgba(22, 24, 23, 0.55);
-  --island-line: rgba(255, 255, 255, 0.12);
-  --accent: #7df5c4;
-  color: var(--on);
-}
-.nav--docked:not(.nav--ink) .nav__cta {
-  color: var(--ink);
-}
-.nav--docked .nav__toggle {
+.nav__toggle {
   height: 48px;
+  border: 0;
   border-radius: 14px;
   padding-inline: 18px;
-  background: var(--island);
-  border: 1px solid var(--island-line);
+  background: var(--glass);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  transform: translateY(8px);
 }
-.nav--docked:has(.menu--open) .nav__island,
-.nav--docked:has(.menu--open) .nav__toggle {
+.nav:has(.menu--open) .nav__island,
+.nav:has(.menu--open) .nav__toggle {
   background: transparent;
-  border-color: transparent;
-  box-shadow: none;
-  color: var(--on);
+}
+.nav:has(.menu--open) .nav__island::before {
+  display: none;
 }
 @media (max-width: 980px) {
   .nav__island--side {
     display: none;
   }
-  .nav--docked .nav__island--main {
+  .nav__island--main {
     padding-inline-end: 6px;
   }
-  .nav--docked .nav__brand {
+  .nav__brand {
     border: 0;
     padding-inline-end: 6px;
   }
