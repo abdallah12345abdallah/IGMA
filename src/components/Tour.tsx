@@ -7,7 +7,7 @@ import { requestDemo } from '../demoEvents'
 import { scrollToY, startSmoothScroll } from '../smoothScroll'
 import { Words } from './Words'
 import { Rotator } from './Rotator'
-import { HeroTicks, LampDust } from './HeroExtras'
+import { HeroTicks } from './HeroExtras'
 import { StopArt, StopScene } from './StopArt'
 
 const Showroom = lazy(() => import('../three/Showroom'))
@@ -178,7 +178,6 @@ export function Tour() {
           ) : null}
         </div>
         <div className="scrim" aria-hidden="true" />
-        <LampDust on={active === 0} />
 
         <section className={`stop stop--hero ${active === 0 && heroIn ? 'is-active' : active > 0 ? 'is-past' : ''}`} inert={active !== 0} aria-labelledby="hero-title">
           <p className="s-meta">{hero.eyebrow}</p>
