@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { company, contact, hero, nav } from '../content/site'
+import { Logo } from './Logo'
 
 /**
  * Over the 3D tour the bar is open and transparent. Once the tour is behind the visitor it
@@ -70,7 +71,7 @@ export function Nav() {
     <header className={`nav ${light ? 'nav--ink' : ''} ${docked ? 'nav--docked' : ''} ${light && !docked ? 'nav--top' : ''}`}>
       <div className="nav__island nav__island--main">
         <a className="nav__brand" href="#top" aria-label={`${company.name}، الصفحة الرئيسية`} onClick={close} dir="ltr">
-          {company.name}
+          <Logo title={company.name} />
         </a>
         <nav className="nav__links" aria-label="القائمة الرئيسية" ref={linksRef}>
           {pill && <span className="nav__mark" style={{ transform: `translateX(${pill.x}px)`, width: pill.w }} aria-hidden="true" />}

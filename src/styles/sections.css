@@ -180,6 +180,21 @@
   border-color: #1e9e64;
 }
 
+/* the logo: the brown link and the letters take the text colour, the second link the accent */
+.nav__brand {
+  display: flex;
+  align-items: center;
+  --logo-accent: #ffd68c;
+}
+.nav__brand svg {
+  display: block;
+  height: 22px;
+  width: auto;
+}
+.nav--top .nav__brand {
+  --logo-accent: #d98a2b;
+}
+
 /* the light along the top edge, fading out towards the ends */
 .nav__island::before {
   content: '';
