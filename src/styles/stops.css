@@ -1204,3 +1204,95 @@
     transform: none;
   }
 }
+
+/* ========== the opening view, tidied: headline and its side block share one baseline ========== */
+.stop--hero .s-side {
+  display: grid;
+  gap: 22px;
+}
+.stop.is-active > .s-side {
+  transition-delay: 0.35s;
+}
+/* burnt brown is the main colour of the opening view */
+.tour__pin[data-tone='light'] .stop--hero .btn--solid {
+  background: #5a2a0c;
+  border-color: #5a2a0c;
+  color: #fff3e2;
+}
+.tour__pin[data-tone='light'] .stop--hero .btn--solid:hover {
+  background: #a5370a;
+  border-color: #a5370a;
+  color: #fff3e2;
+}
+.tour__pin[data-tone='light'] .stop--hero .btn--line {
+  border-color: rgba(90, 42, 12, 0.45);
+  color: #5a2a0c;
+}
+.tour__pin[data-tone='light'] .stop--hero .btn--line:hover {
+  background: rgba(90, 42, 12, 0.08);
+  border-color: #5a2a0c;
+}
+.stop--hero .s-meta {
+  align-items: center;
+  gap: 10px;
+}
+.stop--hero .s-meta::before {
+  content: '';
+  width: 26px;
+  height: 2px;
+  background: #a5370a;
+}
+
+@media (min-width: 768px) {
+  .stop.stop--hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) min(29vw, 430px);
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas: 'meta .' 'title side' '. .' 'work .';
+    gap: 14px 6vw;
+    padding: calc(var(--nav-h) + 3.5vh) var(--gutter) 16px;
+  }
+  .stop.stop--hero > * {
+    position: relative;
+    inset: auto;
+    width: auto;
+    min-width: 0;
+  }
+  .stop.stop--hero > .s-meta { grid-area: meta; }
+  .stop.stop--hero > .s-title { grid-area: title; max-width: 980px; }
+  .stop.stop--hero > .s-side {
+    grid-area: side;
+    align-self: end;
+    padding-bottom: 0.6vh;
+  }
+  .stop--hero .s-side .s-copy {
+    font-size: clamp(16px, 1.15vw, 19px);
+    line-height: 1.8;
+  }
+  .stop.stop--hero > .s-work {
+    grid-area: work;
+    justify-self: start;
+    max-width: calc(100vw - 2 * var(--gutter) - 620px);
+  }
+  /* one hairline ties the bottom row (who uses it today, and the systems list) together */
+  .stop--hero::after {
+    content: '';
+    position: absolute;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: 60px;
+    height: 1px;
+    background: rgba(90, 42, 12, 0.18);
+    opacity: 0;
+    transition: opacity 0.6s 0.5s;
+  }
+  .stop--hero.is-active::after {
+    opacity: 1;
+  }
+}
+@media (max-width: 767px) {
+  .stop--hero .s-side {
+    order: 3;
+    gap: 14px;
+  }
+}

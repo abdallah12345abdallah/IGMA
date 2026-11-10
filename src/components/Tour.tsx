@@ -175,16 +175,18 @@ export function Tour() {
               </svg>
             </span>
           </h1>
-          <div className="s-copy">
-            <p>{hero.lede}</p>
-          </div>
-          <div className="s-actions">
-            <a className="btn btn--solid" href="#demo">
-              {hero.primary}
-            </a>
-            <a className="btn btn--line" href="#systems" onClick={(e) => (e.preventDefault(), goTo(STOPS - 1))}>
-              {hero.secondary}
-            </a>
+          <div className="s-side">
+            <div className="s-copy">
+              <p>{hero.lede}</p>
+            </div>
+            <div className="s-actions">
+              <a className="btn btn--solid" href="#demo">
+                {hero.primary}
+              </a>
+              <a className="btn btn--line" href="#systems" onClick={(e) => (e.preventDefault(), goTo(STOPS - 1))}>
+                {hero.secondary}
+              </a>
+            </div>
           </div>
           <div className="s-work proof">
             <span>{hero.proofLabel}</span>
