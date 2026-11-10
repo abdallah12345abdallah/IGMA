@@ -1248,7 +1248,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) min(29vw, 430px);
     grid-template-rows: auto auto 1fr auto;
-    grid-template-areas: 'meta .' 'title side' '. .' 'work .';
+    grid-template-areas: 'meta .' 'title .' '. side' 'work .';
     gap: 14px 6vw;
     padding: calc(var(--nav-h) + 3.5vh) var(--gutter) 16px;
   }
@@ -1263,8 +1263,7 @@
   .stop.stop--hero > .s-side {
     grid-area: side;
     align-self: end;
-    padding-bottom: 0.6vh;
-    top: 16vh; /* sits well below the headline */
+    margin-bottom: 30px; /* rests just above the bottom line */
   }
   .stop--hero .s-side .s-copy {
     font-size: clamp(16px, 1.15vw, 19px);
