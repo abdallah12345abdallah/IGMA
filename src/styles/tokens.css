@@ -1,0 +1,26 @@
+/*
+  ألوان وخطوط الموقع. غيّرها من هنا. ألوان فصول الأنظمة موجودة في content/site.ts.
+  Design tokens. Chapter colours live with each system in content/site.ts.
+*/
+:root {
+  --sand: #e6e5e0;
+  --sand-2: #d8d7d0;
+  --ink: #10231f;
+  --ink-2: #4a5a55;
+  --green: #0b6e4f;
+  --on: #fffbf2;
+  --on-70: rgba(255, 251, 242, 0.8);
+  --on-line: rgba(255, 251, 242, 0.42);
+  --line: rgba(16, 35, 31, 0.17);
+  --error: #a4221a;
+
+  --font-display: 'Alexandria', 'Segoe UI', Tahoma, sans-serif;
+  --font-body: 'Readex Pro', 'Segoe UI', Tahoma, sans-serif;
+
+  --gutter: clamp(18px, 4vw, 56px);
+  --container: 1280px;
+  --nav-h: 72px;
+  --radius: 4px;
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}

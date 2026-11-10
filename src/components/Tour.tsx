@@ -1,0 +1,224 @@
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { hero, journeyCopy, systems } from '../content/site'
+import { STATIONS } from '../three/stations'
+import { tour } from '../three/tourState'
+import { useIsMobile, useReducedMotion, useWebGLSupport } from '../hooks/useMediaFlags'
+import { requestDemo } from '../demoEvents'
+import { scrollToY, startSmoothScroll } from '../smoothScroll'
+import { Words } from './Words'
+import { IntroLoader } from './IntroLoader'
+
+const Showroom = lazy(() => import('../three/Showroom'))
+
+const STOPS = systems.length + 1 // the overview + one stop per system
+const TAIL = 0.5 // extra hold on the last system
+const SEGMENT_SVH = 115 // scroll distance per stop: raise it for a slower tour
+const HOLD = 0.5 // share of each stop where the camera rests
+const MAX_WAIT_MS = 20000 // turn on smooth scrolling after this even if the 3D is still loading
+
+const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v))
+const smooth = (v: number) => {
+  const c = clamp(v, 0, 1)
+  return c * c * (3 - 2 * c)
+}
+const SAND = '#D6D2C7'
+
+export function Tour() {
+  const reduced = useReducedMotion()
+  const mobile = useIsMobile()
+  const webgl = useWebGLSupport()
+  const rootRef = useRef<HTMLDivElement>(null)
+  const pinRef = useRef<HTMLDivElement>(null)
+  const stopRefs = useRef<(HTMLElement | null)[]>([])
+  const lit = useRef<number[]>(systems.map(() => -1))
+  const [active, setActive] = useState(0)
+  const [ready, setReady] = useState(false)
+  const [visible, setVisible] = useState(true)
+  const [posterGone, setPosterGone] = useState(false)
+  // The still image fades into the live scene instead of being swapped in one frame.
+  useEffect(() => {
+    if (!ready) return
+    const t = window.setTimeout(() => setPosterGone(true), 900)
+    return () => window.clearTimeout(t)
+  }, [ready])
+  const onReady = useCallback(() => setReady(true), [])
+  // The opening headline rises only after the loader hands over to the page.
+  const [introDone, setIntroDone] = useState(false)
+  const onIntroGone = useCallback(() => setIntroDone(true), [])
+  const heroIn = introDone || webgl === false
+
+  // Native scrolling stays on while the scene loads (it never stutters); the smoother
+  // scrolling joins once the 3D is ready, or straight away when there is no 3D.
+  useEffect(() => {
+    if (ready || webgl === false) startSmoothScroll()
+    if (ready || webgl !== true) return
+    const give = window.setTimeout(() => startSmoothScroll(), MAX_WAIT_MS)
+    return () => window.clearTimeout(give)
+  }, [ready, webgl])
+
+  const goTo = useCallback((stop: number) => {
+    const root = rootRef.current
+    if (!root) return
+    const span = root.offsetHeight - window.innerHeight
+    scrollToY(root.offsetTop + span * ((stop + 0.15) / (STOPS - 1 + TAIL)))
+  }, [])
+
+  useEffect(() => {
+    tour.onPick = (i) => goTo(i + 1)
+    return () => {
+      tour.onPick = null
+    }
+  }, [goTo])
+
+  useEffect(() => {
+    const root = rootRef.current
+    const pin = pinRef.current
+    if (!root || !pin) return
+    let raf = 0
+    const read = () => {
+      raf = 0
+      const r = root.getBoundingClientRect()
+      const span = root.offsetHeight - window.innerHeight
+      const u = clamp((-r.top / span) * (STOPS - 1 + TAIL), 0, STOPS - 1)
+      const k = Math.floor(u)
+      const f = k + smooth((u - k - HOLD) / (1 - HOLD))
+      tour.pos = f
+      const idx = Math.round(f)
+      setActive(idx)
+      pin.style.setProperty('--c', idx === 0 ? SAND : systems[idx - 1].color)
+      pin.dataset.tone = idx === 0 ? 'light' : 'dark'
+      if (idx === 0) pin.dataset.nav = 'light'
+      else delete pin.dataset.nav
+      // Light up each system's working cycle step by step while its stop holds.
+      systems.forEach((s, i) => {
+        const el = stopRefs.current[i]
+        if (!el) return
+        const local = clamp((u - (i + 1)) / HOLD, 0, 1)
+        const n = idx === i + 1 ? Math.min(s.flow.length - 1, Math.floor(local * s.flow.length)) : -1
+        if (n !== lit.current[i]) {
+          lit.current[i] = n
+          el.querySelectorAll('.flow li').forEach((li, j) => li.classList.toggle('is-lit', j <= n))
+        }
+      })
+    }
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(read)
+    }
+    read()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: '100px' })
+    io.observe(root)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      io.disconnect()
+    }
+  }, [])
+
+  return (
+    <div className="tour" id="tour" ref={rootRef} style={{ height: `calc(100svh + ${(STOPS - 1 + TAIL) * SEGMENT_SVH}svh)` }}>
+      <span id="systems" className="tour__anchor" style={{ top: `${1.15 * SEGMENT_SVH}svh` }} />
+      {webgl !== false ? <IntroLoader done={ready} reduced={reduced} onGone={onIntroGone} /> : null}
+      <div className="tour__pin" ref={pinRef} data-tone="light" data-nav="light" style={{ ['--c' as string]: SAND }}>
+        {webgl !== true || !posterGone ? (
+          <div className={`posters ${webgl === true && ready ? 'is-fading' : ''}`} aria-hidden="true">
+            {Array.from({ length: STOPS }, (_, i) => (
+              <img key={i} src={`/stops/${mobile ? 'm' : 'd'}-${i}.webp`} alt="" className={i === active ? 'is-on' : ''} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+            ))}
+          </div>
+        ) : null}
+        <div className="tour__canvas" aria-hidden="true">
+          {webgl ? (
+            <Suspense fallback={null}>
+              <Showroom reduced={reduced} mobile={mobile} interactive paused={!visible && ready} onReady={onReady} />
+            </Suspense>
+          ) : null}
+        </div>
+        <div className="scrim" aria-hidden="true" />
+
+        <section className={`stop stop--hero ${active === 0 && heroIn ? 'is-active' : ''}`} inert={active !== 0} aria-labelledby="hero-title">
+          <p className="s-meta">{hero.eyebrow}</p>
+          <h1 className="s-title" id="hero-title">
+            <Words text={hero.title} />
+          </h1>
+          <div className="s-copy">
+            <p>{hero.lede}</p>
+          </div>
+          <div className="s-actions">
+            <a className="btn btn--solid" href="#demo">
+              {hero.primary}
+            </a>
+            <a className="btn btn--line" href="#systems" onClick={(e) => (e.preventDefault(), goTo(1))}>
+              {hero.secondary}
+            </a>
+          </div>
+          <div className="s-work proof">
+            <span>{hero.proofLabel}</span>
+            <ul>
+              {hero.proof.map((p) => (
+                <li key={p}>{p}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {systems.map((s, i) => (
+          <section
+            key={s.id}
+            ref={(el) => {
+              stopRefs.current[i] = el
+            }}
+            className={`stop stop--${STATIONS[i].shot.layout} ${active === i + 1 ? 'is-active' : ''}`}
+            inert={active !== i + 1}
+            aria-labelledby={`stop-${s.id}`}
+          >
+            <p className="s-meta">
+              <span className="s-num" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span>
+                {journeyCopy.counter(i)} · {s.market}
+              </span>
+            </p>
+            <h2 className="s-title" id={`stop-${s.id}`}>
+              <Words text={s.title} />
+            </h2>
+            <div className="s-copy">
+              <p>{s.body}</p>
+              <p className="s-audience">
+                <b>{journeyCopy.audience}</b> {s.audience}
+              </p>
+            </div>
+            <div className="s-work">
+              <ol className="flow" aria-label="دورة العمل">
+                {s.flow.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+              <p className="s-proof">{s.proof}</p>
+            </div>
+            <div className="s-actions">
+              <a className="btn btn--solid" href="#demo" onClick={() => requestDemo(s.id)}>
+                {journeyCopy.demo}
+              </a>
+              <a className="btn btn--line" href={`#/systems/${s.id}`}>
+                {journeyCopy.details}
+              </a>
+            </div>
+          </section>
+        ))}
+
+        <nav className="rail" aria-label="محطات الجولة">
+          {['الكل', ...systems.map((s) => s.short)].map((label, i) => (
+            <button key={label} type="button" aria-current={active === i ? 'step' : undefined} onClick={() => goTo(i)}>
+              <i aria-hidden="true" />
+              <span>{label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+    </div>
+  )
+}
