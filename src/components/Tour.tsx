@@ -7,6 +7,7 @@ import { requestDemo } from '../demoEvents'
 import { scrollToY, startSmoothScroll } from '../smoothScroll'
 import { Words } from './Words'
 import { Rotator } from './Rotator'
+import { HeroTicks, LampDust } from './HeroExtras'
 import { StopArt, StopScene } from './StopArt'
 
 const Showroom = lazy(() => import('../three/Showroom'))
@@ -177,6 +178,7 @@ export function Tour() {
           ) : null}
         </div>
         <div className="scrim" aria-hidden="true" />
+        <LampDust on={active === 0} />
 
         <section className={`stop stop--hero ${active === 0 && heroIn ? 'is-active' : active > 0 ? 'is-past' : ''}`} inert={active !== 0} aria-labelledby="hero-title">
           <p className="s-meta">{hero.eyebrow}</p>
@@ -189,6 +191,7 @@ export function Tour() {
                 <path d="M2 9 C 60 3, 120 12, 180 6 S 270 4, 298 8" pathLength={1} />
               </svg>
             </span>
+            <HeroTicks colors={systems.map((s) => s.color)} run={active === 0 && heroIn && !reduced} />
           </h1>
           <div className="s-side">
             <div className="s-copy">

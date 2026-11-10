@@ -1417,3 +1417,64 @@
     transition: none;
   }
 }
+
+/* ========== opening view extras ========== */
+/* six bars in the systems' colours; the one on screen fills while it is shown */
+.hero-ticks {
+  display: flex;
+  gap: 6px;
+  margin-top: 22px;
+  direction: rtl;
+}
+.hero-ticks i {
+  position: relative;
+  width: 26px;
+  height: 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tc) 22%, transparent);
+  overflow: hidden;
+  transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hero-ticks i.is-done {
+  background: color-mix(in srgb, var(--tc) 55%, transparent);
+}
+.hero-ticks i.is-on {
+  width: 58px;
+}
+.hero-ticks b {
+  position: absolute;
+  inset: 0;
+  background: var(--tc);
+  transform-origin: right;
+  transform: scaleX(1);
+}
+.hero-ticks.is-run b {
+  animation: tick-fill var(--dur) linear both;
+}
+@keyframes tick-fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+/* dust in the lamp's light, between the scene and the words */
+.lamp-dust {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s;
+}
+.lamp-dust.is-on {
+  opacity: 1;
+}
+@media (max-width: 767px) {
+  .lamp-dust {
+    display: none;
+  }
+  .hero-ticks {
+    margin-top: 12px;
+  }
+}

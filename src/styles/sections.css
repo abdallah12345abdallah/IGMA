@@ -2045,3 +2045,68 @@ button.sm__tag:hover {
     padding-bottom: 26px;
   }
 }
+
+/* ---------- the living logo: a spark circles the amber link, the links pull apart and lock again, the G's square pulses ---------- */
+.logo--live .logo__spark {
+  stroke: #fffaf0;
+  stroke-linecap: round;
+  stroke-dasharray: 7 93;
+  opacity: 0.85;
+  animation: logo-spark 3.2s linear infinite;
+}
+.logo--live .logo__two {
+  animation: logo-link 7s cubic-bezier(0.6, 0, 0.3, 1) infinite;
+}
+.logo--live .logo__one {
+  animation: logo-link-back 7s cubic-bezier(0.6, 0, 0.3, 1) infinite;
+}
+.logo--live .logo__dot {
+  animation: logo-dot 2.4s ease-in-out infinite;
+}
+@keyframes logo-spark {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+@keyframes logo-link {
+  0%,
+  70%,
+  100% {
+    transform: translate(0, 0);
+  }
+  80% {
+    transform: translate(7px, -7px);
+  }
+  88% {
+    transform: translate(-1px, 1px);
+  }
+}
+@keyframes logo-link-back {
+  0%,
+  70%,
+  100% {
+    transform: translate(0, 0);
+  }
+  80% {
+    transform: translate(-4px, 4px);
+  }
+  88% {
+    transform: translate(1px, -1px);
+  }
+}
+@keyframes logo-dot {
+  50% {
+    fill: var(--logo-accent, #e9a23b);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo--live .logo__spark,
+  .logo--live .logo__two,
+  .logo--live .logo__one,
+  .logo--live .logo__dot {
+    animation: none;
+  }
+  .logo--live .logo__spark {
+    display: none;
+  }
+}

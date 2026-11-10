@@ -71,7 +71,7 @@ export function Nav() {
     <header className={`nav ${light ? 'nav--ink' : ''} ${docked ? 'nav--docked' : ''} ${light && !docked ? 'nav--top' : ''}`}>
       <div className="nav__island nav__island--main">
         <a className="nav__brand" href="#top" aria-label={`${company.name}، الصفحة الرئيسية`} onClick={close} dir="ltr">
-          <Logo title={company.name} />
+          <Logo title={company.name} live />
         </a>
         <nav className="nav__links" aria-label="القائمة الرئيسية" ref={linksRef}>
           {pill && <span className="nav__mark" style={{ transform: `translateX(${pill.x}px)`, width: pill.w }} aria-hidden="true" />}
