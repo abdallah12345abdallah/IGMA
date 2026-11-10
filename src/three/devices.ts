@@ -40,7 +40,7 @@ function drawScreen(x: CanvasRenderingContext2D, W: number, H: number, kind: Scr
   x.fillStyle = col
   x.fillRect(0, 0, W, 70)
   x.fillStyle = '#fff'
-  x.font = '800 30px Alexandria, Tahoma'
+  x.font = '800 30px Changa, Tahoma'
   x.direction = 'ltr'
   x.fillText(appName, W - 30, 36)
   x.direction = 'rtl'
@@ -67,10 +67,10 @@ function drawScreen(x: CanvasRenderingContext2D, W: number, H: number, kind: Scr
   const card = (cx: number, cy: number, w: number, h: number, label: string, val: string) => {
     x.fillStyle = '#fff'
     x.fillRect(cx, cy, w, h)
-    text(label, cx + w - 18, cy + 30, '500 22px Readex Pro, Tahoma', muted)
-    text(val, cx + w - 18, cy + 78, '800 40px Alexandria, Tahoma', ink)
+    text(label, cx + w - 18, cy + 30, '500 22px Changa, Tahoma', muted)
+    text(val, cx + w - 18, cy + 78, '800 40px Changa, Tahoma', ink)
   }
-  const title = (t: string) => text(t, R, 108, '800 30px Alexandria, Tahoma', ink)
+  const title = (t: string) => text(t, R, 108, '800 30px Changa, Tahoma', ink)
 
   if (kind === 'erp') {
     title('لوحة الإدارة')
@@ -105,8 +105,8 @@ function drawScreen(x: CanvasRenderingContext2D, W: number, H: number, kind: Scr
       const y = 140 + i * 115
       x.fillStyle = '#fff'
       x.fillRect(L + CW * 0.58, y, CW * 0.42, 100)
-      text('شحنة رقم ' + (1043 + i).toLocaleString('ar-EG'), R - 16, y + 32, '700 24px Readex Pro, Tahoma', ink)
-      text(s, R - 16, y + 70, '500 20px Readex Pro, Tahoma', i === 0 ? col : '#9AA5A1')
+      text('شحنة رقم ' + (1043 + i).toLocaleString('ar-EG'), R - 16, y + 32, '700 24px Changa, Tahoma', ink)
+      text(s, R - 16, y + 70, '500 20px Changa, Tahoma', i === 0 ? col : '#9AA5A1')
     })
   } else if (kind === 'restaurant') {
     title('طلب جديد')
@@ -115,7 +115,7 @@ function drawScreen(x: CanvasRenderingContext2D, W: number, H: number, kind: Scr
       const cy = 140 + Math.floor(i / 3) * 150
       x.fillStyle = i === 0 ? col : '#fff'
       x.fillRect(cx, cy, 136, 136)
-      text(n, cx + 120, cy + 110, '700 24px Readex Pro, Tahoma', i === 0 ? '#fff' : ink)
+      text(n, cx + 120, cy + 110, '700 24px Changa, Tahoma', i === 0 ? '#fff' : ink)
     })
     x.fillStyle = '#fff'
     x.fillRect(L, 140, 340, 460)
@@ -125,7 +125,7 @@ function drawScreen(x: CanvasRenderingContext2D, W: number, H: number, kind: Scr
     }
     x.fillStyle = col
     x.fillRect(L + 24, 520, 292, 60)
-    text('إرسال للمطبخ', L + 290, 551, '800 26px Alexandria, Tahoma', '#fff')
+    text('إرسال للمطبخ', L + 290, 551, '800 26px Changa, Tahoma', '#fff')
   } else if (kind === 'gym') {
     title('تسجيل دخول الأعضاء')
     x.fillStyle = '#fff'
@@ -134,13 +134,13 @@ function drawScreen(x: CanvasRenderingContext2D, W: number, H: number, kind: Scr
     x.arc(R - 90, 230, 60, 0, Math.PI * 2)
     x.fillStyle = soft
     x.fill()
-    text('عضو رقم ٢٨٤', R - 180, 210, '800 34px Alexandria, Tahoma', ink)
+    text('عضو رقم ٢٨٤', R - 180, 210, '800 34px Changa, Tahoma', ink)
     x.fillStyle = '#E2F2E8'
     x.fillRect(R - 470, 250, 280, 50)
-    text('الاشتراك ساري', R - 210, 276, '700 24px Readex Pro, Tahoma', '#1E7A4C')
+    text('الاشتراك ساري', R - 210, 276, '700 24px Changa, Tahoma', '#1E7A4C')
     x.fillStyle = col
     x.fillRect(L, 140, CW - 560, 300)
-    text('تسجيل حضور', L + (CW - 560) / 2, 290, '900 46px Alexandria, Tahoma', '#fff', 'center')
+    text('تسجيل حضور', L + (CW - 560) / 2, 290, '900 46px Changa, Tahoma', '#fff', 'center')
     for (let i = 0; i < 2; i++) {
       x.fillStyle = '#fff'
       x.fillRect(L, 470 + i * 70, CW, 56)
@@ -149,10 +149,10 @@ function drawScreen(x: CanvasRenderingContext2D, W: number, H: number, kind: Scr
     title('الحضور والانصراف')
     x.fillStyle = '#fff'
     x.fillRect(R - 460, 140, 460, 460)
-    text('٠٩:٠٢', R - 230, 280, '900 110px Alexandria, Tahoma', ink, 'center')
+    text('٠٩:٠٢', R - 230, 280, '900 110px Changa, Tahoma', ink, 'center')
     x.fillStyle = col
     x.fillRect(R - 400, 380, 340, 90)
-    text('تسجيل حضور', R - 230, 426, '800 32px Alexandria, Tahoma', '#fff', 'center')
+    text('تسجيل حضور', R - 230, 426, '800 32px Changa, Tahoma', '#fff', 'center')
     for (let i = 0; i < 6; i++) {
       const y = 140 + i * 78
       x.fillStyle = '#fff'

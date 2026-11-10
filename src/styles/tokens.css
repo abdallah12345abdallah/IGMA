@@ -14,8 +14,8 @@
   --line: rgba(10, 25, 22, 0.2);
   --error: #a4221a;
 
-  --font-display: 'Alexandria', 'Segoe UI', Tahoma, sans-serif;
-  --font-body: 'Readex Pro', 'Segoe UI', Tahoma, sans-serif;
+  --font-display: 'Changa', 'Segoe UI', Tahoma, sans-serif;
+  --font-body: 'Changa', 'Segoe UI', Tahoma, sans-serif;
 
   --gutter: clamp(18px, 4vw, 56px);
   --container: 1280px;

@@ -370,7 +370,7 @@ function ParticleMark() {
       o.height = H
       const x = o.getContext('2d')!
       const fs = Math.min(H * 0.92, W * 0.3)
-      x.font = `900 ${fs}px "Readex Pro", Alexandria, sans-serif`
+      x.font = `900 ${fs}px Changa, sans-serif`
       x.textAlign = 'center'
       x.textBaseline = 'middle'
       x.fillText('IGMA', W / 2, H / 2 + fs * 0.04)
