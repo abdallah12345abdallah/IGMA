@@ -32,8 +32,10 @@ export interface Item {
  * 'a' text on the right, object on the left
  * 'b' text on the left, object on the right
  * 'c' headline across the bottom, object up top
+ * 't' headline across the top, object low in the middle
+ * 'o' object in the middle, text in the corners
  */
-export type Layout = 'a' | 'b' | 'c'
+export type Layout = 'a' | 'b' | 'c' | 't' | 'o'
 
 export interface Shot {
   /** Camera angle around the spot, 0 = straight in front */
@@ -43,6 +45,8 @@ export interface Shot {
   /** Height the camera looks at */
   look: number
   layout: Layout
+  /** Where the picture sits, as a share of the screen [right, up]; overrides the layout's default */
+  shift?: [number, number]
 }
 
 export interface Station {
@@ -84,7 +88,7 @@ export const STATIONS: Station[] = [
       { special: 'tote', on: 't2', x: -1.0, z: 0.2, ry: 0.35 },
       { dev: 'flat', on: 'c3', x: -0.25, z: 0.14, ry: 0.25 },
     ],
-    shot: { az: 0.4, dist: 6.1, height: 3.4, look: 0.96, layout: 'b' },
+    shot: { az: 0.4, dist: 5.3, height: 3.4, look: 0.96, layout: 'b', shift: [-0.19, 0] },
   },
   {
     // Restaurant: a modern steel prep counter with fresh produce, buns, a stock pot and a cake; a digital menu screen; the POS tablet
@@ -103,7 +107,7 @@ export const STATIONS: Station[] = [
       { dev: 'stand', on: 'counter', x: 0.16, z: 0.2, ry: -0.25 },
       { dev: 'kiosk', x: -0.98, z: -0.15, ry: 0.4 },
     ],
-    shot: { az: -0.25, dist: 5.8, height: 2.6, look: 0.95, layout: 'a' },
+    shot: { az: -0.25, dist: 7, height: 2.6, look: 0.95, layout: 't', shift: [0, -0.16] },
   },
   {
     // Gym: an adjustable bench, a dumbbell rack, competition kettlebells, a medicine ball, a yoga mat, and the check-in kiosk
@@ -118,7 +122,7 @@ export const STATIONS: Station[] = [
       { special: 'yogaMat', x: 0.85, z: 0.1, ry: 1.2 },
       { dev: 'kiosk', x: 0.95, z: -0.45, ry: -0.45 },
     ],
-    shot: { az: 0.45, dist: 5.7, height: 3.0, look: 0.6, layout: 'b' },
+    shot: { az: 0.45, dist: 3.9, height: 2.4, look: 0.6, layout: 'b', shift: [-0.27, 0.02] },
   },
   {
     // HR: a modern white cabinet with personnel folders, an ID badge, a clock and a plant; a lounge chair; the attendance kiosk
@@ -132,7 +136,7 @@ export const STATIONS: Station[] = [
       { special: 'loungeChair', x: 0.75, z: 0.45, ry: -0.6 },
       { dev: 'kiosk', x: -0.2, z: 0.6, ry: 0.15 },
     ],
-    shot: { az: -0.4, dist: 6.0, height: 2.4, look: 0.85, layout: 'a' },
+    shot: { az: -0.4, dist: 7.2, height: 2.4, look: 0.85, layout: 'c', shift: [0, 0.2] },
   },
   {
     // Learning: a modern study desk with a laptop playing a lesson, new books, headphones, a mug and a plant; an ergonomic chair
@@ -153,7 +157,7 @@ export const STATIONS: Station[] = [
   {
     // Your next system: a blueprint that keeps building itself
     items: [{ special: 'blueprint' }],
-    shot: { az: -0.25, dist: 6.4, height: 2.6, look: 1.0, layout: 'a' },
+    shot: { az: -0.25, dist: 5.4, height: 2.6, look: 1.0, layout: 'o', shift: [0, 0.02] },
   },
 ]
 

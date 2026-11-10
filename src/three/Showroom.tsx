@@ -175,6 +175,7 @@ interface View {
   pos: THREE.Vector3
   look: THREE.Vector3
   layout: Layout | 'hero'
+  shift?: [number, number]
 }
 
 const FOV = 30
@@ -197,12 +198,14 @@ function viewFor(stop: number, mobile: boolean, aspect: number): View {
     pos: new THREE.Vector3(p.x + Math.sin(shot.az + p.ry) * d, shot.height * (mobile ? 1.15 : 1), p.z + Math.cos(shot.az + p.ry) * d),
     look: new THREE.Vector3(p.x, shot.look, p.z),
     layout: shot.layout,
+    shift: shot.shift,
   }
 }
 
 /** How far the picture slides to make room for the text. */
-function shiftFor(layout: View['layout'], mobile: boolean): [number, number] {
+function shiftFor({ layout, shift }: View, mobile: boolean): [number, number] {
   if (mobile) return [0, layout === 'hero' ? 0.28 : 0.2]
+  if (shift) return shift
   if (layout === 'hero') return [0, -0.24]
   if (layout === 'a') return [0.17, 0]
   if (layout === 'b') return [-0.17, 0]
@@ -332,8 +335,8 @@ function CameraRig({ fixedStop, reduced, mobile, centered, sun, hemi, lamp, intr
     cam.position.x += Math.sin(time * 0.31) * 0.07 * drift
     look.lerpVectors(A.look, B.look, t)
     cam.lookAt(look)
-    const sa = centered ? [0, 0] : shiftFor(A.layout, mobile)
-    const sb = centered ? [0, 0] : shiftFor(B.layout, mobile)
+    const sa = centered ? [0, 0] : shiftFor(A, mobile)
+    const sb = centered ? [0, 0] : shiftFor(B, mobile)
     cam.setViewOffset(size.width, size.height, size.width * (sa[0] + (sb[0] - sa[0]) * t), size.height * (sa[1] + (sb[1] - sa[1]) * t), size.width, size.height)
     cam.updateProjectionMatrix()
 

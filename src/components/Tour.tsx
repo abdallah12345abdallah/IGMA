@@ -8,6 +8,7 @@ import { scrollToY, startSmoothScroll } from '../smoothScroll'
 import { Words } from './Words'
 import { IntroLoader } from './IntroLoader'
 import { Rotator } from './Rotator'
+import { StopArt } from './StopArt'
 
 const Showroom = lazy(() => import('../three/Showroom'))
 
@@ -110,7 +111,7 @@ export function Tour() {
         const n = idx === i + 1 ? Math.min(s.flow.length - 1, Math.floor(local * s.flow.length)) : -1
         if (n !== lit.current[i]) {
           lit.current[i] = n
-          el.querySelectorAll('.flow li').forEach((li, j) => li.classList.toggle('is-lit', j <= n))
+          el.querySelectorAll('.stop-steps li').forEach((li, j) => li.classList.toggle('is-lit', j <= n))
         }
       })
     }
@@ -190,7 +191,7 @@ export function Tour() {
             ref={(el) => {
               stopRefs.current[i] = el
             }}
-            className={`stop stop--${STATIONS[i].shot.layout} ${s.custom ? 'stop--custom' : ''} ${active === i + 1 ? 'is-active' : ''}`}
+            className={`stop stop--${STATIONS[i].shot.layout} stop--${s.id} ${s.custom ? 'stop--custom' : ''} ${active === i + 1 ? 'is-active' : ''}`}
             inert={active !== i + 1}
             aria-labelledby={`stop-${s.id}`}
           >
@@ -210,14 +211,10 @@ export function Tour() {
               <p className="s-audience">
                 <b>{journeyCopy.audience}</b> {s.audience}
               </p>
+              <p className="s-proof">{s.proof}</p>
             </div>
             <div className="s-work">
-              <ol className="flow" aria-label="دورة العمل">
-                {s.flow.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-              <p className="s-proof">{s.proof}</p>
+              <StopArt id={s.id} flow={s.flow} />
             </div>
             <div className="s-actions">
               {s.custom ? (

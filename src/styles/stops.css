@@ -1,0 +1,681 @@
+/*
+  Each system stop has its own composition and its own element (StopArt.tsx).
+  Desktop: every stop is a grid with its own areas. Phones keep the stacked layout from tour.css.
+  The steps (.stop-steps li) light up one by one as the visitor scrolls (.is-lit).
+*/
+
+/* ---------- shared pieces ---------- */
+.stop-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.stop-steps li {
+  transition:
+    opacity 0.45s,
+    transform 0.55s var(--ease-out),
+    background-color 0.35s,
+    color 0.35s;
+}
+.art {
+  text-shadow: none;
+  font-size: 15px;
+}
+
+/* the backdrop shading for the two new layouts */
+@media (min-width: 768px) {
+  .tour__pin[data-layout='t'] .scrim {
+    opacity: 1;
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--c) 88%, transparent) 0%, color-mix(in srgb, var(--c) 55%, transparent) 34%, transparent 58%);
+  }
+  .tour__pin[data-layout='o'] .scrim {
+    opacity: 1;
+    background: radial-gradient(ellipse 62% 58% at 50% 55%, transparent 40%, color-mix(in srgb, var(--c) 80%, transparent) 100%);
+  }
+}
+
+/* ========== desktop compositions ========== */
+@media (min-width: 768px) {
+  .stop.stop--erp,
+  .stop.stop--logistics,
+  .stop.stop--restaurant,
+  .stop.stop--gym,
+  .stop.stop--hr,
+  .stop.stop--learning,
+  .stop.stop--custom {
+    display: grid;
+    gap: 14px 4vw;
+    padding: calc(var(--nav-h) + 3.5vh) var(--gutter) 76px;
+  }
+  .stop.stop--erp > *,
+  .stop.stop--logistics > *,
+  .stop.stop--restaurant > *,
+  .stop.stop--gym > *,
+  .stop.stop--hr > *,
+  .stop.stop--learning > *,
+  .stop.stop--custom > * {
+    position: relative;
+    inset: auto;
+    width: auto;
+    min-width: 0;
+  }
+  .stop.stop--erp > .s-meta { grid-area: meta; }
+  .stop.stop--erp > .s-title,
+  .stop.stop--logistics > .s-title,
+  .stop.stop--restaurant > .s-title,
+  .stop.stop--gym > .s-title,
+  .stop.stop--hr > .s-title,
+  .stop.stop--learning > .s-title,
+  .stop.stop--custom > .s-title { grid-area: title; }
+  .stop > .s-copy { grid-area: copy; }
+  .stop > .s-work { grid-area: work; }
+  .stop > .s-actions { grid-area: actions; }
+  .stop > .s-meta { grid-area: meta; }
+
+  /* ---------- 1 ERP: text top right, the company ledger under it, desk on the left ---------- */
+  .stop.stop--erp {
+    grid-template-columns: min(48vw, 780px) 1fr;
+    grid-template-rows: auto auto auto 1fr auto auto;
+    grid-template-areas: 'meta .' 'title .' 'copy .' '. .' 'work .' 'actions .';
+  }
+  .stop--erp .s-copy .s-audience {
+    display: none;
+  }
+  .stop--erp .s-work {
+    margin-bottom: 6px;
+  }
+  .stop--erp .s-title {
+    font-size: clamp(38px, min(3.9vw, 7.4vh), 74px);
+  }
+  .stop--erp .s-copy {
+    max-width: 40vw;
+  }
+  .ledger {
+    border-radius: 18px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--c) 55%, transparent);
+    border: 1px solid var(--fg-line);
+    backdrop-filter: blur(10px);
+  }
+  .ledger__row {
+    display: grid;
+    grid-template-columns: 0.7fr repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    align-items: center;
+    padding: 11px 16px;
+    border-top: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+    color: var(--fg-70);
+  }
+  .ledger__head {
+    border-top: 0;
+    font-weight: 600;
+    color: var(--fg);
+    background: color-mix(in srgb, var(--fg) 10%, transparent);
+  }
+  .ledger__live .stop-steps {
+    display: contents;
+  }
+  .ledger__live b {
+    color: var(--fg);
+  }
+  .ledger__live li {
+    justify-self: start;
+    max-width: 100%;
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 13.5px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px dashed var(--fg-line);
+    opacity: 0.45;
+    transform: scale(0.92);
+  }
+  .ledger__live li.is-lit {
+    opacity: 1;
+    transform: none;
+    background: var(--fg);
+    border-color: var(--fg);
+    color: var(--c);
+    font-weight: 600;
+  }
+  .ledger__live {
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+  }
+  .ledger__foot span:first-child::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-inline-end: 8px;
+    border-radius: 50%;
+    background: #7df5c4;
+    box-shadow: 0 0 0 3px rgba(125, 245, 196, 0.25);
+    vertical-align: middle;
+  }
+  .ledger__foot {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--fg-70);
+    border-top: 1px solid var(--fg-line);
+  }
+
+  /* ---------- 2 logistics: the waybill on the left, the cartons large on the right ---------- */
+  .stop.stop--logistics {
+    grid-template-columns: 1fr min(42vw, 680px);
+    grid-template-rows: auto auto auto 1fr auto;
+    grid-template-areas: '. meta' '. title' '. copy' '. work' '. actions';
+  }
+  .stop--logistics .s-title {
+    font-size: clamp(38px, min(4.2vw, 7.6vh), 82px);
+  }
+  .stop--logistics .s-copy .s-audience,
+  .stop--logistics .s-copy .s-proof {
+    display: none;
+  }
+  .stop--logistics .s-work {
+    align-self: center;
+  }
+  .waybill {
+    width: min(36vw, 520px);
+    background: #fbf8f1;
+    color: #0b2a2c;
+    border-radius: 12px;
+    padding: 20px 22px;
+    display: grid;
+    gap: 12px;
+    rotate: -2.5deg;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+  }
+  .waybill__top {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-display);
+    font-weight: 800;
+    border-bottom: 2px solid currentColor;
+    padding-bottom: 8px;
+  }
+  .waybill__fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 22px;
+    font-size: 14px;
+  }
+  .waybill__fields small {
+    display: block;
+    font-size: 12px;
+    opacity: 0.55;
+  }
+  .waybill__code {
+    height: clamp(34px, 6vh, 56px);
+    background: repeating-linear-gradient(90deg, #0b2a2c 0 3px, transparent 3px 6px, #0b2a2c 6px 12px, transparent 12px 15px, #0b2a2c 15px 17px, transparent 17px 22px);
+  }
+  .waybill .stop-steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    padding-top: 2px;
+  }
+  .waybill__top span:last-child {
+    font-family: ui-monospace, Consolas, monospace;
+  }
+  .waybill .stop-steps li {
+    min-width: 0;
+    min-height: 54px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    border-radius: 7px;
+    border: 2.5px solid #0b4246;
+    box-shadow: inset 0 0 0 2px #fbf8f1, inset 0 0 0 3.5px #0b4246;
+    color: #0b4246;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 12.5px;
+    line-height: 1.3;
+    padding: 6px 5px;
+    opacity: 0.1;
+    transform: scale(1.4) rotate(calc(var(--k) * 4deg - 6deg));
+  }
+  .waybill .stop-steps li:last-child {
+    border-color: #a5370a;
+    box-shadow: inset 0 0 0 2px #fbf8f1, inset 0 0 0 3.5px #a5370a;
+    color: #a5370a;
+  }
+  .waybill .stop-steps li.is-lit {
+    opacity: 0.9;
+    transform: rotate(calc(var(--k) * 4deg - 6deg));
+  }
+
+  /* ---------- 3 restaurant: headline across the top, the ticket hanging on the right, counter low in the middle ---------- */
+  .stop.stop--restaurant {
+    grid-template-columns: min(21vw, 300px) 1fr min(26vw, 400px);
+    grid-template-rows: auto auto 1fr auto auto;
+    grid-template-areas: 'work meta .' 'work title .' 'work . .' '. . copy' '. . actions';
+  }
+  .stop--restaurant .s-meta,
+  .stop--restaurant .s-title {
+    justify-self: center;
+    text-align: center;
+  }
+  .stop--restaurant .s-title {
+    font-size: clamp(44px, min(5vw, 9vh), 100px);
+    max-width: 52vw;
+  }
+  .stop--restaurant .s-copy .s-audience {
+    display: none;
+  }
+  .stop--restaurant .s-work {
+    align-self: start;
+  }
+  .ticket {
+    position: relative;
+    background: #fffaf2;
+    color: #3b1c0b;
+    padding: 18px 20px 26px;
+    rotate: -2deg;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 92% 98%, 84% 100%, 76% 98%, 68% 100%, 60% 98%, 52% 100%, 44% 98%, 36% 100%, 28% 98%, 20% 100%, 12% 98%, 4% 100%, 0 98%);
+  }
+  .ticket > b {
+    display: block;
+    font-family: var(--font-display);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed currentColor;
+  }
+  .ticket__items {
+    list-style: none;
+    margin: 0 0 8px;
+    padding: 0 0 8px;
+    border-bottom: 1px dashed currentColor;
+    display: grid;
+    gap: 3px;
+    font-size: 14px;
+  }
+  .ticket .stop-steps {
+    display: grid;
+    gap: 5px;
+    font-size: 14px;
+  }
+  .ticket .stop-steps li {
+    display: flex;
+    justify-content: space-between;
+    opacity: 0.3;
+  }
+  .ticket .stop-steps li::after {
+    content: '○';
+  }
+  .ticket .stop-steps li.is-lit {
+    opacity: 1;
+    font-weight: 600;
+  }
+  .ticket .stop-steps li.is-lit::after {
+    content: '✓';
+  }
+
+  /* ---------- 4 gym: a close-up on the right, the membership ring and text on the left ---------- */
+  .stop.stop--gym {
+    grid-template-columns: 1fr min(46vw, 720px);
+    grid-template-rows: auto 1fr auto auto auto auto;
+    grid-template-areas: '. work' '. .' '. meta' '. title' '. copy' '. actions';
+  }
+  .stop--gym::before {
+    content: 'GYM';
+    position: absolute;
+    left: calc(var(--gutter) - 1vw);
+    top: calc(var(--nav-h) + 2vh);
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: min(18vh, 15vw);
+    line-height: 0.8;
+    color: color-mix(in srgb, var(--fg) 9%, transparent);
+    opacity: 0;
+    transition: opacity 0.8s;
+    pointer-events: none;
+  }
+  .stop--gym.is-active::before {
+    opacity: 1;
+  }
+  .stop--gym .s-title {
+    font-size: clamp(36px, min(3.6vw, 7vh), 70px);
+  }
+  .stop--gym .s-copy .s-audience {
+    display: none;
+  }
+  .gymring {
+    display: flex;
+    align-items: center;
+    gap: 3vw;
+    padding-inline-start: 6vw;
+  }
+  .gymring__dial {
+    position: relative;
+    width: min(30vh, 260px);
+    aspect-ratio: 1;
+    flex: none;
+  }
+  .gymring__dial svg {
+    width: 100%;
+    height: 100%;
+    rotate: -90deg;
+  }
+  .gymring__dial circle {
+    fill: none;
+    stroke-width: 1.8;
+  }
+  .gymring__track {
+    stroke: var(--fg-line);
+  }
+  .gymring__fill {
+    stroke: var(--fg);
+    stroke-linecap: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 96;
+    transition: stroke-dashoffset 0.8s var(--ease-out);
+  }
+  .gymring:has(li:nth-child(1).is-lit) .gymring__fill { stroke-dashoffset: 75; }
+  .gymring:has(li:nth-child(2).is-lit) .gymring__fill { stroke-dashoffset: 50; }
+  .gymring:has(li:nth-child(3).is-lit) .gymring__fill { stroke-dashoffset: 25; }
+  .gymring:has(li:nth-child(4).is-lit) .gymring__fill { stroke-dashoffset: 0; }
+  .gymring__dial > span {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    font-size: 14px;
+    color: var(--fg-70);
+  }
+  .gymring__dial b {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: min(9vh, 76px);
+    line-height: 1;
+    color: var(--fg);
+  }
+  .gymring .stop-steps {
+    display: grid;
+    gap: 12px;
+  }
+  .gymring .stop-steps li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--fg-70);
+  }
+  .gymring .stop-steps li::before {
+    content: '';
+    width: 22px;
+    height: 2px;
+    background: var(--fg-line);
+    transition: width 0.4s var(--ease-out), background-color 0.3s;
+  }
+  .gymring .stop-steps li.is-lit {
+    color: var(--fg);
+    font-weight: 600;
+  }
+  .gymring .stop-steps li.is-lit::before {
+    width: 40px;
+    background: var(--fg);
+  }
+
+  /* ---------- 5 HR: the office up top, the staff card on its lanyard, a wide headline across the bottom ---------- */
+  .stop.stop--hr {
+    grid-template-columns: min(24vw, 340px) 1fr auto;
+    grid-template-rows: auto 1fr auto auto auto;
+    grid-template-areas: 'work . .' '. . .' 'meta meta meta' 'title title title' 'copy copy actions';
+    align-items: end;
+  }
+  .stop--hr .s-title {
+    font-size: clamp(44px, min(5.4vw, 9.4vh), 110px);
+  }
+  .stop--hr .s-copy {
+    max-width: 52vw;
+  }
+  .stop--hr .s-copy .s-audience {
+    display: none;
+  }
+  .stop--hr .s-work {
+    align-self: start;
+  }
+  .idcard {
+    position: relative;
+    margin-top: 4vh;
+    background: #fff;
+    color: #233a09;
+    border-radius: 14px;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 62px 1fr;
+    gap: 6px 14px;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
+    transform-origin: top center;
+    animation: hr-swing 4s ease-in-out infinite;
+  }
+  .idcard::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    width: 2px;
+    height: calc(var(--nav-h) + 8vh);
+    background: linear-gradient(transparent, var(--fg-70));
+  }
+  .idcard__photo {
+    grid-row: span 5;
+    border-radius: 9px;
+    background: linear-gradient(color-mix(in srgb, var(--c) 25%, #fff), color-mix(in srgb, var(--c) 45%, #fff));
+  }
+  .idcard > b {
+    font-family: var(--font-display);
+  }
+  .idcard .stop-steps {
+    display: contents;
+  }
+  .idcard .stop-steps li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13.5px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    opacity: 0.35;
+  }
+  .idcard .stop-steps li.is-lit {
+    opacity: 1;
+  }
+  .idcard em {
+    font-style: normal;
+    font-weight: 600;
+  }
+  @keyframes hr-swing {
+    50% {
+      rotate: -2.5deg;
+    }
+  }
+
+  /* ---------- 6 learning: the left side reads like the course page ---------- */
+  .stop.stop--learning {
+    grid-template-columns: 1fr min(42vw, 680px);
+    grid-template-rows: auto auto auto 1fr auto auto;
+    grid-template-areas: '. meta' '. title' '. work' '. .' '. copy' '. actions';
+  }
+  .stop--learning .s-title {
+    font-size: clamp(36px, min(3.8vw, 7vh), 72px);
+  }
+  .stop--learning .s-copy .s-audience {
+    display: none;
+  }
+  .course {
+    display: grid;
+    gap: 14px;
+  }
+  .course__pct {
+    display: grid;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: min(11vh, 96px);
+    line-height: 1;
+    color: var(--fg);
+  }
+  .course__pct span {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .course__pct span:first-child { opacity: 0.35; }
+  .course:has(li:nth-child(1).is-lit) .course__pct span { opacity: 0; }
+  .course:has(li:nth-child(1).is-lit):not(:has(li:nth-child(2).is-lit)) .course__pct span:nth-child(1),
+  .course:has(li:nth-child(2).is-lit):not(:has(li:nth-child(3).is-lit)) .course__pct span:nth-child(2),
+  .course:has(li:nth-child(3).is-lit):not(:has(li:nth-child(4).is-lit)) .course__pct span:nth-child(3),
+  .course:has(li:nth-child(4).is-lit) .course__pct span:nth-child(4) { opacity: 1; }
+  .course__bar {
+    height: 6px;
+    border-radius: 9px;
+    background: var(--fg-line);
+    overflow: hidden;
+  }
+  .course__bar i {
+    display: block;
+    height: 100%;
+    width: 4%;
+    background: var(--fg);
+    transition: width 0.7s var(--ease-out);
+  }
+  .course:has(li:nth-child(1).is-lit) .course__bar i { width: 25%; }
+  .course:has(li:nth-child(2).is-lit) .course__bar i { width: 50%; }
+  .course:has(li:nth-child(3).is-lit) .course__bar i { width: 75%; }
+  .course:has(li:nth-child(4).is-lit) .course__bar i { width: 100%; }
+  .course .stop-steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+  }
+  .course .stop-steps li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--fg-70);
+  }
+  .course .stop-steps li::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    flex: none;
+    border-radius: 50%;
+    border: 2px solid var(--fg-70);
+    transition: background-color 0.3s;
+  }
+  .course .stop-steps li.is-lit {
+    color: var(--fg);
+  }
+  .course .stop-steps li.is-lit::before {
+    background: var(--fg);
+    border-color: var(--fg);
+  }
+
+  /* ---------- 7 your next system: the plate in the middle, words in the four corners ---------- */
+  .stop.stop--custom {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: 'title meta' '. .' 'actions copy';
+    align-items: start;
+  }
+  .stop--custom .s-meta {
+    justify-self: end;
+  }
+  .stop--custom .s-title {
+    font-size: clamp(36px, min(3.8vw, 7vh), 72px);
+    max-width: 36vw;
+  }
+  .stop--custom .s-copy {
+    align-self: end;
+    justify-self: end;
+    max-width: 34vw;
+  }
+  .stop--custom .s-copy .s-audience {
+    display: none;
+  }
+  .stop--custom .s-actions {
+    align-self: end;
+  }
+  .stop.stop--custom > .s-work {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .chips .stop-steps li {
+    position: absolute;
+    padding: 5px 14px;
+    border-radius: 99px;
+    font-size: 14px;
+    white-space: nowrap;
+    background: color-mix(in srgb, var(--c) 70%, #000);
+    color: var(--fg-70);
+    border: 1px solid var(--fg-line);
+    opacity: 0.45;
+  }
+  .chips .stop-steps li:nth-child(1) { right: 58%; top: 44%; }
+  .chips .stop-steps li:nth-child(2) { left: 56%; top: 38%; }
+  .chips .stop-steps li:nth-child(3) { left: 60%; top: 58%; }
+  .chips .stop-steps li:nth-child(4) { right: 56%; top: 64%; }
+  .chips .stop-steps li.is-lit {
+    opacity: 1;
+    color: #7df5c4;
+    border-color: #7df5c4;
+  }
+}
+
+/* the hanging card swings only when motion is welcome */
+@media (prefers-reduced-motion: reduce) {
+  .idcard {
+    animation: none !important;
+  }
+}
+
+/* ========== phones: the scene on top, the text stacked, each element reduced to its steps ========== */
+@media (max-width: 767px) {
+  .art {
+    background: none;
+    box-shadow: none;
+    border: 0;
+    padding: 0;
+    rotate: none;
+    clip-path: none;
+    color: var(--fg);
+  }
+  .art .deco {
+    display: none;
+  }
+  .art .stop-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .art .stop-steps li {
+    padding: 4px 11px;
+    border-radius: 99px;
+    font-size: 13px;
+    border: 1px solid var(--fg-line);
+    color: var(--fg-70);
+  }
+  .art .stop-steps li.is-lit {
+    background: var(--fg);
+    color: var(--c);
+    border-color: var(--fg);
+  }
+  .ledger__live {
+    display: block;
+  }
+  .idcard,
+  .gymring,
+  .course {
+    display: block;
+  }
+}
