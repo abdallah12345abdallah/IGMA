@@ -7,6 +7,8 @@ export function startSmoothScroll() {
   if (lenis || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {}
   lenis = new Lenis({ autoRaf: true, lerp: 0.11, smoothWheel: true })
   document.documentElement.classList.add('has-lenis')
+  // Respect a lock that was set before smooth scrolling existed (the opening loader).
+  if (document.documentElement.classList.contains('is-locked')) lenis.stop()
 
   // In-page links (#services, #demo...) glide instead of jumping.
   const onClick = (e: MouseEvent) => {
@@ -39,9 +41,26 @@ export function scrollToEl(el: Element, immediate = false) {
   else el.scrollIntoView({ behavior: immediate ? 'instant' : 'smooth' })
 }
 
-/** Holds the page still while the 3D scene finishes loading. */
+const block = (e: Event) => e.preventDefault()
+const KEYS = new Set([' ', 'PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'Home', 'End'])
+const blockKeys = (e: KeyboardEvent) => {
+  if (KEYS.has(e.key)) e.preventDefault()
+}
+
+/** Freezes the page (used while the opening plays). overflow:hidden alone does not stop wheel scrolling in every browser. */
 export function lockScroll(on: boolean) {
   document.documentElement.classList.toggle('is-locked', on)
+  const opts = { passive: false } as AddEventListenerOptions
+  if (on) {
+    window.scrollTo(0, 0)
+    window.addEventListener('wheel', block, opts)
+    window.addEventListener('touchmove', block, opts)
+    window.addEventListener('keydown', blockKeys)
+  } else {
+    window.removeEventListener('wheel', block, opts)
+    window.removeEventListener('touchmove', block, opts)
+    window.removeEventListener('keydown', blockKeys)
+  }
   if (lenis) {
     if (on) lenis.stop()
     else lenis.start()

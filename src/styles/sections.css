@@ -277,53 +277,67 @@
   margin-top: 16px;
   color: var(--ink-2);
 }
+/* contract rules: one open line, separated by dots, no boxes */
 .rules {
   margin-top: 28px;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px 0;
+  font-size: 16px;
 }
-.rules li {
-  padding: 7px 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  font-size: 15px;
+.rules li:not(:last-child)::after {
+  content: '•';
+  margin-inline: 14px;
+  color: var(--green);
 }
 
+/* clients: an open index, each entry marked by a line in its system colour */
 .clients {
   margin-top: clamp(36px, 5vw, 56px);
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
+  gap: 0 28px;
 }
 .clients a {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 230px;
-  padding: 20px;
-  background: var(--c);
-  color: var(--on);
-  border-radius: var(--radius);
-  transition: transform 0.25s var(--ease-out);
+  padding-top: 22px;
+  color: var(--ink);
 }
-.clients a:hover {
-  transform: translateY(-4px);
+.clients a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  inset-inline: 0;
+  height: 3px;
+  background: var(--c);
+  transform-origin: right;
+  transition: transform 0.45s var(--ease-out);
+}
+.clients a:hover::before {
+  transform: scaleY(2.4);
 }
 .clients h3 {
   font-weight: 800;
-  font-size: 21px;
-  line-height: 1.45;
+  font-size: clamp(22px, 1.9vw, 28px);
+  line-height: 1.35;
+  transition: color 0.25s;
+}
+.clients a:hover h3 {
+  color: var(--c);
 }
 .clients p {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 15px;
-  color: var(--on-70);
+  color: var(--ink-2);
 }
 .clients span {
-  margin-top: auto;
+  margin-top: 14px;
   font-size: 14px;
-  padding-top: 12px;
+  color: var(--c);
+  font-weight: 600;
 }
 
 /* ========== DEMO ========== */
@@ -549,7 +563,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .clients a {
-    min-height: 170px;
+    padding-bottom: 30px;
   }
 }
 @media (max-width: 860px) {
@@ -593,6 +607,6 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .clients a {
-    min-height: 130px;
+    padding-bottom: 26px;
   }
 }

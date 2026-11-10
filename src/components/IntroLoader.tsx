@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { company } from '../content/site'
-import { tour } from '../three/tourState'
+import { LAMP_DROP_MS, tour } from '../three/tourState'
 import { lockScroll } from '../smoothScroll'
 
 const MAX_WAIT_MS = 20000 // never hold the visitor longer than this
@@ -35,7 +35,7 @@ export function IntroLoader({ done, reduced, onGone }: { done: boolean; reduced:
     let raf = 0
     const tick = () => {
       const p = finish ? 1 : Math.min(0.99, tour.progress)
-      if (solidRef.current) solidRef.current.style.clipPath = `inset(${(1 - p) * 100}% 0 0 0)`
+      if (solidRef.current) solidRef.current.style.clipPath = `inset(${(1 - p) * 140 - 40}% -40% -40% -40%)`
       if (pctRef.current) pctRef.current.textContent = `${ar(p * 100)}٪`
       raf = requestAnimationFrame(tick)
     }
@@ -57,6 +57,8 @@ export function IntroLoader({ done, reduced, onGone }: { done: boolean; reduced:
         const dy = b.top + b.height / 2 - (a.top + a.height / 2)
         mark.style.transform = `translate(${dx}px, ${dy}px) scale(${s})`
       }
+      // The lamp is already hanging in place behind the dark; it switches on now, in step with the dark clearing.
+      tour.introAt = performance.now() - LAMP_DROP_MS
       setLeaving(true)
     }, 260)
     return () => window.clearTimeout(hold)

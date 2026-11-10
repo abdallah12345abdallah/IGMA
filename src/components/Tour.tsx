@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
-import { hero, journeyCopy, systems } from '../content/site'
+import { hero, journeyCopy, systems, tourStops } from '../content/site'
 import { STATIONS } from '../three/stations'
 import { tour } from '../three/tourState'
 import { useIsMobile, useReducedMotion, useWebGLSupport } from '../hooks/useMediaFlags'
@@ -7,13 +7,15 @@ import { requestDemo } from '../demoEvents'
 import { scrollToY, startSmoothScroll } from '../smoothScroll'
 import { Words } from './Words'
 import { IntroLoader } from './IntroLoader'
+import { Rotator } from './Rotator'
 
 const Showroom = lazy(() => import('../three/Showroom'))
 
-const STOPS = systems.length + 1 // the overview + one stop per system
+const STOPS = tourStops.length + 1 // the overview + one stop per system + your next project
 const TAIL = 0.5 // extra hold on the last system
 const SEGMENT_SVH = 115 // scroll distance per stop: raise it for a slower tour
 const HOLD = 0.5 // share of each stop where the camera rests
+const HEADLINE_DELAY_MS = 250 // after the loader has gone and the lamp is on
 const MAX_WAIT_MS = 20000 // turn on smooth scrolling after this even if the 3D is still loading
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v))
@@ -30,7 +32,7 @@ export function Tour() {
   const rootRef = useRef<HTMLDivElement>(null)
   const pinRef = useRef<HTMLDivElement>(null)
   const stopRefs = useRef<(HTMLElement | null)[]>([])
-  const lit = useRef<number[]>(systems.map(() => -1))
+  const lit = useRef<number[]>(tourStops.map(() => -1))
   const [active, setActive] = useState(0)
   const [ready, setReady] = useState(false)
   const [visible, setVisible] = useState(true)
@@ -41,10 +43,19 @@ export function Tour() {
     const t = window.setTimeout(() => setPosterGone(true), 900)
     return () => window.clearTimeout(t)
   }, [ready])
-  const onReady = useCallback(() => setReady(true), [])
+  const onReady = useCallback(() => {
+    setReady(true)
+  }, [])
   // The opening headline rises only after the loader hands over to the page.
   const [introDone, setIntroDone] = useState(false)
-  const onIntroGone = useCallback(() => setIntroDone(true), [])
+  const onIntroGone = useCallback(() => {
+    // The loader has gone: drop the lamp, switch it on, then bring in the headline.
+    if (tour.introAt == null) tour.introAt = performance.now()
+    const wait = reduced ? 0 : HEADLINE_DELAY_MS
+    window.setTimeout(() => {
+      setIntroDone(true)
+    }, wait)
+  }, [reduced])
   const heroIn = introDone || webgl === false
 
   // Native scrolling stays on while the scene loads (it never stutters); the smoother
@@ -85,12 +96,14 @@ export function Tour() {
       tour.pos = f
       const idx = Math.round(f)
       setActive(idx)
-      pin.style.setProperty('--c', idx === 0 ? SAND : systems[idx - 1].color)
-      pin.dataset.tone = idx === 0 ? 'light' : 'dark'
-      if (idx === 0) pin.dataset.nav = 'light'
+      pin.style.setProperty('--c', idx === 0 ? SAND : tourStops[idx - 1].color)
+      const dark = idx !== 0
+      pin.dataset.tone = dark ? 'dark' : 'light'
+      pin.dataset.layout = idx === 0 ? 'hero' : STATIONS[idx - 1].shot.layout
+      if (!dark) pin.dataset.nav = 'light'
       else delete pin.dataset.nav
       // Light up each system's working cycle step by step while its stop holds.
-      systems.forEach((s, i) => {
+      tourStops.forEach((s, i) => {
         const el = stopRefs.current[i]
         if (!el) return
         const local = clamp((u - (i + 1)) / HOLD, 0, 1)
@@ -132,7 +145,7 @@ export function Tour() {
         <div className="tour__canvas" aria-hidden="true">
           {webgl ? (
             <Suspense fallback={null}>
-              <Showroom reduced={reduced} mobile={mobile} interactive paused={!visible && ready} onReady={onReady} />
+              <Showroom reduced={reduced} mobile={mobile} intro interactive paused={!visible && ready} onReady={onReady} />
             </Suspense>
           ) : null}
         </div>
@@ -141,7 +154,14 @@ export function Tour() {
         <section className={`stop stop--hero ${active === 0 && heroIn ? 'is-active' : ''}`} inert={active !== 0} aria-labelledby="hero-title">
           <p className="s-meta">{hero.eyebrow}</p>
           <h1 className="s-title" id="hero-title">
-            <Words text={hero.title} />
+            <Words text={hero.title} />{' '}
+            <Rotator words={hero.rotate} colors={systems.map((s) => s.color)} run={active === 0 && heroIn} reduced={reduced} />
+            <span className="s-accent">
+              <Words text={hero.accent} offset={3} />
+              <svg viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M2 9 C 60 3, 120 12, 180 6 S 270 4, 298 8" pathLength={1} />
+              </svg>
+            </span>
           </h1>
           <div className="s-copy">
             <p>{hero.lede}</p>
@@ -150,7 +170,7 @@ export function Tour() {
             <a className="btn btn--solid" href="#demo">
               {hero.primary}
             </a>
-            <a className="btn btn--line" href="#systems" onClick={(e) => (e.preventDefault(), goTo(1))}>
+            <a className="btn btn--line" href="#systems" onClick={(e) => (e.preventDefault(), goTo(STOPS - 1))}>
               {hero.secondary}
             </a>
           </div>
@@ -164,13 +184,13 @@ export function Tour() {
           </div>
         </section>
 
-        {systems.map((s, i) => (
+        {tourStops.map((s, i) => (
           <section
             key={s.id}
             ref={(el) => {
               stopRefs.current[i] = el
             }}
-            className={`stop stop--${STATIONS[i].shot.layout} ${active === i + 1 ? 'is-active' : ''}`}
+            className={`stop stop--${STATIONS[i].shot.layout} ${s.custom ? 'stop--custom' : ''} ${active === i + 1 ? 'is-active' : ''}`}
             inert={active !== i + 1}
             aria-labelledby={`stop-${s.id}`}
           >
@@ -200,18 +220,31 @@ export function Tour() {
               <p className="s-proof">{s.proof}</p>
             </div>
             <div className="s-actions">
-              <a className="btn btn--solid" href="#demo" onClick={() => requestDemo(s.id)}>
-                {journeyCopy.demo}
-              </a>
-              <a className="btn btn--line" href={`#/systems/${s.id}`}>
-                {journeyCopy.details}
-              </a>
+              {s.custom ? (
+                <>
+                  <a className="btn btn--solid" href="#demo" onClick={() => requestDemo('other')}>
+                    {journeyCopy.customCta}
+                  </a>
+                  <a className="btn btn--line" href="#services">
+                    {journeyCopy.customMore}
+                  </a>
+                </>
+              ) : (
+                <>
+                  <a className="btn btn--solid" href="#demo" onClick={() => requestDemo(s.id as (typeof systems)[number]['id'])}>
+                    {journeyCopy.demo}
+                  </a>
+                  <a className="btn btn--line" href={`#/systems/${s.id}`}>
+                    {journeyCopy.details}
+                  </a>
+                </>
+              )}
             </div>
           </section>
         ))}
 
         <nav className="rail" aria-label="محطات الجولة">
-          {['الكل', ...systems.map((s) => s.short)].map((label, i) => (
+          {['الكل', ...tourStops.map((s) => s.short)].map((label, i) => (
             <button key={label} type="button" aria-current={active === i ? 'step' : undefined} onClick={() => goTo(i)}>
               <i aria-hidden="true" />
               <span>{label}</span>

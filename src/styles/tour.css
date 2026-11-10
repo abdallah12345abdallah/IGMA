@@ -50,14 +50,37 @@ html.is-locked body {
 .posters img.is-on {
   opacity: 1;
 }
+/* A soft wash of the stop colour behind the text side only, so copy stays readable over the scene. */
 .scrim {
-  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition:
+    opacity 0.6s,
+    background 0.6s;
+}
+@media (min-width: 768px) {
+  .tour__pin[data-layout='a'] .scrim {
+    opacity: 1;
+    background: linear-gradient(to left, color-mix(in srgb, var(--c) 88%, transparent) 0%, color-mix(in srgb, var(--c) 70%, transparent) 38%, transparent 62%);
+  }
+  .tour__pin[data-layout='b'] .scrim {
+    opacity: 1;
+    background: linear-gradient(to right, color-mix(in srgb, var(--c) 88%, transparent) 0%, color-mix(in srgb, var(--c) 70%, transparent) 38%, transparent 62%);
+  }
+  .tour__pin[data-layout='c'] .scrim {
+    opacity: 1;
+    background: linear-gradient(to top, color-mix(in srgb, var(--c) 90%, transparent) 0%, color-mix(in srgb, var(--c) 60%, transparent) 40%, transparent 65%);
+  }
 }
 
 /* ---------- stops: no boxes, the text is laid out across the frame ---------- */
 .stop {
   position: absolute;
   inset: 0;
+  z-index: 2;
   pointer-events: none;
   visibility: hidden;
   transition: visibility 0s linear 0.8s;
@@ -135,8 +158,8 @@ html.is-locked body {
 }
 .s-title {
   font-weight: 900;
-  font-size: clamp(46px, min(5.6vw, 10vh), 104px);
-  line-height: 1.16;
+  font-size: clamp(44px, min(4.7vw, 9.5vh), 96px);
+  line-height: 1.14;
   letter-spacing: -0.015em;
 }
 .stop--hero .s-title {
@@ -203,17 +226,17 @@ html.is-locked body {
 .stop--a .s-title,
 .stop--b .s-title {
   top: calc(var(--nav-h) + 4vh + 34px);
-  width: min(46vw, 760px);
+  width: min(50vw, 960px);
 }
 .stop--a .s-copy,
 .stop--b .s-copy {
   top: 52vh;
-  width: min(30vw, 460px);
+  width: min(44vw, 720px);
 }
 .stop--a .s-work,
 .stop--b .s-work {
   bottom: 140px;
-  width: min(34vw, 520px);
+  width: min(48vw, 780px);
 }
 .stop--a .s-actions,
 .stop--b .s-actions {
@@ -242,12 +265,12 @@ html.is-locked body {
 .stop--c .s-copy {
   top: calc(var(--nav-h) + 4vh);
   right: var(--gutter);
-  width: min(28vw, 420px);
+  width: min(42vw, 640px);
 }
 .stop--c .s-work {
   top: calc(var(--nav-h) + 4vh);
   left: var(--gutter);
-  width: min(28vw, 420px);
+  width: min(42vw, 640px);
 }
 .stop--c .s-actions {
   top: calc(var(--nav-h) + 4vh + 200px);
@@ -275,43 +298,66 @@ html.is-locked body {
 .btn--line:hover {
   background: color-mix(in srgb, var(--fg) 12%, transparent);
 }
+/* working cycle: numbered steps on a line that fills in as each step lights up */
 .flow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  counter-reset: step;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  text-shadow: none;
 }
 .flow li {
+  counter-increment: step;
   position: relative;
-  padding: 7px 12px 7px 20px;
-  font-size: 14px;
-  line-height: 1.4;
-  border: 1px solid var(--fg-line);
-  border-radius: var(--radius);
+  padding: 18px 0 0 14px;
+  font-size: 15.5px;
+  font-weight: 500;
+  line-height: 1.35;
   color: var(--fg-70);
-  text-shadow: none;
+  background:
+    linear-gradient(var(--fg), var(--fg)) no-repeat right 0 top 0 / 0% 2px,
+    linear-gradient(var(--fg-line), var(--fg-line)) no-repeat right 0 top 0.5px / 100% 1px;
   transition:
-    background-color 0.35s,
-    color 0.35s,
-    border-color 0.35s;
+    background-size 0.6s var(--ease-out),
+    color 0.35s;
 }
-.flow li:not(:last-child)::after {
+.flow li::before {
+  content: counter(step, decimal-leading-zero);
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  direction: ltr;
+  text-align: right;
+  opacity: 0.7;
+}
+.flow li::after {
   content: '';
   position: absolute;
-  left: 7px;
-  top: 50%;
-  width: 6px;
-  height: 6px;
-  border-left: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: translateY(-50%) rotate(225deg);
-}
-.flow li:last-child {
-  padding-left: 12px;
+  top: -4px;
+  right: -1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--c);
+  border: 1.5px solid var(--fg-line);
+  transition:
+    background-color 0.35s,
+    border-color 0.35s,
+    transform 0.35s var(--ease-out);
 }
 .flow li.is-lit {
+  color: var(--fg);
+  background-size:
+    100% 2px,
+    100% 1px;
+}
+.flow li.is-lit::after {
   background: var(--fg);
   border-color: var(--fg);
-  color: var(--c);
+  transform: scale(1.15);
 }
 .proof {
   display: flex;
@@ -436,6 +482,7 @@ html.is-locked body {
 @media (max-width: 767px) {
   .scrim {
     display: block;
+    opacity: 1;
     position: absolute;
     inset: 38% 0 0;
     background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--c) 92%, transparent) 38%);
@@ -485,7 +532,7 @@ html.is-locked body {
   }
   .flow li {
     font-size: 12.5px;
-    padding: 5px 9px 5px 17px;
+    padding: 15px 0 0 8px;
   }
   .s-proof {
     margin-top: 8px;
@@ -574,7 +621,7 @@ html.is-locked body {
   margin-top: 14px;
 }
 .sys-hero .flow li.is-lit {
-  color: var(--c);
+  color: var(--fg);
 }
 .sys-hero .stop__proof {
   margin-top: 12px;
@@ -611,20 +658,36 @@ html.is-locked body {
   }
 }
 
-/* ---------- opening loader: the wordmark fills, then flies to the header logo ---------- */
+/* ---------- opening loader: a dark room with the wordmark glowing; the lamp switches on and the dark clears ---------- */
 .intro-loader {
   position: fixed;
   inset: 0;
   z-index: 80;
   display: grid;
   place-items: center;
-  background: #d6d2c7;
-  color: var(--ink);
-  transition: background-color 0.55s ease 0.7s;
+  color: var(--on);
+}
+.intro-loader::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, #1b1e1c 0%, #0b0d0c 70%);
 }
 .intro-loader.is-leaving {
-  background-color: rgba(214, 210, 199, 0);
   pointer-events: none;
+}
+/* the dark clears with the same flicker as the lamp coming on */
+.intro-loader.is-leaving::before {
+  animation: lights-on 1s linear forwards;
+}
+@keyframes lights-on {
+  0% { opacity: 1; }
+  0.1%, 7% { opacity: 0.35; }
+  7.1%, 18% { opacity: 0.95; }
+  18.1%, 26% { opacity: 0.15; }
+  26.1%, 40% { opacity: 0.8; }
+  40.1% { opacity: 0.4; }
+  100% { opacity: 0; }
 }
 .intro-loader__mark {
   position: relative;
@@ -637,14 +700,28 @@ html.is-locked body {
   will-change: transform;
 }
 .intro-loader__outline {
-  color: rgba(16, 35, 31, 0.13);
+  color: rgba(255, 241, 214, 0.07);
+  transition: opacity 0.3s;
 }
 .intro-loader__solid {
   position: absolute;
   inset: 0;
+  color: #fff1d6;
+  text-shadow:
+    0 0 24px rgba(255, 226, 184, 0.45),
+    0 0 80px rgba(255, 226, 184, 0.25);
+  clip-path: inset(100% -40% -40% -40%);
+  transition:
+    clip-path 0.35s ease-out,
+    color 0.6s ease 0.3s,
+    text-shadow 0.6s ease 0.3s;
+}
+.intro-loader.is-leaving .intro-loader__outline {
+  opacity: 0;
+}
+.intro-loader.is-leaving .intro-loader__solid {
   color: var(--ink);
-  clip-path: inset(100% 0 0 0);
-  transition: clip-path 0.35s ease-out;
+  text-shadow: none;
 }
 .intro-loader__pct {
   position: absolute;
@@ -653,15 +730,12 @@ html.is-locked body {
   right: 0;
   text-align: center;
   font-size: 15px;
-  color: var(--ink-2);
+  color: rgba(255, 241, 214, 0.55);
   font-variant-numeric: tabular-nums;
   transition: opacity 0.3s;
 }
 .intro-loader.is-leaving .intro-loader__pct {
   opacity: 0;
-}
-.intro-loader.is-leaving .intro-loader__mark {
-  transition-delay: 0s;
 }
 @media (prefers-reduced-motion: reduce) {
   .intro-loader {
@@ -669,5 +743,111 @@ html.is-locked body {
   }
   .intro-loader.is-leaving {
     opacity: 0;
+  }
+  .intro-loader.is-leaving::before {
+    animation: none;
+  }
+}
+
+/* ---------- opening headline: a fixed start, a rotating word, a hand-drawn accent ---------- */
+.stop--hero .s-title {
+  font-size: clamp(54px, min(7vw, 12vh), 136px);
+  line-height: 1.08;
+}
+.rot-wrap {
+  display: block;
+  width: fit-content;
+}
+.w > .rot {
+  display: inline-grid;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+.rot__w {
+  display: block;
+  grid-area: 1 / 1;
+  justify-self: start;
+  color: var(--wc);
+  transform: translateY(108%);
+  transition:
+    transform 0.8s var(--ease-out),
+    opacity 0.5s;
+  opacity: 0;
+}
+.rot__w.is-on {
+  transform: none;
+  opacity: 1;
+}
+.rot__w.is-out {
+  transform: translateY(-108%);
+  opacity: 0;
+}
+.s-accent {
+  position: relative;
+  display: block;
+  width: fit-content;
+  margin-top: 0.34em;
+  font-size: 0.34em;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--green);
+}
+.s-accent svg {
+  position: absolute;
+  inset-inline: -2%;
+  bottom: -0.32em;
+  width: 104%;
+  height: 0.45em;
+  overflow: visible;
+}
+.s-accent path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0.9s var(--ease-out);
+}
+.stop.is-active .s-accent path {
+  stroke-dashoffset: 0;
+  transition-delay: 0.85s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rot__w,
+  .s-accent path {
+    transition: none;
+  }
+}
+
+/* ---------- the next-project stop ---------- */
+.stop--custom .s-title {
+  color: var(--on);
+}
+.stop--custom .s-num {
+  border-style: dashed;
+}
+@media (max-width: 767px) {
+  .stop--hero .s-title {
+    font-size: clamp(38px, 11vw, 52px);
+  }
+  .s-accent {
+    font-size: 0.42em;
+  }
+}
+
+/* the proof line shares the bottom row with the stop list */
+@media (min-width: 768px) {
+  .stop--hero .s-work {
+    bottom: 50px;
+    width: auto;
+    max-width: calc(100vw - 2 * var(--gutter) - 640px);
+  }
+  .stop--hero .proof {
+    border-top: 0;
+    padding-top: 0;
   }
 }

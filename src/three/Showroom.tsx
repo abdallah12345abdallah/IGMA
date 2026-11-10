@@ -1,11 +1,47 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Html, Preload, useGLTF } from '@react-three/drei'
+import { Html, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
-import { GALLERY, HERO_SHOT, HERO_SHOT_MOBILE, MODEL_FILES, STATIONS, type Item, type Layout } from './stations'
-import { tour } from './tourState'
-import { systems } from '../content/site'
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
+
+import { GALLERY, HERO_SHOT, HERO_SHOT_MOBILE, LAMP, MODEL_FILES, STATIONS, type Item, type Layout } from './stations'
+import { blueprint, device, screenTexture } from './devices'
+import { sideboard, folders, badge, deskClock, loungeChair, bookStack, headphones, modernDesk, mug, taskChair, bench, cartonL, cartonS, palletJack, tote, dumbbell, dumbbellRack, kettlebell, kettlebellColor, medBall, pallet, plate, plates, steelCounter, stockPot, yogaMat } from './props'
+
+const BUILT: Record<string, () => THREE.Object3D> = {
+  dumbbell,
+  kettlebell,
+  pallet,
+  plates,
+  steelCounter,
+  stockPot,
+  plate,
+  bench,
+  dumbbellRack,
+  yogaMat,
+  medBall,
+  modernDesk,
+  sideboard,
+  folders,
+  badge,
+  deskClock,
+  loungeChair,
+  taskChair,
+  bookStack,
+  headphones,
+  mug,
+  cartonL,
+  cartonS,
+  palletJack,
+  tote: () => tote('#0F5257'),
+  toteGrey: () => tote('#3a3f44'),
+  kbPink: () => kettlebellColor('#e0607e'),
+  kbBlue: () => kettlebellColor('#3c6fd1'),
+  kbYellow: () => kettlebellColor('#e7b93a'),
+}
+import { LAMP_DROP_MS, tour } from './tourState'
+import { tourStops } from '../content/site'
 
 const url = (f: string) => `/models/${f}.glb`
 THREE.DefaultLoadingManager.onProgress = (_url, loaded, total) => {
@@ -13,41 +49,70 @@ THREE.DefaultLoadingManager.onProgress = (_url, loaded, total) => {
 }
 MODEL_FILES.forEach((f) => useGLTF.preload(url(f)))
 
-/* ---------- the one object we build ourselves: a rubber hex dumbbell ---------- */
-function dumbbell() {
-  const g = new THREE.Group()
-  const chrome = new THREE.MeshPhysicalMaterial({ color: '#d5d9dc', metalness: 1, roughness: 0.16 })
-  const rubber = new THREE.MeshPhysicalMaterial({ color: '#161718', roughness: 0.85 })
-  const hex = new THREE.Shape()
-  for (let i = 0; i < 6; i++) {
-    const a = (i * Math.PI) / 3 + Math.PI / 6
-    if (i === 0) hex.moveTo(Math.cos(a) * 0.62, Math.sin(a) * 0.62)
-    else hex.lineTo(Math.cos(a) * 0.62, Math.sin(a) * 0.62)
-  }
-  hex.closePath()
-  const head = new THREE.ExtrudeGeometry(hex, { depth: 0.36, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05, bevelSegments: 4 })
-  head.translate(0, 0, -0.18).rotateY(Math.PI / 2)
-  ;[-1, 1].forEach((d) => {
-    const m = new THREE.Mesh(head, rubber)
-    m.position.x = d * 0.82
-    g.add(m)
-    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.04, 32).rotateZ(Math.PI / 2), chrome)
-    cap.position.x = d * 1.06
-    g.add(cap)
+/** Background colour per stop: sand for the overview, then each system's colour. */
+const SAND = new THREE.Color('#D6D2C7')
+const STOP_COLORS = [SAND, ...tourStops.map((s) => new THREE.Color(s.color))]
+
+/* ---------- one shader for (nearly) everything ----------
+ * Every distinct combination of texture slots compiles its own shader, and on integrated
+ * GPUs each compile blocks the page for a moment. Giving every surface the same slots
+ * (neutral 1x1 textures where a model has none) lets them all share a single shader. */
+const tex1 = (r: number, g: number, b: number, srgb: boolean) => {
+  const t = new THREE.DataTexture(new Uint8Array([r, g, b, 255]), 1, 1)
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace
+  t.needsUpdate = true
+  return t
+}
+const WHITE = tex1(255, 255, 255, true)
+const WHITE_LINEAR = tex1(255, 255, 255, false)
+const FLAT_NORMAL = tex1(128, 128, 255, false)
+const unified = new Map<string, THREE.Material>()
+function unify(mat: THREE.Material): THREE.Material {
+  const src = mat as THREE.MeshStandardMaterial
+  if (!src.isMeshStandardMaterial) return mat
+  const hit = unified.get(src.uuid)
+  if (hit) return hit
+  const m = new THREE.MeshStandardMaterial({
+    color: src.color,
+    map: src.map ?? WHITE,
+    normalMap: src.normalMap ?? FLAT_NORMAL,
+    normalScale: src.normalMap ? src.normalScale : new THREE.Vector2(1, 1),
+    roughness: src.roughness,
+    roughnessMap: src.roughnessMap ?? WHITE_LINEAR,
+    metalness: src.metalness,
+    metalnessMap: src.metalnessMap ?? WHITE_LINEAR,
+    emissive: src.emissive,
+    emissiveIntensity: src.emissiveIntensity,
+    emissiveMap: src.emissiveMap ?? WHITE,
+    alphaTest: src.alphaTest,
+    transparent: src.transparent,
+    opacity: src.opacity,
+    side: src.side,
   })
-  g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 1.4, 32).rotateZ(Math.PI / 2), chrome))
-  g.scale.setScalar(0.2)
-  return g
+  unified.set(src.uuid, m)
+  return m
 }
 
 /* ---------- composing a station from its items ---------- */
-function buildStation(items: Item[], scenes: Record<string, THREE.Object3D>) {
+function buildStation(index: number, scenes: Record<string, THREE.Object3D>) {
+  const def = STATIONS[index]
+  const stop = tourStops[index]
+  const tex = def.screen ? screenTexture(def.screen, stop.color, stop.name) : null
   const station = new THREE.Group()
   const byId: Record<string, THREE.Object3D> = {}
+  const devices: THREE.Object3D[] = []
   const box = new THREE.Box3()
-  items.forEach((it) => {
-    const obj = it.file === '@dumbbell' ? dumbbell() : scenes[it.file].clone(true)
+  let tick: ((t: number) => void) | undefined
+  def.items.forEach((it: Item) => {
+    let obj: THREE.Object3D
+    if (it.dev && tex) obj = device(it.dev, tex)
+    else if (it.special && BUILT[it.special]) obj = BUILT[it.special]()
+    else if (it.special === 'blueprint') {
+      obj = blueprint()
+      tick = obj.userData.tick
+    } else obj = scenes[it.file!].clone(true)
     obj.rotation.set(it.rx ?? 0, 0, it.rz ?? 0)
+    if (it.s) obj.scale.multiplyScalar(it.s)
     const holder = new THREE.Group()
     holder.add(obj)
     holder.updateMatrixWorld(true)
@@ -64,14 +129,18 @@ function buildStation(items: Item[], scenes: Record<string, THREE.Object3D>) {
     station.add(holder)
     station.updateMatrixWorld(true)
     if (it.id) byId[it.id] = holder
+    if (it.dev) devices.push(holder)
   })
   station.traverse((o) => {
     const m = o as THREE.Mesh
     if (m.isMesh) {
       m.castShadow = true
       m.receiveShadow = true
+      m.material = Array.isArray(m.material) ? m.material.map(unify) : unify(m.material)
     }
   })
+  // Measure the props only, so the device never shrinks the scene.
+  devices.forEach((d) => (d.visible = false))
   const outer = new THREE.Group()
   outer.add(station)
   box.setFromObject(station)
@@ -82,13 +151,20 @@ function buildStation(items: Item[], scenes: Record<string, THREE.Object3D>) {
   const c = box.getCenter(new THREE.Vector3())
   station.position.set(-c.x, -box.min.y, -c.z)
   outer.userData.height = box.max.y - box.min.y
+  devices.forEach((d) => (d.visible = true))
+  outer.userData.tick = tick
   return outer
 }
 
-const TOP = GALLERY.pedestalHeight
+/** Spots stand in one line, alternating slightly forward and back. */
+/** The shared platform all systems stand on: one company, one floor. */
+const PLATFORM = {
+  w: (STATIONS.length - 1) * GALLERY.gap + GALLERY.zone + 0.9,
+  d: 2 * GALLERY.stagger + GALLERY.zone + 0.9,
+  h: 0.12,
+}
 
-/** Pedestals stand in one line, alternating slightly forward and back. */
-function pedestalPos(i: number) {
+function spotPos(i: number) {
   return { x: (i - (STATIONS.length - 1) / 2) * GALLERY.gap, z: i % 2 ? -GALLERY.stagger : GALLERY.stagger }
 }
 
@@ -100,23 +176,23 @@ interface View {
 }
 
 const FOV = 30
-const HALF_ROW = ((STATIONS.length - 1) / 2) * GALLERY.gap + GALLERY.pedestalRadius
+const HALF_ROW = PLATFORM.w / 2
 
 function viewFor(stop: number, mobile: boolean, aspect: number): View {
   if (stop === 0) {
     if (mobile) return { pos: new THREE.Vector3(...HERO_SHOT_MOBILE.pos), look: new THREE.Vector3(...HERO_SHOT_MOBILE.look), layout: 'hero' }
-    // Pull in or back so the line of pedestals fills the width of any screen.
+    // Pull in or back so the whole line fills the width of any screen.
     const look = new THREE.Vector3(...HERO_SHOT.look)
     const dir = new THREE.Vector3(...HERO_SHOT.pos).sub(look).normalize()
     const d = HALF_ROW / GALLERY.heroFill / (Math.tan(THREE.MathUtils.degToRad(FOV / 2)) * aspect)
     return { pos: look.clone().addScaledVector(dir, d), look, layout: 'hero' }
   }
-  const p = pedestalPos(stop - 1)
+  const p = spotPos(stop - 1)
   const shot = STATIONS[stop - 1].shot
   const d = shot.dist * (mobile ? 1.5 : 1)
   return {
-    pos: new THREE.Vector3(p.x + Math.sin(shot.az) * d, TOP + shot.height * (mobile ? 1.15 : 1), p.z + Math.cos(shot.az) * d),
-    look: new THREE.Vector3(p.x, TOP + shot.look, p.z),
+    pos: new THREE.Vector3(p.x + Math.sin(shot.az) * d, shot.height * (mobile ? 1.15 : 1), p.z + Math.cos(shot.az) * d),
+    look: new THREE.Vector3(p.x, shot.look, p.z),
     layout: shot.layout,
   }
 }
@@ -131,19 +207,104 @@ function shiftFor(layout: View['layout'], mobile: boolean): [number, number] {
 }
 
 const ease = (t: number) => t * t * (3 - 2 * t)
+const PLATFORM_TINT = new THREE.Color('#ffffff')
+
+/* ---------- the lamp that hangs over the gallery and follows the visitor ---------- */
+function useLamp(scenes: Record<string, THREE.Object3D>) {
+  return useMemo(() => {
+    const rig = new THREE.Group()
+    const model = scenes[LAMP.file].clone(true)
+    model.scale.setScalar(LAMP.scale)
+    rig.add(model)
+    rig.updateMatrixWorld(true)
+    const b = new THREE.Box3().setFromObject(model)
+    model.position.y -= b.max.y // hang from its top
+    rig.updateMatrixWorld(true)
+    const bottom = new THREE.Box3().setFromObject(model).min.y
+    model.traverse((o) => {
+      if ((o as THREE.Mesh).isMesh) o.castShadow = false
+    })
+    const bulbMat = new THREE.MeshBasicMaterial({ color: new THREE.Color('#fff1d6'), toneMapped: false })
+    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.16, 24, 16), bulbMat)
+    bulb.position.y = bottom + 0.22
+    rig.add(bulb)
+    const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 40, 8), new THREE.MeshStandardMaterial({ color: '#1a1a1a' }))
+    cable.position.y = 20
+    rig.add(cable)
+    // A faint visible beam under the lamp.
+    const c = document.createElement('canvas')
+    c.width = 4
+    c.height = 256
+    const x = c.getContext('2d')!
+    const grad = x.createLinearGradient(0, 0, 0, 256)
+    grad.addColorStop(0, 'rgba(255,255,255,1)')
+    grad.addColorStop(1, 'rgba(255,255,255,0)')
+    x.fillStyle = grad
+    x.fillRect(0, 0, 4, 256)
+    const beam = new THREE.Mesh(
+      new THREE.ConeGeometry(1, 1, 64, 1, true),
+      new THREE.MeshBasicMaterial({ color: '#ffe9c4', alphaMap: new THREE.CanvasTexture(c), transparent: true, opacity: BEAM_OPACITY, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, toneMapped: false }),
+    )
+    const spot = new THREE.SpotLight('#ffe2b8', 0, 0, 0.6, 0.7, 1.6)
+    spot.castShadow = true
+    spot.shadow.mapSize.set(2048, 2048)
+    spot.shadow.bias = -0.0003
+    spot.shadow.normalBias = 0.03
+    return { rig, beam, spot, bottom, bulbMat }
+  }, [scenes])
+}
+
+const BEAM_OPACITY = 0.016
+const SPOT_GAIN = 0.8
+const BULB_ON = new THREE.Color('#fff1d6')
+const BULB_OFF = new THREE.Color('#4a4540')
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v))
+
+/**
+ * The opening, in seconds from tour.introAt: the room is dark, the lamp drops in
+ * and swings, flickers on, then the room fills with light.
+ */
+const DROP_S = LAMP_DROP_MS / 1000
+function introState(s: number) {
+  if (s < 0) return { drop: 0, spot: 0, room: 0, swing: 0 }
+  const d = clamp01(s / DROP_S)
+  // ease out with a small overshoot, like a cable taking the weight
+  const drop = 1 + 2.2 * Math.pow(d - 1, 3) + 1.2 * Math.pow(d - 1, 2)
+  const since = s - DROP_S
+  const swing = since < 0 ? 0 : Math.sin(since * 4) * Math.exp(-since * 1.6) * 0.06
+  let spot = 0
+  if (since >= 0) {
+    if (since < 0.07) spot = 0.7
+    else if (since < 0.18) spot = 0.04
+    else if (since < 0.26) spot = 0.9
+    else if (since < 0.4) spot = 0.18
+    else spot = 0.6 + 0.4 * clamp01((since - 0.4) / 0.5)
+  }
+  const r = clamp01((since - 0.35) / 0.9)
+  return { drop, spot, room: r * r * (3 - 2 * r), swing }
+}
 
 interface RigProps {
   fixedStop?: number
   reduced: boolean
   mobile: boolean
   centered?: boolean
-  light: React.RefObject<THREE.DirectionalLight | null>
+  sun: React.RefObject<THREE.DirectionalLight | null>
+  hemi: React.RefObject<THREE.HemisphereLight | null>
+  lamp: ReturnType<typeof useLamp> | null
+  intro?: boolean
 }
 
-function CameraRig({ fixedStop, reduced, mobile, centered, light }: RigProps) {
-  const { camera, size } = useThree()
+const SUN = 0.8
+const HEMI = 0.45
+const ENV = 0.6
+const DARK = 1 // how much of the room shows before the lamp is on (1 = no dimming)
+
+function CameraRig({ fixedStop, reduced, mobile, centered, sun, hemi, lamp, intro }: RigProps) {
+  const { camera, size, scene } = useThree()
   const pos = useRef(fixedStop ?? tour.pos)
   const look = useMemo(() => new THREE.Vector3(), [])
+  const bg = useMemo(() => new THREE.Color(), [])
 
   useFrame((state, delta) => {
     const cam = camera as THREE.PerspectiveCamera
@@ -153,28 +314,67 @@ function CameraRig({ fixedStop, reduced, mobile, centered, light }: RigProps) {
     const p = pos.current
     const a = Math.floor(p)
     const t = ease(p - a)
+    const b = Math.min(a + 1, STATIONS.length)
     const aspect = size.width / size.height
     const A = viewFor(a, mobile, aspect)
-    const B = viewFor(Math.min(a + 1, STATIONS.length), mobile, aspect)
+    const B = viewFor(b, mobile, aspect)
     const time = state.clock.elapsedTime
     const drift = reduced ? 0 : 1
     cam.position.lerpVectors(A.pos, B.pos, t)
-    // Pull back a little mid-move, like a camera on a dolly track.
     cam.position.z += Math.sin(t * Math.PI) * (a === 0 ? 0 : 1.6)
     cam.position.y += Math.sin(t * Math.PI) * (a === 0 ? 0 : 0.5) + Math.sin(time * 0.23) * 0.05 * drift
     cam.position.x += Math.sin(time * 0.31) * 0.07 * drift
     look.lerpVectors(A.look, B.look, t)
     cam.lookAt(look)
-    // The key light travels with the camera so every pedestal is lit the same way.
-    if (light.current) {
-      light.current.position.set(look.x - 6, 11, look.z + 7)
-      light.current.target.position.copy(look)
-      light.current.target.updateMatrixWorld()
-    }
     const sa = centered ? [0, 0] : shiftFor(A.layout, mobile)
     const sb = centered ? [0, 0] : shiftFor(B.layout, mobile)
     cam.setViewOffset(size.width, size.height, size.width * (sa[0] + (sb[0] - sa[0]) * t), size.height * (sa[1] + (sb[1] - sa[1]) * t), size.width, size.height)
     cam.updateProjectionMatrix()
+
+    const io = intro && !reduced ? introState(tour.introAt == null ? -1 : (performance.now() - tour.introAt) / 1000) : { drop: 1, spot: 1, room: 1, swing: 0 }
+    const room = DARK + (1 - DARK) * io.room
+
+    // The backdrop takes the colour of the stop in view; the floor matches so it has no edge.
+    bg.copy(STOP_COLORS[a]).lerp(STOP_COLORS[b], t).multiplyScalar(room)
+    scene.environmentIntensity = ENV * room
+    if (hemi.current) hemi.current.intensity = HEMI * room
+    if (scene.background instanceof THREE.Color) scene.background.copy(bg)
+    if (scene.fog) scene.fog.color.copy(bg)
+    scene.userData.floor?.color.copy(bg)
+    // the platform is the stop colour, a shade lighter, so it reads as one floor
+    scene.userData.platform?.color.copy(bg).lerp(PLATFORM_TINT, a === 0 && t < 0.5 ? 0.25 : 0.07)
+
+    if (sun.current) {
+      sun.current.intensity = SUN * room
+      sun.current.position.set(look.x - 6, 11, look.z + 7)
+      sun.current.target.position.copy(look)
+      sun.current.target.updateMatrixWorld()
+    }
+
+    // The lamp hangs over the middle of the line, then moves over each system.
+    if (lamp) {
+      const at = (s: number) => (s === 0 ? { x: 0, z: 0, h: LAMP.heroHeight, ang: LAMP.heroAngle } : { ...spotPos(s - 1), h: LAMP.stopHeight, ang: LAMP.stopAngle })
+      const la = at(a)
+      const lb = at(b)
+      const lx = la.x + (lb.x - la.x) * t
+      const lz = la.z + (lb.z - la.z) * t
+      const h = la.h + (lb.h - la.h) * t
+      const ang = la.ang + (lb.ang - la.ang) * t
+      lamp.rig.position.set(lx, h + (1 - io.drop) * 11, lz)
+      lamp.rig.rotation.z = (reduced ? 0 : Math.sin(time * 0.6) * 0.012) + io.swing
+      const y = h + lamp.bottom
+      lamp.spot.position.set(lx, y, lz)
+      lamp.spot.target.position.set(lx, 0, lz)
+      lamp.spot.target.updateMatrixWorld()
+      lamp.spot.angle = ang
+      lamp.spot.intensity = SPOT_GAIN * Math.pow(Math.max(1, y), 1.6) * io.spot
+      lamp.bulbMat.color.copy(BULB_OFF).lerp(BULB_ON, io.spot)
+      ;const overview = a === 0 ? 1 - t : 0
+      ;(lamp.beam.material as THREE.MeshBasicMaterial).opacity = BEAM_OPACITY * io.spot * (1 - overview * 0.6)
+      const r = Math.tan(ang) * y * 0.92
+      lamp.beam.scale.set(r, y, r)
+      lamp.beam.position.set(lx, y / 2, lz)
+    }
   })
   return null
 }
@@ -185,7 +385,9 @@ function Environment() {
     const pmrem = new THREE.PMREMGenerator(gl)
     const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
     scene.environment = env
-    scene.environmentIntensity = 0.95
+    scene.environmentIntensity = ENV
+    scene.background = SAND.clone()
+    scene.fog = new THREE.Fog(SAND.clone(), 40, 95)
     return () => {
       env.dispose()
       pmrem.dispose()
@@ -195,70 +397,134 @@ function Environment() {
 }
 
 function Floor() {
+  const { scene } = useThree()
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: SAND.clone(), roughness: 0.95 }), [])
+  useEffect(() => {
+    scene.userData.floor = mat
+  }, [scene, mat])
   return (
-    <mesh rotation-x={-Math.PI / 2} receiveShadow>
-      <planeGeometry args={[120, 120]} />
-      <shadowMaterial opacity={0.2} />
+    <mesh rotation-x={-Math.PI / 2} receiveShadow material={mat}>
+      <planeGeometry args={[240, 240]} />
     </mesh>
   )
 }
 
-function pedestal(color: string) {
+/** Soft dark blob for contact shadows: dark in the middle, fading out well before the edge. */
+const SHADOW_TEX = (() => {
+  const c = document.createElement('canvas')
+  c.width = c.height = 256
+  const x = c.getContext('2d')!
+  const g = x.createRadialGradient(128, 128, 0, 128, 128, 128)
+  g.addColorStop(0, 'rgba(0,0,0,.55)')
+  g.addColorStop(0.35, 'rgba(0,0,0,.38)')
+  g.addColorStop(0.7, 'rgba(0,0,0,.1)')
+  g.addColorStop(1, 'rgba(0,0,0,0)')
+  x.fillStyle = g
+  x.fillRect(0, 0, 256, 256)
+  return new THREE.CanvasTexture(c)
+})()
+
+/** Each system's zone on the shared platform: a rounded tile in its colour with a fine outline. */
+const ZONE_TEX = (() => {
+  const c = document.createElement('canvas')
+  c.width = c.height = 256
+  const x = c.getContext('2d')!
+  x.beginPath()
+  x.roundRect(6, 6, 244, 244, 34)
+  x.fillStyle = 'rgba(255,255,255,.3)'
+  x.fill()
+  x.lineWidth = 4
+  x.strokeStyle = 'rgba(255,255,255,.95)'
+  x.stroke()
+  const t = new THREE.CanvasTexture(c)
+  t.colorSpace = THREE.SRGBColorSpace
+  t.anisotropy = 4
+  return t
+})()
+
+function Platform() {
+  const mesh = useMemo(() => {
+    const m = new THREE.Mesh(new RoundedBoxGeometry(PLATFORM.w, PLATFORM.h, PLATFORM.d, 4, 0.05), new THREE.MeshStandardMaterial({ color: '#d9d4c9', roughness: 0.6, metalness: 0.05 }))
+    m.position.y = PLATFORM.h / 2
+    m.receiveShadow = true
+    m.castShadow = true
+    return m
+  }, [])
+  const { scene } = useThree()
+  useEffect(() => {
+    scene.userData.platform = mesh.material
+  }, [scene, mesh])
+  return <primitive object={mesh} />
+}
+
+function pool(color: string) {
   const g = new THREE.Group()
-  const body = new THREE.Mesh(
-    new THREE.CylinderGeometry(GALLERY.pedestalRadius, GALLERY.pedestalRadius, TOP, 96),
-    new THREE.MeshPhysicalMaterial({ color: new THREE.Color(color).multiplyScalar(0.72), roughness: 0.55, clearcoat: 0.25 }),
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(GALLERY.zone, GALLERY.zone).rotateX(-Math.PI / 2),
+    new THREE.MeshStandardMaterial({ color, map: ZONE_TEX, transparent: true, roughness: 0.9, depthWrite: false }),
   )
-  body.position.y = TOP / 2
-  body.castShadow = true
-  body.receiveShadow = true
-  const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(GALLERY.pedestalRadius - 0.02, 0.018, 10, 128).rotateX(Math.PI / 2),
-    new THREE.MeshStandardMaterial({ color: '#c79a4b', metalness: 1, roughness: 0.3 }),
+  m.position.y = 0.004
+  m.receiveShadow = true
+  // A soft contact shadow so each group sits on the floor instead of floating.
+  const contact = new THREE.Mesh(
+    new THREE.CircleGeometry(GALLERY.stationSize * 0.55, 48).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ map: SHADOW_TEX, transparent: true, depthWrite: false }),
   )
-  rim.position.y = TOP
-  g.add(body, rim)
+  contact.position.y = 0.008
+  g.add(m, contact)
   return g
 }
 
-function Stations({ interactive, fixedStop, reduced }: { interactive: boolean; fixedStop?: number; reduced: boolean }) {
+function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: boolean; fixedStop?: number; reduced: boolean; onLamp: (l: ReturnType<typeof useLamp>) => void }) {
   const gltfs = useGLTF(MODEL_FILES.map(url))
   const [hover, setHover] = useState(-1)
-  const { groups, outers } = useMemo(() => {
-    const scenes: Record<string, THREE.Object3D> = {}
-    MODEL_FILES.forEach((f, i) => (scenes[f] = gltfs[i].scene))
+  const scenes = useMemo(() => {
+    const out: Record<string, THREE.Object3D> = {}
+    MODEL_FILES.forEach((f, i) => (out[f] = gltfs[i].scene))
+    return out
+  }, [gltfs])
+  const lamp = useLamp(scenes)
+  useEffect(() => onLamp(lamp), [lamp, onLamp])
+
+  const { groups, outers, zones } = useMemo(() => {
     const groups: THREE.Group[] = []
-    const outers = STATIONS.map((s, i) => {
-      const g = buildStation(s.items, scenes)
-      g.position.y = TOP
+    const zones: THREE.Group[] = []
+    const outers = STATIONS.map((_, i) => {
+      const g = buildStation(i, scenes)
       groups.push(g)
       const outer = new THREE.Group()
-      const p = pedestalPos(i)
-      outer.position.set(p.x, 0, p.z)
-      outer.add(pedestal(systems[i].color), g)
+      const p = spotPos(i)
+      outer.position.set(p.x, PLATFORM.h, p.z)
+      const zone = pool(tourStops[i].color)
+      const contact = zone.children[1]
+      outer.add(contact, g)
+      zone.position.set(p.x, PLATFORM.h, p.z)
+      zones.push(zone)
       return outer
     })
-    return { groups, outers }
-  }, [gltfs])
+    return { groups, outers, zones }
+  }, [scenes])
   const shown = useRef(STATIONS.map(() => 1))
 
   useFrame((state, delta) => {
     const dt = Math.min(0.05, delta)
     const k = 1 - Math.exp(-dt * 9)
     const pos = fixedStop ?? tour.pos
+    const time = reduced ? 0 : state.clock.elapsedTime
     groups.forEach((g, i) => {
-      // In the overview every pedestal shows; on a stop only the system in view stays up.
+      // In the overview every system shows; on a stop only the one in view stays.
       const want = Math.max(Math.min(1, Math.max(0, 1 - pos)), Math.max(0, 1 - Math.abs(pos - (i + 1)) * 1.4))
       shown.current[i] = reduced ? want : shown.current[i] + (want - shown.current[i]) * (1 - Math.exp(-dt * 5))
       const v = shown.current[i]
       const e = v * v * (3 - 2 * v)
       outers[i].scale.setScalar(Math.max(0.001, e))
       outers[i].visible = e > 0.01
+      ;((zones[i].children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial).opacity = e
       const lift = interactive && hover === i && tour.pos < 0.3 ? 0.22 : 0
-      g.position.y += (TOP + lift - g.position.y) * k
-      // The object in focus turns slowly, which keeps the scene alive between scrolls.
-      const focus = Math.max(0, 1 - Math.abs(tour.pos - (i + 1)))
-      g.rotation.y = focus * Math.sin(state.clock.elapsedTime * 0.35) * 0.18
+      g.position.y += (lift - g.position.y) * k
+      const focus = Math.max(0, 1 - Math.abs(pos - (i + 1)))
+      g.rotation.y = focus * Math.sin(time * 0.35) * 0.18
+      g.userData.tick?.(time)
     })
   })
 
@@ -271,6 +537,14 @@ function Stations({ interactive, fixedStop, reduced }: { interactive: boolean; f
 
   return (
     <>
+      <Platform />
+      {zones.map((z, i) => (
+        <primitive key={'z' + i} object={z} />
+      ))}
+      <primitive object={lamp.rig} />
+      <primitive object={lamp.beam} />
+      <primitive object={lamp.spot} />
+      <primitive object={lamp.spot.target} />
       {outers.map((g, i) => (
         <primitive
           key={i}
@@ -289,12 +563,33 @@ function Stations({ interactive, fixedStop, reduced }: { interactive: boolean; f
         />
       ))}
       {interactive && hover >= 0 && tour.pos < 0.3 ? (
-        <Html position={[outers[hover].position.x, TOP + groups[hover].userData.height + 0.6, outers[hover].position.z]} center zIndexRange={[20, 0]}>
-          <span className="pick-label">{systems[hover].name}</span>
+        <Html position={[outers[hover].position.x, groups[hover].userData.height + 0.6, outers[hover].position.z]} center zIndexRange={[20, 0]}>
+          <span className="pick-label">{tourStops[hover].name}</span>
         </Html>
       ) : null}
     </>
   )
+}
+
+/**
+ * Uploads every texture and compiles the shaders once, before the first frame is shown.
+ * (drei's <Preload all> also renders into an offscreen cube, which compiles every shader twice.)
+ */
+function Warm() {
+  const { gl, scene, camera } = useThree()
+  useLayoutEffect(() => {
+    scene.traverse((o) => {
+      const mats = (o as THREE.Mesh).material
+      if (!mats) return
+      ;(Array.isArray(mats) ? mats : [mats]).forEach((m) => {
+        Object.values(m).forEach((v) => {
+          if (v instanceof THREE.Texture) gl.initTexture(v)
+        })
+      })
+    })
+    gl.compile(scene, camera)
+  }, [gl, scene, camera])
+  return null
 }
 
 /** Fires once everything is loaded, compiled and drawn a few times. */
@@ -318,42 +613,50 @@ interface Props {
   dpr?: number
   /** Keep the object centred (used where the canvas sits beside the text) */
   centered?: boolean
+  /** Play the opening: dark room, the lamp drops in and switches on (waits for tour.introAt) */
+  intro?: boolean
 }
 
-export default function Showroom({ reduced, mobile, fixedStop, interactive = false, paused, onReady, dpr, centered }: Props) {
-  const light = useRef<THREE.DirectionalLight>(null)
+export default function Showroom({ reduced, mobile, fixedStop, interactive = false, paused, onReady, dpr, centered, intro }: Props) {
+  const sun = useRef<THREE.DirectionalLight>(null)
+  const hemi = useRef<THREE.HemisphereLight>(null)
+  const [lamp, setLamp] = useState<ReturnType<typeof useLamp> | null>(null)
   return (
     <Canvas
+      flat
+      onCreated={({ gl }) => {
+        ;(window as unknown as { __gl?: THREE.WebGLRenderer }).__gl = gl
+      }}
       frameloop={paused ? 'never' : 'always'}
       dpr={dpr ?? [1, mobile ? 1.5 : 1.75]}
-      camera={{ fov: FOV, near: 0.1, far: 160, position: [-9, 9, 17] }}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+      camera={{ fov: FOV, near: 0.1, far: 200, position: [0, 12, 32] }}
+      gl={{ antialias: true, powerPreference: 'high-performance' }}
       shadows={{ type: THREE.PCFShadowMap }}
       style={{ pointerEvents: interactive && !mobile ? 'auto' : 'none' }}
     >
       <Environment />
+      <hemisphereLight ref={hemi} args={['#fff4e4', '#6b6359', HEMI]} />
       <directionalLight
-        ref={light}
-        intensity={2.3}
+        ref={sun}
+        intensity={SUN}
         color="#fff1df"
         castShadow
         shadow-mapSize={[mobile ? 1024 : 2048, mobile ? 1024 : 2048]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.03}
-        shadow-radius={5}
-        shadow-camera-left={-9}
-        shadow-camera-right={9}
-        shadow-camera-top={9}
-        shadow-camera-bottom={-9}
-        shadow-camera-far={45}
+        shadow-camera-left={-12}
+        shadow-camera-right={12}
+        shadow-camera-top={12}
+        shadow-camera-bottom={-12}
+        shadow-camera-far={50}
       />
       <Floor />
       <Suspense fallback={null}>
-        <Stations interactive={interactive} fixedStop={fixedStop} reduced={reduced} />
-        <Preload all />
+        <Stations interactive={interactive} fixedStop={fixedStop} reduced={reduced} onLamp={setLamp} />
+        <Warm />
         <Ready onReady={onReady} />
       </Suspense>
-      <CameraRig fixedStop={fixedStop} reduced={reduced} mobile={mobile} centered={centered} light={light} />
+      <CameraRig fixedStop={fixedStop} reduced={reduced} mobile={mobile} centered={centered} sun={sun} hemi={hemi} lamp={lamp} intro={intro} />
     </Canvas>
   )
 }

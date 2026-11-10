@@ -46,10 +46,13 @@ export const nav = [
 
 export const hero = {
   eyebrow: 'حلول برمجية وأتمتة أعمال في مصر والسعودية',
-  title: 'أنظمة تدير شركات حقيقية، كل يوم.',
-  lede: 'أنظمة متكاملة لإدارة الشركات والشحن والمطاعم والجيمات والموارد البشرية والتعليم، تحت علامة واحدة.',
+  title: 'أنظمة تدير',
+  /** Cycles under the headline, one word per system, in that system's colour */
+  rotate: ['حساباتك.', 'شحناتك.', 'مطعمك.', 'ناديك.', 'موظفيك.', 'أكاديميتك.'],
+  accent: 'وإن لم تجد نظامك، نبنيه.',
+  lede: 'ستة أنظمة جاهزة تعمل اليوم لدى عملاء في مصر والسعودية، وفريق يبني أنظمة جديدة حسب احتياج شركتك.',
   primary: 'اطلب عرضًا توضيحيًا',
-  secondary: 'شاهد الأنظمة',
+  secondary: 'ابنِ نظامك معنا',
   proofLabel: 'تعمل اليوم لدى',
   proof: ['منظومة ERP وHR في مصر', 'شركتي شحن في السعودية', 'جيم في السعودية', 'مطعم في مصر'],
   scrollCue: 'مرّر لتتعرف على الأنظمة',
@@ -208,11 +211,45 @@ export const systems: SystemContent[] = [
   },
 ]
 
+/** Everything a tour stop needs. Each system is one; the last stop is the custom-build offer. */
+export interface StopContent {
+  id: string
+  name: string
+  short: string
+  color: string
+  market: string
+  title: string
+  body: string
+  audience: string
+  flow: string[]
+  proof: string
+  /** The last stop links to the custom-development offer instead of a system page */
+  custom?: boolean
+}
+
+export const customStop: StopContent = {
+  id: 'custom',
+  name: 'نظامك الخاص',
+  short: 'مشروعك',
+  color: '#0B6E4F',
+  market: 'تطوير حسب الطلب',
+  title: 'لم تجد نظامك؟ نبنيه لك من الصفر.',
+  body: 'نفس الفريق الذي بنى الأنظمة الستة يصمم نظامًا لطريقة عمل شركتك، بنطاق مكتوب ودفعات حسب مراحل المشروع.',
+  audience: 'الشركات التي تحتاج نظامًا خاصًا أو ربط أنظمتها الحالية',
+  flow: ['فهم الاحتياج', 'التصميم', 'التطوير', 'التشغيل والدعم'],
+  proof: 'نعمل في مصر والسعودية، وننفذ عن بعد أو بزيارات مباشرة.',
+  custom: true,
+}
+
+export const tourStops: StopContent[] = [...systems, customStop]
+
 export const journeyCopy = {
-  counter: (i: number) => `النظام ${i + 1} من ${systems.length}`,
+  counter: (i: number) => (i < systems.length ? `النظام ${i + 1} من ${systems.length}` : 'المشروع القادم'),
   audience: 'مناسب لـ',
   details: 'تفاصيل النظام',
   demo: 'اطلب عرضًا',
+  customCta: 'ابدأ مشروعك',
+  customMore: 'خدماتنا',
 }
 
 export const services = {
