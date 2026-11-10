@@ -754,7 +754,7 @@
     background: color-mix(in srgb, var(--c) 70%, #000);
     color: var(--fg-70);
     border: 1px solid var(--fg-line);
-    opacity: 0.45;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   }
   .chips .stop-steps li:nth-child(1) { right: 58%; top: 44%; }
   .chips .stop-steps li:nth-child(2) { left: 56%; top: 38%; }

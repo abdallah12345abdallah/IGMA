@@ -111,6 +111,147 @@
   }
 }
 
+/* ---------- docked: after the tour the bar splits into three floating islands ---------- */
+.nav__dot {
+  display: none;
+}
+.nav__links {
+  position: relative;
+}
+.nav__pill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 34px;
+  margin-top: -17px;
+  border-radius: 99px;
+  background: var(--ink);
+  transition:
+    transform 0.45s var(--ease-out),
+    width 0.45s var(--ease-out);
+  z-index: 0;
+}
+.nav__links a {
+  position: relative;
+  z-index: 1;
+}
+.nav__brand,
+.nav__links,
+.nav__cta {
+  transition:
+    background-color 0.45s,
+    box-shadow 0.45s,
+    padding 0.45s var(--ease-out),
+    border-color 0.45s,
+    color 0.3s,
+    transform 0.55s var(--ease-out);
+}
+.nav--docked {
+  --island: rgba(250, 248, 243, 0.78);
+  --island-line: rgba(10, 25, 22, 0.08);
+  color: var(--ink);
+  gap: 10px;
+  height: calc(var(--nav-h) + 4px);
+}
+.nav--docked .nav__brand,
+.nav--docked .nav__links,
+.nav--docked .nav__cta,
+.nav--docked .nav__toggle {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  border-radius: 99px;
+  background: var(--island);
+  border: 1px solid var(--island-line);
+  box-shadow: 0 10px 30px rgba(10, 25, 22, 0.1);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  transform: translateY(6px);
+}
+.nav--docked .nav__brand {
+  gap: 9px;
+  padding-inline: 20px;
+  font-size: 21px;
+}
+.nav--docked .nav__dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1fbf7a;
+  box-shadow: 0 0 0 4px rgba(31, 191, 122, 0.2);
+}
+.nav--docked .nav__links {
+  gap: 2px;
+  padding-inline: 7px;
+  margin-inline: auto;
+}
+.nav--docked .nav__links a {
+  padding: 7px 15px;
+  border: 0;
+  border-radius: 99px;
+  transition: color 0.3s, background-color 0.2s;
+}
+.nav--docked .nav__links a:hover {
+  background: rgba(10, 25, 22, 0.06);
+}
+.nav--docked .nav__links a[aria-current] {
+  color: var(--on);
+  background: none;
+}
+.nav--docked .nav__cta {
+  padding-inline: 20px;
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--on);
+}
+.nav--docked .nav__cta:hover {
+  background: var(--green);
+  border-color: var(--green);
+}
+/* the pill only shows once docked */
+.nav:not(.nav--docked) .nav__pill {
+  display: none;
+}
+/* on dark sections (the demo form and the footer) the islands turn dark glass */
+.nav--docked:not(.nav--ink) {
+  --island: rgba(20, 24, 22, 0.55);
+  --island-line: rgba(255, 255, 255, 0.12);
+  color: var(--on);
+}
+.nav--docked:not(.nav--ink) .nav__pill {
+  background: var(--on);
+}
+.nav--docked:not(.nav--ink) .nav__links a[aria-current] {
+  color: var(--ink);
+}
+.nav--docked:not(.nav--ink) .nav__links a:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.nav--docked:not(.nav--ink) .nav__cta {
+  background: var(--on);
+  border-color: var(--on);
+  color: var(--ink);
+}
+.nav--docked .nav__toggle {
+  padding-inline: 18px;
+}
+.nav--docked:has(.menu--open) .nav__brand,
+.nav--docked:has(.menu--open) .nav__toggle {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--on);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav__brand,
+  .nav__links,
+  .nav__cta,
+  .nav__pill {
+    transition: none;
+  }
+}
+
 /* ========== SECTIONS ========== */
 .section {
   padding-block: clamp(72px, 10vw, 136px);
