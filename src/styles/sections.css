@@ -1979,11 +1979,13 @@ button.sm__tag:hover {
   color: rgba(246, 234, 220, 0.6);
 }
 .ft__mark {
+  --logo-accent: #ffd68c;
+  display: block;
   width: 100%;
-  height: 100%;
-  min-height: 250px;
-  cursor: crosshair;
-  touch-action: pan-y;
+  height: auto;
+  max-height: 220px;
+  align-self: center;
+  color: #fff3e2;
 }
 @media (max-width: 860px) {
   .ft__grid {
@@ -1991,7 +1993,7 @@ button.sm__tag:hover {
   }
   .ft__mark {
     order: -1;
-    min-height: 150px;
+    max-height: 110px;
   }
 }
 

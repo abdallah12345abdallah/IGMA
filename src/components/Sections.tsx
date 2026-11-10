@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { clients, company, contact, footer, markets, nav, plans, services, systems } from '../content/site'
 import { MarketsMap } from './MarketsMap'
+import { Logo } from './Logo'
 
 /** Each service's colour. */
 const SVC_COLOR = ['#18306F', '#A5370A', '#0B4246', '#860F30']
@@ -337,160 +338,6 @@ const OFFICES = [
 ]
 const officeTime = (tz: string) => new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit', timeZone: tz }).format(new Date())
 
-/**
- * The IGMA wordmark drawn from thousands of points. They scatter away from the cursor and
- * gather back, like the systems in the opening view. Runs only while the footer is on screen.
- */
-function ParticleMark() {
-  const ref = useRef<HTMLCanvasElement>(null)
-  useEffect(() => {
-    const cv = ref.current
-    if (!cv) return
-    const ctx = cv.getContext('2d')!
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    type P = { x: number; y: number; vx: number; vy: number; tx: number; ty: number; s: number; a: boolean }
-    let pts: P[] = []
-    let W = 0
-    let H = 0
-    let raf = 0
-    let running = false
-    const m = { x: -9999, y: -9999 }
-
-    const build = () => {
-      const r = cv.getBoundingClientRect()
-      if (!r.width) return
-      const dpr = Math.min(2, window.devicePixelRatio || 1)
-      W = Math.round(r.width)
-      H = Math.round(r.height)
-      cv.width = W * dpr
-      cv.height = H * dpr
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      const o = document.createElement('canvas')
-      o.width = W
-      o.height = H
-      const x = o.getContext('2d')!
-      // the logo (the same geometry as Logo.tsx): main shapes on one layer, the amber link on another
-      const k = Math.min((W * 0.9) / 125, (H * 0.8) / 25)
-      const ox = (W - 125 * k) / 2
-      const oy = (H - 25 * k) / 2
-      const L = 0.325 * k // the links are drawn on a 100-unit box
-      const lx = (v: number) => ox + (v - 0.5) * L
-      const ly = (v: number) => oy + (v - 10.5) * L
-      const ring = (c: CanvasRenderingContext2D, rx: number, ry: number) => {
-        c.lineWidth = 13 * L
-        c.beginPath()
-        c.roundRect(lx(rx), ly(ry), 50 * L, 50 * L, 14 * L)
-        c.stroke()
-      }
-      x.fillStyle = x.strokeStyle = '#000'
-      ring(x, 7, 31)
-      const letters: [number, number, number, number][][] = [
-        [[0, 0, 1, 5]],
-        [[0, 0, 4, 1], [0, 0, 1, 5], [0, 4, 4, 1], [3, 2, 1, 3], [2, 2, 1, 1]],
-        [[0, 0, 5, 1], [0, 0, 1, 5], [2, 0, 1, 5], [4, 0, 1, 5]],
-        [[0, 0, 4, 1], [0, 0, 1, 5], [3, 0, 1, 5], [0, 2, 4, 1]],
-      ]
-      let gx = 40
-      letters.forEach((letter, i) => {
-        letter.forEach(([bx, by, w, h]) => x.fillRect(ox + (gx + bx * 5) * k, oy + by * 5 * k, w * 5 * k, h * 5 * k))
-        gx += ([1, 4, 5, 4][i] + 1) * 5
-      })
-      const o2 = document.createElement('canvas')
-      o2.width = W
-      o2.height = H
-      const y2 = o2.getContext('2d')!
-      y2.strokeStyle = '#000'
-      ring(y2, 43, 17)
-      // where the brown link passes over, the amber one is hidden
-      y2.save()
-      y2.beginPath()
-      y2.rect(lx(46), ly(56), 22 * L, 22 * L)
-      y2.clip()
-      y2.globalCompositeOperation = 'destination-out'
-      ring(y2, 7, 31)
-      y2.restore()
-      const d = x.getImageData(0, 0, W, H).data
-      const d2 = y2.getImageData(0, 0, W, H).data
-      const step = W < 500 ? 3 : 4
-      const next: P[] = []
-      for (let yy = 0; yy < H; yy += step)
-        for (let xx = 0; xx < W; xx += step) {
-          const i = (yy * W + xx) * 4 + 3
-          const a = d2[i] > 128
-          if (a || d[i] > 128) next.push({ x: Math.random() * W, y: Math.random() * H, vx: 0, vy: 0, tx: xx, ty: yy, s: 1.3 + Math.random() * 1.3, a })
-        }
-      pts = next
-      if (reduced) {
-        pts.forEach((p) => {
-          p.x = p.tx
-          p.y = p.ty
-        })
-        draw()
-      }
-    }
-    const draw = () => {
-      ctx.clearRect(0, 0, W, H)
-      for (const p of pts) {
-        const sp = Math.min(1, Math.hypot(p.vx, p.vy) / 6)
-        ctx.fillStyle = sp > 0.15 ? `rgba(255, 214, 140, ${0.65 + sp * 0.35})` : p.a ? 'rgba(255, 196, 110, 0.9)' : 'rgba(246, 226, 196, 0.6)'
-        ctx.fillRect(p.x, p.y, p.s, p.s)
-      }
-    }
-    const frame = () => {
-      raf = requestAnimationFrame(frame)
-      for (const p of pts) {
-        const dx = p.x - m.x
-        const dy = p.y - m.y
-        const d2 = dx * dx + dy * dy
-        if (d2 < 12000) {
-          const f = (12000 - d2) / 12000
-          const dd = Math.sqrt(d2 + 1)
-          p.vx += (dx / dd) * f * 5
-          p.vy += (dy / dd) * f * 5
-        }
-        p.vx = (p.vx + (p.tx - p.x) * 0.05) * 0.82
-        p.vy = (p.vy + (p.ty - p.y) * 0.05) * 0.82
-        p.x += p.vx
-        p.y += p.vy
-      }
-      draw()
-    }
-    const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !running && !reduced) {
-        running = true
-        frame()
-      } else if (!e.isIntersecting && running) {
-        running = false
-        cancelAnimationFrame(raf)
-      }
-    })
-    const move = (e: PointerEvent) => {
-      const r = cv.getBoundingClientRect()
-      m.x = e.clientX - r.left
-      m.y = e.clientY - r.top
-    }
-    const leave = () => {
-      m.x = m.y = -9999
-    }
-    const ro = new ResizeObserver(build)
-    document.fonts.ready.then(() => {
-      build()
-      ro.observe(cv)
-      io.observe(cv)
-    })
-    cv.addEventListener('pointermove', move)
-    cv.addEventListener('pointerleave', leave)
-    return () => {
-      cancelAnimationFrame(raf)
-      io.disconnect()
-      ro.disconnect()
-      cv.removeEventListener('pointermove', move)
-      cv.removeEventListener('pointerleave', leave)
-    }
-  }, [])
-  return <canvas ref={ref} className="ft__mark" role="img" aria-label="شعار IGMA" />
-}
-
 export function Footer() {
   const year = new Date().getFullYear()
   const [, tick] = useState(0)
@@ -532,7 +379,7 @@ export function Footer() {
             © {year} {company.name} · <span dir="ltr">{company.descriptor}</span>
           </p>
         </div>
-        <ParticleMark />
+        <Logo className="ft__mark" title={company.name} />
       </div>
     </footer>
   )
