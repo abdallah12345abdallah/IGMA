@@ -1,15 +1,21 @@
 import { useId } from 'react'
 
 /** Square-Kufic letters on a 5-unit grid: [x, y, w, h] per block, in grid units. */
-const LETTERS: [number, number, number, number][][] = [
+const SOLID: [number, number, number, number][][] = [
   // I
   [[0, 0, 1, 5]],
-  // G (its small inner square is drawn on its own so it can pulse)
-  [[0, 0, 4, 1], [0, 0, 1, 5], [0, 4, 4, 1], [3, 2, 1, 3]],
+  // G
+  [[0, 0, 4, 1], [0, 0, 1, 5], [0, 4, 4, 1], [3, 2, 1, 3], [2, 2, 1, 1]],
   // M
   [[0, 0, 5, 1], [0, 0, 1, 5], [2, 0, 1, 5], [4, 0, 1, 5]],
-  // A
-  [[0, 0, 4, 1], [0, 0, 1, 5], [3, 0, 1, 5], [0, 2, 4, 1]],
+]
+/** The A is drawn in dots, one per module. */
+const A_CELLS: [number, number][] = [
+  [0, 0], [1, 0], [2, 0], [3, 0],
+  [0, 1], [3, 1],
+  [0, 2], [1, 2], [2, 2], [3, 2],
+  [0, 3], [3, 3],
+  [0, 4], [3, 4],
 ]
 const WIDTHS = [1, 4, 5, 4]
 const U = 5 // one grid unit
@@ -17,22 +23,20 @@ const SYMBOL_W = 32 // the links, scaled to the letters' height
 const GAP = 8
 
 /**
- * IGMA: two interlocking links (the brown one in the current text colour, the other in
- * --logo-accent) and the name set as square Kufic on one grid.
- * With `live`, a spark circles the amber link, the links pull apart and lock again now and
- * then, and the square inside the G pulses.
+ * IGMA: two interlocking links (one in the current text colour, the other in --logo-accent)
+ * and the name set as square Kufic, with the A in dots.
+ * With `live`, the accent link runs as a moving dashed line and the links breathe.
  */
 export function Logo({ className, title = 'IGMA', live = false }: { className?: string; title?: string; live?: boolean }) {
   const id = useId().replace(/:/g, '')
+  const origins: number[] = []
   let x = SYMBOL_W + GAP
-  const blocks: string[] = []
-  let gDot = 0
-  LETTERS.forEach((letter, i) => {
-    letter.forEach(([bx, by, w, h]) => blocks.push(`M${x + bx * U} ${by * U}h${w * U}v${h * U}h${-w * U}z`))
-    if (i === 1) gDot = x + 2 * U
-    x += (WIDTHS[i] + 1) * U
+  WIDTHS.forEach((w) => {
+    origins.push(x)
+    x += (w + 1) * U
   })
   const width = x - U
+  const blocks = SOLID.flatMap((letter, i) => letter.map(([bx, by, w, h]) => `M${origins[i] + bx * U} ${by * U}h${w * U}v${h * U}h${-w * U}z`))
   const ring = <rect x="7" y="31" width="50" height="50" rx="14" fill="none" stroke="currentColor" strokeWidth="13" />
   return (
     <svg className={`${className ?? ''} ${live ? 'logo--live' : ''}`} viewBox={`0 0 ${width} 25`} role="img" aria-label={title}>
@@ -45,15 +49,16 @@ export function Logo({ className, title = 'IGMA', live = false }: { className?: 
         </defs>
         <g className="logo__one">{ring}</g>
         <g className="logo__two">
-          <rect x="43" y="17" width="50" height="50" rx="14" fill="none" stroke="var(--logo-accent, #f2b25c)" strokeWidth="13" />
-          {live && <rect className="logo__spark" x="43" y="17" width="50" height="50" rx="14" fill="none" strokeWidth="13" pathLength={100} />}
+          <rect className="logo__run" x="43" y="17" width="50" height="50" rx="14" fill="none" stroke="var(--logo-accent, #f2b25c)" strokeWidth="13" />
         </g>
         <g className="logo__one" clipPath={`url(#over-${id})`}>
           {ring}
         </g>
       </g>
       <path d={blocks.join('')} fill="currentColor" />
-      <rect className="logo__dot" x={gDot} y={2 * U} width={U} height={U} fill="currentColor" />
+      {A_CELLS.map(([cx, cy]) => (
+        <circle key={`${cx}-${cy}`} cx={origins[3] + cx * U + U / 2} cy={cy * U + U / 2} r={2.2} fill="currentColor" />
+      ))}
     </svg>
   )
 }

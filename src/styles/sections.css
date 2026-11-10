@@ -2046,67 +2046,27 @@ button.sm__tag:hover {
   }
 }
 
-/* ---------- the living logo: a spark circles the amber link, the links pull apart and lock again, the G's square pulses ---------- */
-.logo--live .logo__spark {
-  stroke: #fffaf0;
-  stroke-linecap: round;
-  stroke-dasharray: 7 93;
-  opacity: 0.85;
-  animation: logo-spark 3.2s linear infinite;
+/* ---------- the living logo: the accent link runs as a dashed line, the links breathe ---------- */
+.logo--live .logo__run {
+  stroke-dasharray: 12 8;
+  animation: logo-run 1.4s linear infinite;
 }
 .logo--live .logo__two {
-  animation: logo-link 7s cubic-bezier(0.6, 0, 0.3, 1) infinite;
+  animation: logo-breathe 5s ease-in-out infinite;
 }
-.logo--live .logo__one {
-  animation: logo-link-back 7s cubic-bezier(0.6, 0, 0.3, 1) infinite;
-}
-.logo--live .logo__dot {
-  animation: logo-dot 2.4s ease-in-out infinite;
-}
-@keyframes logo-spark {
+@keyframes logo-run {
   to {
-    stroke-dashoffset: -100;
+    stroke-dashoffset: -40;
   }
 }
-@keyframes logo-link {
-  0%,
-  70%,
-  100% {
-    transform: translate(0, 0);
-  }
-  80% {
-    transform: translate(7px, -7px);
-  }
-  88% {
-    transform: translate(-1px, 1px);
-  }
-}
-@keyframes logo-link-back {
-  0%,
-  70%,
-  100% {
-    transform: translate(0, 0);
-  }
-  80% {
-    transform: translate(-4px, 4px);
-  }
-  88% {
-    transform: translate(1px, -1px);
-  }
-}
-@keyframes logo-dot {
+@keyframes logo-breathe {
   50% {
-    fill: var(--logo-accent, #f2b25c);
+    transform: translate(3px, -3px);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .logo--live .logo__spark,
-  .logo--live .logo__two,
-  .logo--live .logo__one,
-  .logo--live .logo__dot {
+  .logo--live .logo__run,
+  .logo--live .logo__two {
     animation: none;
-  }
-  .logo--live .logo__spark {
-    display: none;
   }
 }
