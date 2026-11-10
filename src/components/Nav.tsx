@@ -68,21 +68,31 @@ export function Nav() {
 
   return (
     <header className={`nav ${light ? 'nav--ink' : ''} ${docked ? 'nav--docked' : ''}`}>
-      <a className="nav__brand" href="#top" aria-label={`${company.name}، الصفحة الرئيسية`} onClick={close} dir="ltr">
-        <i className="nav__dot" aria-hidden="true" />
-        {company.name}
-      </a>
-      <nav className="nav__links" aria-label="القائمة الرئيسية" ref={linksRef}>
-        {pill && <span className="nav__pill" style={{ transform: `translateX(${pill.x}px)`, width: pill.w }} aria-hidden="true" />}
-        {nav.map((n) => (
-          <a key={n.href} href={n.href} aria-current={current === n.href ? 'location' : undefined}>
-            {n.label}
-          </a>
-        ))}
-      </nav>
-      <a className="nav__cta" href="#demo">
-        {hero.primary}
-      </a>
+      <div className="nav__island nav__island--main">
+        <a className="nav__brand" href="#top" aria-label={`${company.name}، الصفحة الرئيسية`} onClick={close} dir="ltr">
+          {company.name}
+        </a>
+        <nav className="nav__links" aria-label="القائمة الرئيسية" ref={linksRef}>
+          {pill && <span className="nav__mark" style={{ transform: `translateX(${pill.x}px)`, width: pill.w }} aria-hidden="true" />}
+          {nav.map((n) => (
+            <a key={n.href} href={n.href} aria-current={current === n.href ? 'location' : undefined}>
+              {n.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+      <div className="nav__island nav__island--side">
+        <a className="nav__talk" href="#contact">
+          <i aria-hidden="true" />
+          تواصل
+        </a>
+        <a className="nav__cta" href="#demo">
+          {hero.primary}
+          <span className="nav__arrow" aria-hidden="true">
+            ←
+          </span>
+        </a>
+      </div>
       <button className="nav__toggle" type="button" aria-expanded={open} aria-controls="mobile-menu" onClick={() => setOpen((v) => !v)}>
         {open ? 'إغلاق' : 'القائمة'}
       </button>
