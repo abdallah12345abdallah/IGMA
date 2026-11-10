@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { clients, company, contact, footer, markets, nav, plans, services, systems } from '../content/site'
 import { ServiceVisual, type ServiceKind } from './ServiceVisual'
 import { MarketsMap } from './MarketsMap'
@@ -101,87 +101,64 @@ export function Markets() {
   )
 }
 
-/** Accent per contract model, and a small mark per contract rule. */
+/** Accent per contract model. */
 const MODEL_COLOR = ['#18306F', '#0B5A3E', '#A5370A']
-const RULE_MARK = ['✎', '⚙', '٪', '⛨']
 const isNone = (v: string) => v === '—'
 
 export function Plans() {
-  const grid = useRef<HTMLDivElement>(null)
-  // A soft light follows the cursor along the edges of every tile.
-  useEffect(() => {
-    const el = grid.current
-    if (!el || window.matchMedia('(hover: none)').matches) return
-    let raf = 0
-    let ev: PointerEvent | null = null
-    const paint = () => {
-      raf = 0
-      if (!ev) return
-      el.querySelectorAll<HTMLElement>('.pl__cell').forEach((c) => {
-        const r = c.getBoundingClientRect()
-        c.style.setProperty('--x', `${ev!.clientX - r.left}px`)
-        c.style.setProperty('--y', `${ev!.clientY - r.top}px`)
-      })
-    }
-    const onMove = (e: PointerEvent) => {
-      ev = e
-      if (!raf) raf = requestAnimationFrame(paint)
-    }
-    el.addEventListener('pointermove', onMove)
-    return () => {
-      el.removeEventListener('pointermove', onMove)
-      cancelAnimationFrame(raf)
-    }
-  }, [])
-
+  // the rules run as a slow ticker; repeated so the loop has no gap
+  const ticker = [...plans.rules, ...plans.rules, ...plans.rules, ...plans.rules]
   return (
     <section className="section pl" id="plans" data-nav="light" aria-labelledby="plans-title">
-      <div className="container">
+      <div className="pl__aurora" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </div>
+      <div className="container pl__in">
         <header className="head">
           <p className="kicker">{plans.kicker}</p>
           <h2 id="plans-title">{plans.title}</h2>
         </header>
-        <div className="pl__grid" ref={grid}>
-          <div className="pl__cell pl__tiers">
-            <small>الباقات</small>
-            <h3>ثلاث مستويات، نحددها معك.</h3>
-            <div className="pl__tierrow">
-              {plans.columns.map((c, j) => (
-                <div key={c} className={j === 1 ? 'is-main' : ''}>
-                  <b dir="ltr">{c}</b>
-                  <small>{plans.columnNotes[j]}</small>
-                  <ul>
-                    {plans.rows.map((r) => (
-                      <li key={r.label} className={isNone(r.values[j]) ? 'no' : ''}>
-                        <span>{r.label}</span>
-                        <span>{isNone(r.values[j]) ? 'غير متاح' : r.values[j]}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
+        <ul className="pl__models">
           {plans.models.map((m, i) => (
-            <div key={m.name} className="pl__cell pl__model" style={{ ['--c' as string]: MODEL_COLOR[i] }}>
-              <small>نموذج تعاقد</small>
-              <h3>{m.name}</h3>
-              <p>
-                {m.fits}
-                <b>{m.billing}</b>
-              </p>
-            </div>
+            <li key={m.name} className="pl__glass" style={{ ['--c' as string]: MODEL_COLOR[i] }}>
+              <b>{m.name}</b>
+              {m.fits} · {m.billing}
+            </li>
           ))}
-          {plans.rules.map((r, i) => (
-            <div key={r} className="pl__cell pl__rule">
-              <i aria-hidden="true">{RULE_MARK[i]}</i>
-              <b>{r}</b>
-            </div>
+        </ul>
+        <div className="pl__cards">
+          {plans.columns.map((c, j) => (
+            <article key={c} className={`pl__card pl__glass ${j === 1 ? 'is-main' : ''}`} aria-labelledby={`pl-${j}`}>
+              <h3 id={`pl-${j}`} dir="ltr">
+                {c}
+              </h3>
+              <p className="pl__tag">{plans.columnNotes[j]}</p>
+              <ul>
+                {plans.rows.map((r) => (
+                  <li key={r.label} className={isNone(r.values[j]) ? 'no' : ''}>
+                    <span>{r.label}</span>
+                    <span>{isNone(r.values[j]) ? 'غير متاح' : r.values[j]}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
           ))}
-          <div className="pl__cell pl__note">
-            <small>ملاحظة</small>
-            <p>{plans.note}</p>
-          </div>
+        </div>
+        <p className="pl__note">{plans.note}</p>
+      </div>
+      {/* the rules run edge to edge, outside the content column */}
+      <div className="pl__ticker">
+        <ul className="sr-only">
+          {plans.rules.map((r) => (
+            <li key={r}>{r}</li>
+          ))}
+        </ul>
+        <div aria-hidden="true">
+          {ticker.map((r, i) => (
+            <span key={i}>{r}</span>
+          ))}
         </div>
       </div>
     </section>
