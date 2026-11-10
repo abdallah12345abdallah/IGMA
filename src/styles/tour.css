@@ -14,7 +14,7 @@ html.is-locked body {
   position: absolute;
 }
 .tour__pin {
-  --c: #d6d2c7;
+  --c: #c6c0b2;
   --fg: var(--on);
   --fg-70: var(--on-70);
   --fg-line: var(--on-line);
@@ -31,7 +31,7 @@ html.is-locked body {
 .tour__pin[data-tone='light'] {
   --fg: var(--ink);
   --fg-70: var(--ink-2);
-  --fg-line: rgba(16, 35, 31, 0.28);
+  --fg-line: rgba(10, 25, 22, 0.3);
 }
 .tour__canvas,
 .posters {

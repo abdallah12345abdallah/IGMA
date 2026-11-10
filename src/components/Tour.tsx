@@ -23,7 +23,7 @@ const smooth = (v: number) => {
   const c = clamp(v, 0, 1)
   return c * c * (3 - 2 * c)
 }
-const SAND = '#D6D2C7'
+const SAND = '#C6C0B2'
 
 export function Tour() {
   const reduced = useReducedMotion()

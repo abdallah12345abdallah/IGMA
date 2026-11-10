@@ -3,15 +3,15 @@
   Design tokens. Chapter colours live with each system in content/site.ts.
 */
 :root {
-  --sand: #e6e5e0;
-  --sand-2: #d8d7d0;
-  --ink: #10231f;
-  --ink-2: #4a5a55;
-  --green: #0b6e4f;
+  --sand: #d9d5cb;
+  --sand-2: #cac5b9;
+  --ink: #0a1916;
+  --ink-2: #3b4945;
+  --green: #08583f;
   --on: #fffbf2;
   --on-70: rgba(255, 251, 242, 0.8);
   --on-line: rgba(255, 251, 242, 0.42);
-  --line: rgba(16, 35, 31, 0.17);
+  --line: rgba(10, 25, 22, 0.2);
   --error: #a4221a;
 
   --font-display: 'Alexandria', 'Segoe UI', Tahoma, sans-serif;
