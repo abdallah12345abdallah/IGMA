@@ -26,6 +26,7 @@ const smooth = (v: number) => {
   return c * c * (3 - 2 * c)
 }
 const SAND = '#cfc5c1'
+const BRAND = '#5e1a2c' // the site's main colour
 const fillFrom = (e: React.PointerEvent<HTMLElement>) => {
   const r = e.currentTarget.getBoundingClientRect()
   e.currentTarget.style.setProperty('--fx', `${e.clientX - r.left}px`)
@@ -182,7 +183,7 @@ export function Tour() {
           <p className="s-meta">{hero.eyebrow}</p>
           <h1 className="s-title" id="hero-title">
             <Words text={hero.title} />{' '}
-            <Rotator words={hero.rotate} colors={systems.map((s) => s.color)} run={active === 0 && heroIn} reduced={reduced} />
+            <Rotator words={hero.rotate} colors={[BRAND]} run={active === 0 && heroIn} reduced={reduced} />
             <span className="s-accent">
               <Words text={hero.accent} offset={3} />
               <svg viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true">
