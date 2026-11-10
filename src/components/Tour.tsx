@@ -32,7 +32,6 @@ const fillFrom = (e: React.PointerEvent<HTMLElement>) => {
   e.currentTarget.style.setProperty('--fx', `${e.clientX - r.left}px`)
   e.currentTarget.style.setProperty('--fy', `${e.clientY - r.top}px`)
 }
-const SCROLL_BROWN = '#7a2a3e' // the scrollbar outside the tour
 
 export function Tour() {
   const reduced = useReducedMotion()
@@ -118,7 +117,6 @@ export function Tour() {
       const idx = Math.round(f)
       setActive(idx)
       pin.style.setProperty('--c', idx === 0 ? SAND : tourStops[idx - 1].color)
-      document.documentElement.style.setProperty('--sb', idx === 0 ? SCROLL_BROWN : tourStops[idx - 1].color)
       const dark = idx !== 0
       pin.dataset.tone = dark ? 'dark' : 'light'
       pin.dataset.layout = idx === 0 ? 'hero' : STATIONS[idx - 1].shot.layout
@@ -146,7 +144,6 @@ export function Tour() {
     const io = new IntersectionObserver(
       ([e]) => {
         setVisible(e.isIntersecting)
-        if (!e.isIntersecting) document.documentElement.style.setProperty('--sb', SCROLL_BROWN)
       },
       { rootMargin: '100px' },
     )

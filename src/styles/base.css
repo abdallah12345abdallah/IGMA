@@ -201,9 +201,9 @@ h3 {
   max-width: 64ch;
 }
 
-/* ---------- scrollbar: thin, widens on hover; takes the colour of the system on screen in the tour ---------- */
+/* ---------- scrollbar: thin, widens on hover, in the site's main colour ---------- */
 :root {
-  --sb: #7a2a3e;
+  --sb: #5e1a2c; /* the site's main colour, everywhere */
   scrollbar-color: var(--sb) color-mix(in srgb, var(--sb) 14%, #efe8e5);
   scrollbar-width: thin;
 }
