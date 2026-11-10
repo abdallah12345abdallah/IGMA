@@ -677,53 +677,132 @@
   }
 }
 
-/* clients: an open index, each entry marked by a line in its system colour */
-.clients {
-  margin-top: clamp(36px, 5vw, 56px);
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0 28px;
+/* clients: two ribbons of client tiles crossing in an X, each moving its own way */
+.cl {
+  background: #efebe3;
+  overflow: hidden;
 }
-.clients a {
+.cl__ribbons {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding-top: 22px;
-  color: var(--ink);
+  height: 400px;
+  margin-top: 16px;
 }
-.clients a::before {
-  content: '';
+.cl__ribbon {
   position: absolute;
-  top: 0;
-  inset-inline: 0;
-  height: 3px;
-  background: var(--c);
-  transform-origin: right;
-  transition: transform 0.45s var(--ease-out);
+  left: -8%;
+  right: -8%;
+  top: 50%;
+  padding-block: 18px;
+  overflow: hidden;
 }
-.clients a:hover::before {
-  transform: scaleY(2.4);
+.cl__ribbon--dark {
+  z-index: 2;
+  background: var(--ink);
+  transform: translateY(-50%) rotate(-5deg);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
 }
-.clients h3 {
-  font-weight: 800;
-  font-size: clamp(22px, 1.9vw, 28px);
-  line-height: 1.35;
-  transition: color 0.25s;
+.cl__ribbon--light {
+  background: #d9eadf;
+  transform: translateY(-50%) rotate(4deg);
 }
-.clients a:hover h3 {
+.cl__track {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  animation: cl-run 44s linear infinite;
+}
+.cl__ribbon--light .cl__track {
+  animation-direction: reverse;
+  animation-duration: 52s;
+}
+.cl__ribbons:hover .cl__track {
+  animation-play-state: paused;
+}
+@keyframes cl-run {
+  to {
+    transform: translateX(50%);
+  }
+}
+.cl__tile {
+  flex: none;
+  width: 330px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border-radius: 22px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 16px 30px -26px rgba(10, 25, 22, 0.5);
+  transition: transform 0.4s var(--ease-out);
+}
+.cl__tile:hover {
+  transform: translateY(-4px);
+}
+.cl__ribbon--dark .cl__tile {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+.cl__mark {
+  flex: none;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--c) 14%, #fff);
   color: var(--c);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 17px;
 }
-.clients p {
-  margin-top: 8px;
-  font-size: 15px;
+.cl__ribbon--dark .cl__mark {
+  background: var(--c);
+  color: #fff;
+}
+.cl__tile b {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 19px;
+  line-height: 1.3;
+}
+.cl__tile small {
+  display: block;
+  margin-top: 3px;
+  font-size: 14px;
+  opacity: 0.75;
+}
+.cl__stats {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 44px;
+  font-size: 16px;
   color: var(--ink-2);
 }
-.clients span {
-  margin-top: 14px;
-  font-size: 14px;
-  color: var(--c);
-  font-weight: 600;
+.cl__stats b {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 40px;
+  color: var(--ink);
+  margin-inline-end: 8px;
+  vertical-align: -4px;
+}
+@media (max-width: 760px) {
+  .cl__ribbons {
+    height: 330px;
+  }
+  .cl__tile {
+    width: 270px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl__track {
+    animation: none;
+  }
 }
 
 /* ========== DEMO ========== */

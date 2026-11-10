@@ -165,28 +165,75 @@ export function Plans() {
   )
 }
 
-export function Clients() {
+/** Short code shown on each client's tile, by system. */
+const CLIENT_MARK: Record<string, string> = { erp: 'ERP', logistics: 'LOG', gym: 'GYM', restaurant: 'RES', learning: 'EDU' }
+
+function ClientTile({ c }: { c: (typeof clients.items)[number] }) {
+  const sys = systems.find((s) => s.id === c.id)
   return (
-    <section className="section section--sand2" id="clients" data-nav="light" aria-labelledby="clients-title">
+    <a className="cl__tile" href={`#/systems/${c.id}`} tabIndex={-1} style={{ ['--c' as string]: sys?.color }}>
+      <span className="cl__mark" dir="ltr">
+        {CLIENT_MARK[c.id]}
+      </span>
+      <span>
+        <b>{c.sector}</b>
+        <small>
+          {c.system} · {c.place}
+        </small>
+      </span>
+    </a>
+  )
+}
+
+export function Clients() {
+  // each ribbon repeats the list so the loop never shows a gap
+  const forward = [...clients.items, ...clients.items, ...clients.items, ...clients.items]
+  const back = [...forward].reverse()
+  return (
+    <section className="section cl" id="clients" data-nav="light" aria-labelledby="clients-title">
       <div className="container">
         <header className="head">
           <p className="kicker">{clients.kicker}</p>
           <h2 id="clients-title">{clients.title}</h2>
         </header>
-        <ul className="clients">
-          {clients.items.map((c) => {
-            const sys = systems.find((s) => s.id === c.id)
-            return (
-              <li key={c.sector} style={{ ['--c' as string]: sys?.color }}>
-                <a href={`#/systems/${c.id}`}>
-                  <h3>{c.sector}</h3>
-                  <p dir="auto">{c.system}</p>
-                  <span>{c.place}</span>
-                </a>
-              </li>
-            )
-          })}
+        {/* the readable list, for keyboards and screen readers */}
+        <ul className="sr-only">
+          {clients.items.map((c) => (
+            <li key={c.sector}>
+              <a href={`#/systems/${c.id}`}>
+                {c.sector}: {c.system}، {c.place}
+              </a>
+            </li>
+          ))}
         </ul>
+      </div>
+      {/* two ribbons crossing in an X, each running its own way; they pause under the pointer */}
+      <div className="cl__ribbons" aria-hidden="true">
+        <div className="cl__ribbon cl__ribbon--light">
+          <div className="cl__track">
+            {back.map((c, i) => (
+              <ClientTile key={i} c={c} />
+            ))}
+          </div>
+        </div>
+        <div className="cl__ribbon cl__ribbon--dark">
+          <div className="cl__track">
+            {forward.map((c, i) => (
+              <ClientTile key={i} c={c} />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="container cl__stats">
+        <span>
+          <b>{clients.items.length}</b>أنظمة تعمل لدى عملاء
+        </span>
+        <span>
+          <b>{markets.regions.length}</b>سوقان: مصر والسعودية
+        </span>
+        <span>
+          <b>{systems.length}</b>أنظمة جاهزة، ونبني السابع حسب طلبك
+        </span>
       </div>
     </section>
   )
