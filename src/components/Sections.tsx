@@ -247,55 +247,110 @@ export function Clients() {
   )
 }
 
+/** Phrases the split-flap board cycles through. */
+const BOARD = ['IGMA', 'أنظمة تدير شركتك', 'مصر والسعودية', 'نبني نظامك']
+const FLAPS = 16
+/** Office hours used for the "open now" state, in each office's own time zone. */
+const OPEN_FROM = 9
+const OPEN_TO = 18
+const OFFICES = [
+  { id: 'egypt' as const, code: 'CAI', city: 'الجيزة', tz: 'Africa/Cairo' },
+  { id: 'saudi' as const, code: 'RUH', city: 'الرياض', tz: 'Asia/Riyadh' },
+]
+
+function officeNow(tz: string) {
+  const now = new Date()
+  const h = +new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: tz }).format(now)
+  return {
+    time: new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit', timeZone: tz }).format(now),
+    open: h >= OPEN_FROM && h < OPEN_TO,
+  }
+}
+
+/** A departure board whose letters flip from one phrase to the next. */
+function FlapBoard() {
+  const [i, setI] = useState(0)
+  const [flipKey, setFlipKey] = useState(0)
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const id = window.setInterval(() => {
+      setI((n) => (n + 1) % BOARD.length)
+      setFlipKey((k) => k + 1)
+    }, 3600)
+    return () => window.clearInterval(id)
+  }, [])
+  const text = BOARD[i]
+  const chars = [...text.padEnd(FLAPS, ' ')].slice(0, FLAPS)
+  const rtl = /[\u0600-\u06FF]/.test(text)
+  return (
+    <div className="ft__flaps" dir={rtl ? 'rtl' : 'ltr'} role="img" aria-label={text}>
+      {chars.map((ch, k) => (
+        <span key={`${flipKey}-${k}`} className="ft__flap" style={{ ['--k' as string]: k }} aria-hidden="true">
+          {ch}
+        </span>
+      ))}
+    </div>
+  )
+}
+
 export function Footer() {
   const year = new Date().getFullYear()
+  const [, tick] = useState(0)
+  useEffect(() => {
+    const id = window.setInterval(() => tick((n) => n + 1), 30000)
+    return () => window.clearInterval(id)
+  }, [])
   return (
-    <footer className="footer" id="contact">
+    <footer className="ft" id="contact">
       <div className="container">
-        <p className="footer__statement">{footer.statement}</p>
-        <div className="footer__grid">
-          <div>
-            <p className="footer__mark" dir="ltr">
-              {company.name}
-            </p>
-            <p dir="ltr" className="footer__desc">
-              {company.descriptor}
-            </p>
-            <p>{company.promise}</p>
-          </div>
-          <div>
-            <h2>{contact.egypt.label}</h2>
-            <p>{contact.egypt.address}</p>
-            <a href={`tel:+${contact.egypt.whatsapp}`} dir="ltr">
-              {contact.egypt.phone}
-            </a>
-          </div>
-          <div>
-            <h2>{contact.saudi.label}</h2>
-            <p>{contact.saudi.address}</p>
-            <a href={`tel:+${contact.saudi.whatsapp}`} dir="ltr">
-              {contact.saudi.phone}
-            </a>
-          </div>
-          <div>
-            <h2>{footer.sections}</h2>
-            <ul>
-              {nav.map((n) => (
-                <li key={n.href}>
-                  <a href={n.href}>{n.label}</a>
-                </li>
-              ))}
-              <li>
-                <a href={contact.facebook} target="_blank" rel="noreferrer">
-                  {footer.social}
-                </a>
-              </li>
-            </ul>
-          </div>
+        <div className="ft__head">
+          <p className="ft__mark" dir="ltr">
+            {company.name}
+          </p>
+          <p className="ft__statement">{footer.statement}</p>
         </div>
-        <p className="footer__legal">
-          © {year} {company.name}
-        </p>
+        <FlapBoard />
+        <div className="ft__rows" role="table" aria-label="مكاتبنا">
+          <div className="ft__row ft__row--head" role="row">
+            <span role="columnheader">المكتب</span>
+            <span role="columnheader">العنوان</span>
+            <span role="columnheader">واتساب</span>
+            <span role="columnheader">الحالة</span>
+          </div>
+          {OFFICES.map((o) => {
+            const c = contact[o.id]
+            const now = officeNow(o.tz)
+            return (
+              <div className="ft__row" role="row" key={o.id}>
+                <b role="cell">
+                  <span dir="ltr">{o.code}</span> · {o.city}
+                </b>
+                <span role="cell">{c.address}</span>
+                <a role="cell" href={`https://wa.me/${c.whatsapp}`} target="_blank" rel="noopener noreferrer" dir="ltr">
+                  {c.phone}
+                </a>
+                <span role="cell" className={now.open ? 'is-open' : ''}>
+                  {now.time} · {now.open ? 'مفتوح الآن' : 'مغلق الآن'}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+        <div className="ft__foot">
+          <nav aria-label={footer.sections}>
+            {nav.map((n) => (
+              <a key={n.href} href={n.href}>
+                {n.label}
+              </a>
+            ))}
+            <a href={contact.facebook} target="_blank" rel="noreferrer">
+              {footer.social}
+            </a>
+          </nav>
+          <p>
+            © {year} {company.name} · <span dir="ltr">{company.descriptor}</span>
+          </p>
+        </div>
       </div>
     </footer>
   )
