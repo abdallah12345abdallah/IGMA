@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Nav } from './components/Nav'
+import { BackToTop } from './components/BackToTop'
 import { Tour } from './components/Tour'
 import { Clients, Footer, Markets, Plans, Services } from './components/Sections'
 import { Demo } from './components/Demo'
@@ -95,6 +96,7 @@ export default function App() {
         )}
       </main>
       <Footer />
+      <BackToTop />
     </>
   )
 }
