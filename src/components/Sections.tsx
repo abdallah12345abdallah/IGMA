@@ -347,7 +347,7 @@ function ParticleMark() {
     const cv = ref.current
     if (!cv) return
     const ctx = cv.getContext('2d')!
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduced = true // drawn once and kept still: the dots sit in place, no motion
     type P = { x: number; y: number; vx: number; vy: number; tx: number; ty: number; s: number; a: boolean }
     let pts: P[] = []
     let W = 0
