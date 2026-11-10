@@ -16,6 +16,8 @@ const STOPS = tourStops.length + 1 // the overview + one stop per system + your 
 const TAIL = 0.5 // extra hold on the last system
 const SEGMENT_SVH = 115 // scroll distance per stop: raise it for a slower tour
 const HOLD = 0.5 // share of each stop where the camera rests
+const STEPS_FROM = 0.12 // the steps start lighting after this share of the rest, once the content has settled
+const STEPS_TO = 0.9 // and are all lit by this share
 const HEADLINE_DELAY_MS = 250 // after the loader has gone and the lamp is on
 const MAX_WAIT_MS = 20000 // turn on smooth scrolling after this even if the 3D is still loading
 
@@ -108,7 +110,8 @@ export function Tour() {
         const el = stopRefs.current[i]
         if (!el) return
         const local = clamp((u - (i + 1)) / HOLD, 0, 1)
-        const n = idx === i + 1 ? Math.min(s.flow.length - 1, Math.floor(local * s.flow.length)) : -1
+        const p = (local - STEPS_FROM) / (STEPS_TO - STEPS_FROM)
+        const n = idx === i + 1 && p >= 0 ? Math.min(s.flow.length - 1, Math.floor(p * s.flow.length)) : -1
         if (n !== lit.current[i]) {
           lit.current[i] = n
           el.querySelectorAll('.stop-steps li').forEach((li, j) => li.classList.toggle('is-lit', j <= n))
@@ -152,7 +155,7 @@ export function Tour() {
         </div>
         <div className="scrim" aria-hidden="true" />
 
-        <section className={`stop stop--hero ${active === 0 && heroIn ? 'is-active' : ''}`} inert={active !== 0} aria-labelledby="hero-title">
+        <section className={`stop stop--hero ${active === 0 && heroIn ? 'is-active' : active > 0 ? 'is-past' : ''}`} inert={active !== 0} aria-labelledby="hero-title">
           <p className="s-meta">{hero.eyebrow}</p>
           <h1 className="s-title" id="hero-title">
             <Words text={hero.title} />{' '}
@@ -191,7 +194,7 @@ export function Tour() {
             ref={(el) => {
               stopRefs.current[i] = el
             }}
-            className={`stop stop--${STATIONS[i].shot.layout} stop--${s.id} ${s.custom ? 'stop--custom' : ''} ${active === i + 1 ? 'is-active' : ''}`}
+            className={`stop stop--${STATIONS[i].shot.layout} stop--${s.id} ${s.custom ? 'stop--custom' : ''} ${active === i + 1 ? 'is-active' : active > i + 1 ? 'is-past' : ''}`}
             inert={active !== i + 1}
             aria-labelledby={`stop-${s.id}`}
           >

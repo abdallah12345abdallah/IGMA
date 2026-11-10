@@ -1108,3 +1108,99 @@
 .stop--learning:has(.stop-steps li:nth-child(4).is-lit) .lc--cert {
   transform: rotate(-3deg);
 }
+
+/* ========== scroll choreography: how content leaves and arrives ========== */
+/* leaving is quick, with no delay; passed stops go up, the ones ahead wait below */
+.stop > * {
+  transition:
+    opacity 0.28s ease,
+    transform 0.4s var(--ease-out);
+}
+.stop.is-past > *:not(.s-title) {
+  transform: translateY(-24px);
+}
+/* arriving is slower, in order: meta, headline, copy, element, cards, buttons */
+.stop.is-active > * {
+  transition:
+    opacity 0.6s var(--ease-out),
+    transform 0.95s var(--ease-out);
+}
+.stop.is-active > .s-scene {
+  transition-delay: 0.45s;
+}
+.stop.is-active > .s-actions {
+  transition-delay: 0.62s;
+}
+
+@media (min-width: 768px) {
+  /* each element enters its own way */
+  .art {
+    opacity: 0;
+    transform: var(--enter, translateY(30px));
+    transition:
+      opacity 0.25s,
+      transform 0.35s var(--ease-out);
+  }
+  .stop.is-active .art {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.6s 0.4s,
+      transform 1s var(--ease-out) 0.4s;
+  }
+  .ledger { --enter: translateY(46px) scale(0.94); }
+  .waybill { --enter: translate(-50px, 24px) rotate(-7deg); }
+  .ticket { --enter: translateY(-70px); }
+  .gymring { --enter: rotate(-12deg) scale(0.86); }
+  .idcard { --enter: translateY(-90px) rotate(7deg); }
+  .course { --enter: translateY(34px); }
+  .chips { --enter: scale(0.85); }
+
+  /* the cards around the object follow one after another */
+  .tour .stop .s-scene > * {
+    opacity: 0;
+    translate: 0 22px;
+    transition:
+      opacity 0.25s,
+      translate 0.35s var(--ease-out),
+      transform 0.6s var(--ease-out),
+      box-shadow 0.4s;
+  }
+  .tour .stop.is-active .s-scene > * {
+    opacity: 1;
+    translate: none;
+    transition:
+      opacity 0.5s calc(0.6s + var(--i, 0) * 0.13s),
+      translate 0.85s var(--ease-out) calc(0.6s + var(--i, 0) * 0.13s),
+      transform 0.6s var(--ease-out),
+      box-shadow 0.4s;
+  }
+  .s-scene > :nth-child(2) { --i: 1; }
+  .s-scene > :nth-child(3) { --i: 2; }
+  .s-scene > :nth-child(4) { --i: 3; }
+  .s-scene > :nth-child(5) { --i: 4; }
+
+  /* the route draws itself in */
+  .route__line {
+    stroke-dashoffset: 0;
+  }
+  .stop--logistics:not(.is-active) .route__line {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stop > *,
+  .stop.is-active > *,
+  .art,
+  .stop.is-active .art,
+  .tour .stop .s-scene > *,
+  .tour .stop.is-active .s-scene > * {
+    transition-duration: 0.01s !important;
+    transition-delay: 0s !important;
+  }
+  .stop.is-past > *:not(.s-title),
+  .art {
+    transform: none;
+  }
+}
