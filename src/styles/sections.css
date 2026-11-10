@@ -140,17 +140,24 @@
 }
 /* the opening view on the light sand: barely tinted glass with brown text */
 .nav--top {
-  --glass: rgba(90, 42, 12, 0.08);
+  --glass: transparent;
   --edge: rgba(90, 42, 12, 0.35);
   --text: #4a2008;
   --amber: #a5370a;
 }
 .nav--top .nav__island::before {
-  background: linear-gradient(90deg, transparent 4%, var(--edge) 50%, transparent 96%) top / 100% 1px no-repeat,
-    linear-gradient(rgba(90, 42, 12, 0.18), rgba(90, 42, 12, 0.08));
+  display: none;
+}
+.nav--top .nav__island,
+.nav--top .nav__toggle {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.nav--top .nav__toggle {
+  box-shadow: inset 0 0 0 1px rgba(74, 32, 8, 0.4);
 }
 .nav--top .nav__brand {
-  border-inline-end-color: rgba(90, 42, 12, 0.2);
+  border-inline-end-color: transparent;
 }
 .nav--top .nav__links a:hover {
   background: rgba(90, 42, 12, 0.08);
