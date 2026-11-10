@@ -71,6 +71,7 @@ export const STATIONS: Station[] = [
       { dev: 'laptop', on: 'desk', x: 0.18, z: 0.04, ry: -0.18, s: 1.4 },
     ],
     shot: { az: -0.35, dist: 6.4, height: 2.4, look: 1.08, layout: 'a' },
+    heroScale: 0.85,
   },
   {
     // Logistics: labelled cartons on a pallet, a pallet truck, stacked totes, and a tablet tracking shipments
@@ -153,7 +154,7 @@ export const STATIONS: Station[] = [
       { file: 'binder_notebook', on: 'desk', x: 0.12, z: 0.18, ry: 0.15, s: 0.55 },
     ],
     shot: { az: 0.3, dist: 10.5, height: 4.2, look: 0.8, layout: 'b' },
-    heroScale: 0.6,
+    heroScale: 0.78,
   },
   {
     // Your next system: a blueprint that keeps building itself
