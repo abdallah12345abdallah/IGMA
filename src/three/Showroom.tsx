@@ -49,7 +49,7 @@ THREE.DefaultLoadingManager.onProgress = (_url, loaded, total) => {
 MODEL_FILES.forEach((f) => useGLTF.preload(url(f)))
 
 /** Background colour per stop: sand for the overview, then each system's colour. */
-const SAND = new THREE.Color('#c3cac0')
+const SAND = new THREE.Color('#cfc5c1')
 const STOP_COLORS = [SAND, ...tourStops.map((s) => new THREE.Color(s.color))]
 
 /* ---------- one shader for (nearly) everything ----------

@@ -25,13 +25,13 @@ const smooth = (v: number) => {
   const c = clamp(v, 0, 1)
   return c * c * (3 - 2 * c)
 }
-const SAND = '#c3cac0'
+const SAND = '#cfc5c1'
 const fillFrom = (e: React.PointerEvent<HTMLElement>) => {
   const r = e.currentTarget.getBoundingClientRect()
   e.currentTarget.style.setProperty('--fx', `${e.clientX - r.left}px`)
   e.currentTarget.style.setProperty('--fy', `${e.clientY - r.top}px`)
 }
-const SCROLL_BROWN = '#1a5a4f' // the scrollbar outside the tour
+const SCROLL_BROWN = '#7a2a3e' // the scrollbar outside the tour
 
 export function Tour() {
   const reduced = useReducedMotion()
