@@ -236,34 +236,63 @@ export function device(kind: DeviceKind, tex: THREE.Texture) {
   return g
 }
 
-/** The seventh spot: wireframe blocks that keep assembling, for "your next system". */
+/**
+ * The seventh spot, "your next system": modules in the systems' colours drop onto a plate
+ * and lock in with a small light, then lift away and assemble again in a new order.
+ */
 export function blueprint() {
   const g = new THREE.Group()
-  const mat = new THREE.LineBasicMaterial({ color: '#7DF5C4', transparent: true, toneMapped: false })
-  const blocks = [
-    [0.9, 0.5, 0.7, 0, 0, 0],
-    [0.6, 0.45, 0.5, 0.1, 0.5, -0.05],
-    [0.35, 0.35, 0.35, -0.05, 0.95, 0.05],
-    [0.5, 0.25, 0.9, 0.75, 0, 0.15],
-    [0.4, 0.6, 0.4, -0.75, 0, -0.2],
+  const plate = new THREE.Mesh(new RoundedBoxGeometry(2.1, 0.08, 1.5, 2, 0.03), new THREE.MeshStandardMaterial({ color: '#163b31', roughness: 0.6 }))
+  plate.position.y = 0.04
+  g.add(plate)
+  // colour, x, z, width, height, depth
+  const spec: [string, number, number, number, number, number][] = [
+    ['#18306F', -0.62, -0.38, 0.6, 0.5, 0.55],
+    ['#A5370A', 0.08, -0.38, 0.7, 0.3, 0.55],
+    ['#0B4246', 0.7, -0.38, 0.45, 0.75, 0.55],
+    ['#860F30', -0.62, 0.32, 0.6, 0.35, 0.6],
+    ['#DFF7EC', 0.08, 0.32, 0.7, 0.55, 0.6],
+    ['#2F7FA3', 0.7, 0.32, 0.45, 0.25, 0.6],
   ]
-  const parts = blocks.map((b, i) => {
-    const l = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(b[0], b[1], b[2])), mat.clone())
-    l.userData = { home: new THREE.Vector3(b[3], b[4] + b[1] / 2, b[5]), i }
-    g.add(l)
-    return l
+  const ledMat = new THREE.MeshBasicMaterial({ color: '#7DF5C4', transparent: true, toneMapped: false })
+  const mods = spec.map(([c, x, z, w, h, d]) => {
+    const m = new THREE.Group()
+    const box = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 2, 0.035), new THREE.MeshStandardMaterial({ color: c, roughness: 0.4, metalness: 0.1 }))
+    box.position.y = h / 2
+    m.add(box)
+    const led = new THREE.Mesh(new THREE.BoxGeometry(w * 0.5, 0.02, 0.05), ledMat.clone())
+    led.position.set(0, h + 0.011, d / 2 - 0.08)
+    m.add(led)
+    m.position.set(x, 0.08, z)
+    g.add(m)
+    return { m, led }
   })
-  const grid = new THREE.GridHelper(2.2, 11, 0x0b6e4f, 0x0b6e4f)
-  ;(grid.material as THREE.Material).transparent = true
-  ;(grid.material as THREE.Material).opacity = 0.5
-  grid.position.y = 0.005
-  g.add(grid)
-  g.userData.tick = (t: number) =>
-    parts.forEach((p) => {
-      const k = Math.min(1, ((Math.sin(t * 0.8 - p.userData.i * 0.7) + 1) / 2) * 1.6)
-      p.position.copy(p.userData.home)
-      p.position.y += (1 - k) * 0.8
-      ;(p.material as THREE.LineBasicMaterial).opacity = 0.3 + 0.7 * k
+  const clamp = (v: number) => Math.min(1, Math.max(0, v))
+  const smooth = (v: number) => {
+    v = clamp(v)
+    return v * v * (3 - 2 * v)
+  }
+  // lands with a small overshoot, like a part clicking into place
+  const land = (v: number) => {
+    v = clamp(v)
+    return 1 + 2.6 * Math.pow(v - 1, 3) + 1.6 * Math.pow(v - 1, 2)
+  }
+  const T = 7
+  g.userData.tick = (time: number) => {
+    // start at 70% of the cycle so the first (and any frozen) frame shows the finished build
+    const t = time + T * 0.7
+    const n = Math.floor(t / T)
+    const k = (t % T) / T
+    mods.forEach(({ m, led }, i) => {
+      const slot = (i * 5 + n * 2) % 6
+      const drop = land((k - 0.05 - slot * 0.08) / 0.16)
+      const up = smooth((k - 0.86) / 0.12)
+      m.position.y = 0.08 + (1 - drop) * 2.2 + up * 2.2
+      m.visible = k > 0.05 + slot * 0.08 && up < 1
+      m.rotation.y = (1 - drop) * 0.6
+      const lit = clamp((k - 0.2 - slot * 0.08) / 0.06)
+      ;(led.material as THREE.MeshBasicMaterial).opacity = lit * (0.6 + 0.4 * Math.sin(t * 6 + i))
     })
+  }
   return g
 }
