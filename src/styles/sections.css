@@ -527,7 +527,7 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 3px solid #18306f;
+  border: 3px solid #5e1a2c;
   opacity: 0.25;
 }
 .sv__float .f2 {
@@ -536,7 +536,7 @@
   width: 18px;
   height: 18px;
   border-radius: 5px;
-  background: #a5370a;
+  background: #94404f;
   opacity: 0.35;
   animation-duration: 11s;
 }
@@ -546,8 +546,8 @@
   width: 26px;
   height: 26px;
   background:
-    linear-gradient(#0b4246, #0b4246) center / 100% 4px no-repeat,
-    linear-gradient(#0b4246, #0b4246) center / 4px 100% no-repeat;
+    linear-gradient(#7a2a3e, #7a2a3e) center / 100% 4px no-repeat,
+    linear-gradient(#7a2a3e, #7a2a3e) center / 4px 100% no-repeat;
   opacity: 0.3;
   animation-duration: 17s;
 }
@@ -764,9 +764,9 @@
 
 /* markets: a dotted map of the region with a card beside each country */
 .mk {
-  --eg: #a5370a;
-  --sa: #0b5a3e;
-  --sea: #2f7fa3;
+  --eg: #94404f;
+  --sa: #7a2a3e;
+  --sea: #c48a92;
   background: #efe8e5;
 }
 .mk__head h2 {

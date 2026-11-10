@@ -4,7 +4,7 @@ import { MarketsMap } from './MarketsMap'
 import { Logo } from './Logo'
 
 /** Each service's colour. */
-const SVC_COLOR = ['#18306F', '#A5370A', '#0B4246', '#860F30']
+const SVC_COLOR = ['#5e1a2c', '#94404f', '#7a2a3e', '#4a1322']
 const AUTO_MS = 3400
 
 /** A small live drawing of what each service does, shown when its panel opens. */
@@ -187,7 +187,7 @@ export function Markets() {
 }
 
 /** Accent per contract model. */
-const MODEL_COLOR = ['#18306F', '#0B5A3E', '#A5370A']
+const MODEL_COLOR = ['#5e1a2c', '#7a2a3e', '#94404f']
 const isNone = (v: string) => v === '—'
 
 export function Plans() {

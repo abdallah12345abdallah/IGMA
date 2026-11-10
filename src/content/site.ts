@@ -63,7 +63,7 @@ export const systems: SystemContent[] = [
     id: 'erp',
     name: 'IGMA ERP & Automation',
     short: 'ERP',
-    color: '#18306F',
+    color: '#5E1A2C', // every system in the site's main colour
     market: 'مصر والسعودية',
     title: 'دورة العمل كلها في نظام واحد.',
     body: 'من المشتريات والمخزون إلى الحسابات والموارد البشرية. بيانات واحدة تنتقل بين الأقسام بدل الجداول والرسائل.',
@@ -88,7 +88,7 @@ export const systems: SystemContent[] = [
     id: 'logistics',
     name: 'IGMA Logistics',
     short: 'الشحن',
-    color: '#0B4246',
+    color: '#5E1A2C', // every system in the site's main colour
     market: 'السعودية أولًا',
     title: 'كل شحنة، مكانها وحالتها معروفان.',
     body: 'نظام متخصص لشركات الشحن يدير الشحنات والسائقين والفروع والتحصيل من شاشة واحدة.',
@@ -113,7 +113,7 @@ export const systems: SystemContent[] = [
     id: 'restaurant',
     name: 'IGMA Restaurant',
     short: 'المطاعم',
-    color: '#A5370A',
+    color: '#5E1A2C', // every system in the site's main colour
     market: 'مصر أولًا',
     title: 'من الطلب إلى المطبخ إلى الفاتورة.',
     body: 'نقطة بيع وطلبات ومخزون وتكلفة وصفات في نظام واحد، يعرف ما خرج من المطبخ وكم كلّف.',
@@ -138,7 +138,7 @@ export const systems: SystemContent[] = [
     id: 'gym',
     name: 'IGMA Gym',
     short: 'الجيم',
-    color: '#860F30',
+    color: '#5E1A2C', // every system in the site's main colour
     market: 'السعودية',
     title: 'الأعضاء والاشتراكات تحت السيطرة.',
     body: 'سجل كامل لكل عضو، واشتراكات تتجدد في وقتها، وحضور مسجل بدون دفاتر.',
@@ -163,7 +163,7 @@ export const systems: SystemContent[] = [
     id: 'hr',
     name: 'IGMA HR',
     short: 'الموارد البشرية',
-    color: '#34520E',
+    color: '#5E1A2C', // every system in the site's main colour
     market: 'مصر والسعودية',
     title: 'الموظف من التعيين إلى الراتب.',
     body: 'نظام مستقل أو جزء من ERP، يجمع بيانات الموظفين والحضور والإجازات والرواتب في مكان واحد.',
@@ -188,7 +188,7 @@ export const systems: SystemContent[] = [
     id: 'learning',
     name: 'IGMA Learning',
     short: 'التعليم',
-    color: '#974507',
+    color: '#5E1A2C', // every system in the site's main colour
     market: 'مصر والسعودية',
     title: 'منصتك الخاصة لتقديم محتواك.',
     body: 'للمدرسين والمدربين ومقدمي المحتوى. دوراتك وطلابك ومتابعتهم على منصة تحمل اسمك.',
@@ -231,7 +231,7 @@ export const customStop: StopContent = {
   id: 'custom',
   name: 'نظامك الخاص',
   short: 'مشروعك',
-  color: '#08583F',
+  color: '#5E1A2C',
   market: 'تطوير حسب الطلب',
   title: 'لم تجد نظامك؟ نبنيه لك من الصفر.',
   body: 'نفس الفريق الذي بنى الأنظمة الستة يصمم نظامًا لطريقة عمل شركتك، بنطاق مكتوب ودفعات حسب مراحل المشروع.',

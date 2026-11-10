@@ -247,12 +247,12 @@ export function blueprint() {
   g.add(plate)
   // colour, x, z, width, height, depth
   const spec: [string, number, number, number, number, number][] = [
-    ['#18306F', -0.62, -0.38, 0.6, 0.5, 0.55],
-    ['#A5370A', 0.08, -0.38, 0.7, 0.3, 0.55],
-    ['#0B4246', 0.7, -0.38, 0.45, 0.75, 0.55],
-    ['#860F30', -0.62, 0.32, 0.6, 0.35, 0.6],
+    ['#5e1a2c', -0.62, -0.38, 0.6, 0.5, 0.55],
+    ['#94404f', 0.08, -0.38, 0.7, 0.3, 0.55],
+    ['#7a2a3e', 0.7, -0.38, 0.45, 0.75, 0.55],
+    ['#4a1322', -0.62, 0.32, 0.6, 0.35, 0.6],
     ['#DFF7EC', 0.08, 0.32, 0.7, 0.55, 0.6],
-    ['#2F7FA3', 0.7, 0.32, 0.45, 0.25, 0.6],
+    ['#c48a92', 0.7, 0.32, 0.45, 0.25, 0.6],
   ]
   const ledMat = new THREE.MeshBasicMaterial({ color: '#7DF5C4', transparent: true, toneMapped: false })
   const mods = spec.map(([c, x, z, w, h, d]) => {
