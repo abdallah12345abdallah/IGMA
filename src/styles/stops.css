@@ -1296,3 +1296,95 @@
     gap: 14px;
   }
 }
+
+/* ========== the opening buttons ========== */
+.stop--hero .btn--roll,
+.stop--hero .btn--rise {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    color 0.35s,
+    border-color 0.35s,
+    background-size 0.5s cubic-bezier(0.7, 0, 0.2, 1),
+    scale 0.15s;
+}
+.stop--hero .btn--roll:active,
+.stop--hero .btn--rise:active {
+  scale: 0.97;
+}
+.stop--hero .btn--roll span,
+.stop--hero .btn--rise span {
+  display: inline-block;
+  transition: transform 0.5s cubic-bezier(0.7, 0, 0.2, 1);
+}
+/* main: burnt orange wipes in from the right while the words roll up and come back from below */
+.tour__pin[data-tone='light'] .stop--hero .btn--roll,
+.tour__pin[data-tone='light'] .stop--hero .btn--roll:hover {
+  background: linear-gradient(#a5370a, #a5370a) right / 0% 100% no-repeat, #5a2a0c;
+  border-color: #5a2a0c;
+  color: #fff3e2;
+}
+.tour__pin[data-tone='light'] .stop--hero .btn--roll:hover {
+  background-size: 100% 100%;
+  border-color: #a5370a;
+}
+.stop--hero .btn--roll::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transform: translateY(110%);
+  transition: transform 0.5s cubic-bezier(0.7, 0, 0.2, 1);
+}
+.stop--hero .btn--roll:hover span {
+  transform: translateY(-160%);
+}
+.stop--hero .btn--roll:hover::after {
+  transform: none;
+}
+/* a soft band of light passes over it now and then */
+.stop--hero .btn--roll::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 220, 170, 0.35), transparent);
+  transform: translateX(-120%) skewX(-18deg);
+  animation: btn-sheen 4.5s ease-in-out 1.5s infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes btn-sheen {
+  0%,
+  70% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(380%) skewX(-18deg);
+  }
+}
+/* secondary: brown rises from the bottom like liquid, the words turn cream */
+.tour__pin[data-tone='light'] .stop--hero .btn--rise,
+.tour__pin[data-tone='light'] .stop--hero .btn--rise:hover {
+  background: linear-gradient(#5a2a0c, #5a2a0c) bottom / 100% 0% no-repeat;
+}
+.tour__pin[data-tone='light'] .stop--hero .btn--rise:hover {
+  background-size: 100% 100%;
+  border-color: #5a2a0c;
+  color: #fff3e2;
+}
+.stop--hero .btn--rise:hover span {
+  transform: translateY(-1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .stop--hero .btn--roll::before {
+    animation: none;
+    display: none;
+  }
+  .stop--hero .btn--roll span,
+  .stop--hero .btn--roll::after {
+    transition: none;
+  }
+}

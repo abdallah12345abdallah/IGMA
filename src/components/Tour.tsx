@@ -180,11 +180,11 @@ export function Tour() {
               <p>{hero.lede}</p>
             </div>
             <div className="s-actions">
-              <a className="btn btn--solid" href="#demo">
-                {hero.primary}
+              <a className="btn btn--solid btn--roll" href="#demo" data-text={hero.primary}>
+                <span>{hero.primary}</span>
               </a>
-              <a className="btn btn--line" href="#systems" onClick={(e) => (e.preventDefault(), goTo(STOPS - 1))}>
-                {hero.secondary}
+              <a className="btn btn--line btn--rise" href="#systems" onClick={(e) => (e.preventDefault(), goTo(STOPS - 1))}>
+                <span>{hero.secondary}</span>
               </a>
             </div>
           </div>
