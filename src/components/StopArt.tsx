@@ -20,12 +20,19 @@ export function StopArt({ id, flow }: { id: string; flow: string[] }) {
     // one ledger for the whole company: a single record lights up across the departments
     return (
       <div className="art ledger">
+        <div className="ledger__bar deco">
+          <i />
+          <i />
+          <i />
+          <span>IGMA ERP · سجل موحّد</span>
+        </div>
         <div className="ledger__row ledger__head deco">
           <span>السجل</span>
-          <span>المشتريات</span>
-          <span>المخزن</span>
-          <span>المبيعات</span>
-          <span>الحسابات</span>
+          {['المشتريات', 'المخزن', 'المبيعات', 'الحسابات'].map((d, k) => (
+            <span key={d} style={{ ['--k' as string]: k } as CSSProperties}>
+              {d}
+            </span>
+          ))}
         </div>
         <div className="ledger__row deco">
           <span>PO-117</span>
@@ -37,6 +44,7 @@ export function StopArt({ id, flow }: { id: string; flow: string[] }) {
         <div className="ledger__row ledger__live">
           <b className="deco">PO-118</b>
           {steps((s) => <span>{s}</span>)}
+          <span className="ledger__track deco" />
         </div>
         <div className="ledger__foot deco">
           <span>رقم واحد في كل الأقسام</span>
