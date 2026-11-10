@@ -154,7 +154,7 @@ export const STATIONS: Station[] = [
       { file: 'binder_notebook', on: 'desk', x: 0.12, z: 0.18, ry: 0.15, s: 0.55 },
     ],
     shot: { az: 0.3, dist: 10.5, height: 4.2, look: 0.8, layout: 'b' },
-    heroScale: 0.78,
+    heroScale: 0.72,
   },
   {
     // Your next system: a blueprint that keeps building itself
