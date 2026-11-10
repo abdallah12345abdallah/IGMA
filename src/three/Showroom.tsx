@@ -266,11 +266,11 @@ function useLamp(scenes: Record<string, THREE.Object3D>) {
 /** The lamp swings as a real pendulum hung from a point above it. */
 const PEND = {
   above: 2.6, // the pivot sits this far above the top of the shade
-  damping: 0.32, // how quickly a swing dies away
-  carry: 1, // how strongly travelling between systems sets it swinging
+  damping: 0.75, // how quickly a swing dies away
+  carry: 0.3, // how strongly travelling between systems sets it swinging
   air: 0.000035, // how much a quick pointer movement pushes it
   nudge: 0.07, // the kick when the opening system scatters
-  max: 0.32, // never swings further than this (radians)
+  max: 0.14, // never swings further than this (radians)
 }
 const pend = { x: 0, z: 0, vx: 0, vz: 0, px: NaN, pz: NaN, svx: 0, svz: 0, air: 0, hero: -1 }
 if (typeof window !== 'undefined') {
@@ -413,8 +413,8 @@ function CameraRig({ fixedStop, reduced, mobile, centered, sun, hemi, lamp, intr
         pend.svx = vx
         pend.svz = vz
         const g = 9.8 / len
-        let fz = -g * Math.sin(pend.z) - PEND.damping * pend.vz - (THREE.MathUtils.clamp(ax, -40, 40) * PEND.carry) / len
-        let fx = -g * Math.sin(pend.x) - PEND.damping * pend.vx + (THREE.MathUtils.clamp(az, -40, 40) * PEND.carry) / len
+        let fz = -g * Math.sin(pend.z) - PEND.damping * pend.vz - (THREE.MathUtils.clamp(ax, -12, 12) * PEND.carry) / len
+        let fx = -g * Math.sin(pend.x) - PEND.damping * pend.vx + (THREE.MathUtils.clamp(az, -12, 12) * PEND.carry) / len
         // a quick pointer movement pushes the air; a faint draught keeps it alive
         fz += THREE.MathUtils.clamp(pend.air, -3000, 3000) * PEND.air
         pend.air *= Math.exp(-dt * 10)
