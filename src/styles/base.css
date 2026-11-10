@@ -200,3 +200,39 @@ h3 {
   color: var(--ink-2);
   max-width: 64ch;
 }
+
+/* ---------- scrollbar: thin, widens on hover; takes the colour of the system on screen in the tour ---------- */
+:root {
+  --sb: #7a3a12;
+  scrollbar-color: var(--sb) transparent;
+  scrollbar-width: thin;
+}
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  border: 4px solid transparent;
+  border-radius: 6px;
+  background: linear-gradient(var(--sb), color-mix(in srgb, var(--sb) 70%, #ffd68c)) padding-box;
+  min-height: 60px;
+}
+::-webkit-scrollbar-thumb:hover {
+  border-width: 2px;
+}
+::-webkit-scrollbar-thumb:active {
+  background: #ffd68c padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ---------- text selection: amber with burnt-brown text ---------- */
+::selection {
+  background: #ffd68c;
+  color: #4a2008;
+  text-shadow: none;
+}

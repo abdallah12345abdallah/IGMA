@@ -27,6 +27,7 @@ const smooth = (v: number) => {
   return c * c * (3 - 2 * c)
 }
 const SAND = '#C6C0B2'
+const SCROLL_BROWN = '#7a3a12' // the scrollbar outside the tour
 
 export function Tour() {
   const reduced = useReducedMotion()
@@ -100,6 +101,7 @@ export function Tour() {
       const idx = Math.round(f)
       setActive(idx)
       pin.style.setProperty('--c', idx === 0 ? SAND : tourStops[idx - 1].color)
+      document.documentElement.style.setProperty('--sb', idx === 0 ? SCROLL_BROWN : tourStops[idx - 1].color)
       const dark = idx !== 0
       pin.dataset.tone = dark ? 'dark' : 'light'
       pin.dataset.layout = idx === 0 ? 'hero' : STATIONS[idx - 1].shot.layout
@@ -124,7 +126,13 @@ export function Tour() {
     read()
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onScroll)
-    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: '100px' })
+    const io = new IntersectionObserver(
+      ([e]) => {
+        setVisible(e.isIntersecting)
+        if (!e.isIntersecting) document.documentElement.style.setProperty('--sb', SCROLL_BROWN)
+      },
+      { rootMargin: '100px' },
+    )
     io.observe(root)
     return () => {
       cancelAnimationFrame(raf)
