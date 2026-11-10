@@ -14,8 +14,8 @@
   --line: rgba(10, 25, 22, 0.2);
   --error: #a4221a;
 
-  --font-display: 'Changa', 'Segoe UI', Tahoma, sans-serif;
-  --font-body: 'Changa', 'Segoe UI', Tahoma, sans-serif;
+  --font-display: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
+  --font-body: 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
 
   --gutter: clamp(18px, 4vw, 56px);
   --container: 1280px;
