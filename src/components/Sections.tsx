@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { clients, company, contact, footer, markets, nav, plans, services, systems } from '../content/site'
 import { MarketsMap } from './MarketsMap'
+import { Logo } from './Logo'
 
 /** Each service's colour. */
 const SVC_COLOR = ['#18306F', '#A5370A', '#0B4246', '#860F30']
@@ -300,7 +301,7 @@ export function Clients() {
             ))}
           </svg>
           <div className="cl__hub">
-            <b dir="ltr">IGMA</b>
+            <Logo className="cl__logo" title={company.name} />
             <small>نظام واحد، عملاء حقيقيون</small>
           </div>
           <ul className="cl__pols">

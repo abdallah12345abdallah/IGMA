@@ -1160,11 +1160,12 @@
   text-align: center;
   box-shadow: 0 16px 26px -14px rgba(0, 0, 0, 0.6);
 }
-.cl__hub b {
+.cl__logo {
+  --logo-accent: #f2b25c;
   display: block;
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 30px;
+  height: 30px;
+  width: auto;
+  margin: 0 auto 8px;
 }
 .cl__hub small {
   font-size: 13px;
