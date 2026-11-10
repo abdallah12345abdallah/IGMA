@@ -155,18 +155,17 @@ export const STATIONS: Station[] = [
 ]
 
 export const GALLERY = {
-  tile: 2.3, // each system stands on a floating tile this wide
-  tileGap: 0.3, // space between tiles
-  tileHeight: 0.16, // thickness of a tile
-  stationSize: 2.0, // every station is scaled to this footprint
-  heroFill: 0.5, // share of the screen width the cluster fills in the opening view
+  spacing: 2.7, // distance between neighbours in a row
+  rowDepth: 3.1, // distance between rows (front row of four, then two, then one)
+  stationSize: 2.1, // every station is scaled to this footprint
+  heroFill: 0.55, // share of the screen width the front row fills in the opening view
 }
 
 /** The lamp: how high it hangs over the overview and over each system. */
 export const LAMP = { file: 'modern_ceiling_lamp_01', scale: 1.7, heroHeight: 6.4, stopHeight: 5.4, heroAngle: 1.05, stopAngle: 0.5 }
 
 /** The opening view: the whole line, seen from the front. The distance is fitted to the screen width at runtime. */
-export const HERO_SHOT = { pos: [0, 14, 27] as const, look: [0, 1.6, 0] as const }
+export const HERO_SHOT = { pos: [0, 16, 26] as const, look: [0, 0.6, 0.8] as const }
 /** On phones the line is seen end-on so it fits the narrow screen. */
 export const HERO_SHOT_MOBILE = { pos: [-40, 36, 14] as const, look: [1.5, 0, 0] as const }
 

@@ -3,7 +3,6 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Html, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 
 import { GALLERY, HERO_SHOT, HERO_SHOT_MOBILE, LAMP, MODEL_FILES, STATIONS, type Item, type Layout } from './stations'
 import { blueprint, device, screenTexture } from './devices'
@@ -157,14 +156,18 @@ function buildStation(index: number, scenes: Record<string, THREE.Object3D>) {
 }
 
 /**
- * The systems stand on slim floating tiles that nest in a two-row brick pattern,
- * seen from above at an angle: separate products, one cluster, one company.
+ * The systems stand straight on the floor in a wedge: four in front, two behind them,
+ * and the next project alone at the back. Read right to left, like the page.
  */
-const TILE = { size: GALLERY.tile, gap: GALLERY.tileGap, h: GALLERY.tileHeight }
-const HALF = (TILE.size + TILE.gap) / 2
+const ROWS = [4, 2, 1]
+const SP = GALLERY.spacing
 
 function spotPos(i: number) {
-  return { x: (i - (STATIONS.length - 1) / 2) * HALF * 1.0, z: i % 2 ? HALF : -HALF, ry: 0 }
+  let row = 0
+  let k = i
+  while (k >= ROWS[row]) k -= ROWS[row++]
+  const n = ROWS[row]
+  return { x: ((n - 1) / 2 - k) * SP, z: (1 - row) * GALLERY.rowDepth, ry: 0 }
 }
 
 /* ---------- camera choreography ---------- */
@@ -175,7 +178,7 @@ interface View {
 }
 
 const FOV = 30
-const HALF_ROW = ((STATIONS.length - 1) / 2) * HALF + TILE.size / 2
+const HALF_ROW = ((ROWS[0] - 1) / 2) * SP + GALLERY.stationSize / 2
 
 function viewFor(stop: number, mobile: boolean, aspect: number): View {
   if (stop === 0) {
@@ -200,7 +203,7 @@ function viewFor(stop: number, mobile: boolean, aspect: number): View {
 /** How far the picture slides to make room for the text. */
 function shiftFor(layout: View['layout'], mobile: boolean): [number, number] {
   if (mobile) return [0, layout === 'hero' ? 0.28 : 0.2]
-  if (layout === 'hero') return [0, -0.13]
+  if (layout === 'hero') return [0, -0.08]
   if (layout === 'a') return [0.17, 0]
   if (layout === 'b') return [-0.17, 0]
   return [0, 0.25]
@@ -421,28 +424,36 @@ const SHADOW_TEX = (() => {
   return new THREE.CanvasTexture(c)
 })()
 
-/** A floating tile: a slab in the system colour with a light top, and a soft contact shadow. */
-const TILE_TOP = new THREE.MeshStandardMaterial({ color: '#f4f1eb', roughness: 0.55 })
-function tile(color: string) {
+/** Under each system: a faint glow of its colour and a soft contact shadow, no pedestal. */
+const GLOW_TEX = (() => {
+  const c = document.createElement('canvas')
+  c.width = c.height = 256
+  const x = c.getContext('2d')!
+  const g = x.createRadialGradient(128, 128, 0, 128, 128, 128)
+  g.addColorStop(0, 'rgba(255,255,255,.55)')
+  g.addColorStop(0.6, 'rgba(255,255,255,.22)')
+  g.addColorStop(1, 'rgba(255,255,255,0)')
+  x.fillStyle = g
+  x.fillRect(0, 0, 256, 256)
+  const t = new THREE.CanvasTexture(c)
+  t.colorSpace = THREE.SRGBColorSpace
+  return t
+})()
+function ground(color: string) {
   const g = new THREE.Group()
-  const base = new THREE.Mesh(new RoundedBoxGeometry(TILE.size, TILE.h, TILE.size, 4, 0.06), new THREE.MeshStandardMaterial({ color, roughness: 0.5 }))
-  base.position.y = TILE.h / 2
-  const top = new THREE.Mesh(new RoundedBoxGeometry(TILE.size - 0.05, 0.03, TILE.size - 0.05, 3, 0.012), TILE_TOP)
-  top.position.y = TILE.h + 0.005
-  ;[base, top].forEach((m) => {
-    m.receiveShadow = true
-    m.castShadow = true
-  })
+  const glow = new THREE.Mesh(
+    new THREE.PlaneGeometry(GALLERY.stationSize * 1.5, GALLERY.stationSize * 1.5).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ color, map: GLOW_TEX, transparent: true, depthWrite: false }),
+  )
+  glow.position.y = 0.004
   const contact = new THREE.Mesh(
-    new THREE.PlaneGeometry(TILE.size * 0.92, TILE.size * 0.92).rotateX(-Math.PI / 2),
+    new THREE.PlaneGeometry(GALLERY.stationSize * 1.05, GALLERY.stationSize * 1.05).rotateX(-Math.PI / 2),
     new THREE.MeshBasicMaterial({ map: SHADOW_TEX, transparent: true, depthWrite: false }),
   )
-  contact.position.y = TILE.h + 0.025
-  g.add(base, top, contact)
+  contact.position.y = 0.008
+  g.add(glow, contact)
   return g
 }
-/** Height of a tile's top surface, where the station stands. */
-const TILE_TOP_Y = TILE.h + 0.022
 
 function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: boolean; fixedStop?: number; reduced: boolean; onLamp: (l: ReturnType<typeof useLamp>) => void }) {
   const gltfs = useGLTF(MODEL_FILES.map(url))
@@ -455,27 +466,19 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
   const lamp = useLamp(scenes)
   useEffect(() => onLamp(lamp), [lamp, onLamp])
 
-  const { groups, outers, floats } = useMemo(() => {
+  const { groups, outers } = useMemo(() => {
     const groups: THREE.Group[] = []
-    const floats: THREE.Group[] = []
     const outers = STATIONS.map((_, i) => {
       const g = buildStation(i, scenes)
       groups.push(g)
       const outer = new THREE.Group()
       const p = spotPos(i)
-      outer.position.set(p.x, 0.35, p.z)
+      outer.position.set(p.x, 0, p.z)
       outer.rotation.y = p.ry
-      // the tile and its station float together
-      const float = new THREE.Group()
-      const holder = new THREE.Group()
-      holder.position.y = TILE_TOP_Y
-      holder.add(g)
-      float.add(tile(tourStops[i].color), holder)
-      outer.add(float)
-      floats.push(float)
+      outer.add(ground(tourStops[i].color), g)
       return outer
     })
-    return { groups, outers, floats }
+    return { groups, outers }
   }, [scenes])
   const shown = useRef(STATIONS.map(() => 1))
 
@@ -492,8 +495,6 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
       const e = v * v * (3 - 2 * v)
       outers[i].scale.setScalar(Math.max(0.001, e))
       outers[i].visible = e > 0.01
-      // tiles drift gently, each on its own beat
-      floats[i].position.y = reduced ? 0 : Math.sin(time * 0.8 + i * 0.9) * 0.05
       const lift = interactive && hover === i && tour.pos < 0.3 ? 0.22 : 0
       g.position.y += (lift - g.position.y) * k
       const focus = Math.max(0, 1 - Math.abs(pos - (i + 1)))
