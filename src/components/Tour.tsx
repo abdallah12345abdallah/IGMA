@@ -8,7 +8,7 @@ import { scrollToY, startSmoothScroll } from '../smoothScroll'
 import { Words } from './Words'
 import { IntroLoader } from './IntroLoader'
 import { Rotator } from './Rotator'
-import { StopArt } from './StopArt'
+import { StopArt, StopScene } from './StopArt'
 
 const Showroom = lazy(() => import('../three/Showroom'))
 
@@ -216,6 +216,7 @@ export function Tour() {
             <div className="s-work">
               <StopArt id={s.id} flow={s.flow} />
             </div>
+            <StopScene id={s.id} reduced={reduced} />
             <div className="s-actions">
               {s.custom ? (
                 <>

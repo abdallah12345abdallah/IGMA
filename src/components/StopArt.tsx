@@ -148,3 +148,69 @@ export function StopArt({ id, flow }: { id: string; flow: string[] }) {
   // your next system: the project stages as labels on the modules
   return <div className="art chips">{steps()}</div>
 }
+
+/**
+ * Live content that floats in the space around the 3D object. Purely illustrative
+ * (hidden from screen readers and on phones); it follows the same lit steps as StopArt.
+ */
+export function StopScene({ id, reduced }: { id: string; reduced: boolean }) {
+  if (id === 'erp') {
+    const toasts = [
+      { t: 'طلب شراء PO-118 بانتظار الموافقة', d: 'المشتريات' },
+      { t: 'تم استلام 40 صنفًا في المخزن', d: 'المخزن' },
+      { t: 'صدرت فاتورة INV-552', d: 'المبيعات' },
+      { t: 'تم إنشاء القيد المحاسبي تلقائيًا', d: 'الحسابات' },
+    ]
+    return (
+      <div className="s-scene scene-erp" aria-hidden="true">
+        {toasts.map((x, k) => (
+          <div key={x.t} className="toast" style={{ ['--k' as string]: k } as CSSProperties}>
+            <i />
+            <span>
+              <b>{x.d}</b>
+              {x.t}
+            </span>
+            <small>الآن</small>
+          </div>
+        ))}
+      </div>
+    )
+  }
+  if (id === 'logistics') {
+    const d = 'M 20 120 C 120 20, 220 150, 320 80 S 500 30, 580 70'
+    const pins: [number, number, string][] = [
+      [20, 120, 'الفرع'],
+      [180, 92, 'الفرز'],
+      [400, 52, 'الطريق'],
+      [580, 70, 'العميل'],
+    ]
+    return (
+      <div className="s-scene scene-route" aria-hidden="true">
+        <svg viewBox="0 0 600 170" className="route">
+          <path d={d} className="route__line" />
+          <path d={d} className="route__done" pathLength={100} />
+          {pins.map(([x, y, t], k) => (
+            <g key={t} className="route__pin" style={{ ['--k' as string]: k } as CSSProperties}>
+              <circle cx={x} cy={y} r="7" />
+              <text x={x} y={y - 16} textAnchor="middle">
+                {t}
+              </text>
+            </g>
+          ))}
+          <g className="route__truck">
+            <rect x="-11" y="-7" width="22" height="14" rx="3" />
+            {!reduced && <animateMotion dur="7s" repeatCount="indefinite" rotate="auto" keyPoints="1;0" keyTimes="0;1" calcMode="linear" path={d} />}
+          </g>
+        </svg>
+        <div className="gps">
+          <i />
+          <span>
+            <b dir="ltr">#2041</b> على الطريق إلى جدة
+          </span>
+          <small>يصل خلال 35 دقيقة</small>
+        </div>
+      </div>
+    )
+  }
+  return null
+}
