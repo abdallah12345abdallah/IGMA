@@ -47,13 +47,7 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
 
   const sys = systems.find((s) => s.id === system)
   const sysLabel = sys?.name ?? demo.other
-  const office = markets.regions.find((r) => r.id === market)?.name ?? ''
   const ready = !!name.trim() && !!company.trim()
-
-  const cycleSystem = () => {
-    const ids = [...systems.map((s) => s.id as string), OTHER]
-    setSystem(ids[(ids.indexOf(system) + 1) % ids.length])
-  }
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -96,29 +90,7 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
           </div>
         ) : (
           <form onSubmit={submit} noValidate>
-            <div className="sm__box">
-              <div className="sm__in">
-                <label className="sr-only" htmlFor="demo-story">
-                  احكِ لنا عن شركتك وما الذي تريد تحسينه
-                </label>
-                <textarea id="demo-story" rows={2} value={story} onChange={(e) => read(e.target.value)} placeholder="مثلًا: عندي مطعمين في الرياض والطلبات بتضيع بين الصالة والمطبخ" />
-                <div className="sm__tags">
-                  <button type="button" className="sm__tag" style={{ ['--c' as string]: sys?.color ?? '#0a1916' }} onClick={cycleSystem} aria-label={`النظام: ${sysLabel}. اضغط للتغيير`}>
-                    <small>النظام</small> {sys?.short ?? 'نظام خاص'}
-                  </button>
-                  <button type="button" className="sm__tag" onClick={() => setMarket(market === 'egypt' ? 'saudi' : 'egypt')} aria-label={`المكتب: ${office}. اضغط للتغيير`}>
-                    <small>المكتب</small> {office}
-                  </button>
-                  <span className={`sm__tag ${name.trim() ? 'is-set' : 'is-empty'}`}>{name.trim() ? <><small>الاسم</small> {name.trim()}</> : 'اسمك؟'}</span>
-                  <span className={`sm__tag ${company.trim() ? 'is-set' : 'is-empty'}`}>{company.trim() ? <><small>الشركة</small> {company.trim()}</> : 'شركتك؟'}</span>
-                  <button className="sm__send" type="submit" aria-disabled={!ready}>
-                    أرسل
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="sm__prompts">
+            <div className="sm__prompts" aria-label="أمثلة جاهزة">
               {PROMPTS.map((p) => (
                 <button key={p} type="button" onClick={() => read(p)}>
                   {p}
@@ -126,49 +98,90 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
               ))}
             </div>
 
-            <div className="sm__who">
-              <div className="field">
-                <label htmlFor="demo-name">{demo.fields.name}</label>
-                <input
-                  id="demo-name"
-                  name="name"
-                  autoComplete="name"
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value)
-                    if (e.target.value.trim()) setErrors((x) => ({ ...x, name: undefined }))
-                  }}
-                  aria-invalid={!!errors.name}
-                  aria-describedby={errors.name ? 'err-name' : undefined}
-                />
-                {errors.name && (
-                  <p className="field__error" id="err-name">
-                    {errors.name}
-                  </p>
-                )}
-              </div>
-              <div className="field">
-                <label htmlFor="demo-company">{demo.fields.company}</label>
-                <input
-                  id="demo-company"
-                  name="organization"
-                  autoComplete="organization"
-                  value={company}
-                  onChange={(e) => {
-                    setCompany(e.target.value)
-                    if (e.target.value.trim()) setErrors((x) => ({ ...x, company: undefined }))
-                  }}
-                  aria-invalid={!!errors.company}
-                  aria-describedby={errors.company ? 'err-company' : undefined}
-                />
-                {errors.company && (
-                  <p className="field__error" id="err-company">
-                    {errors.company}
-                  </p>
-                )}
+            <div className="sm__box">
+              <div className="sm__in">
+                {/* 1. the business, in the visitor's words */}
+                <label className="sm__label" htmlFor="demo-story">
+                  احكِ لنا عن شركتك وما الذي تريد تحسينه
+                </label>
+                <textarea id="demo-story" rows={2} value={story} onChange={(e) => read(e.target.value)} placeholder="مثلًا: عندي مطعمين في الرياض والطلبات بتضيع بين الصالة والمطبخ" />
+
+                {/* 2. who is asking */}
+                <div className="sm__who">
+                  <div className="sm__field">
+                    <label htmlFor="demo-name">{demo.fields.name}</label>
+                    <input
+                      id="demo-name"
+                      name="name"
+                      autoComplete="name"
+                      placeholder="اسمك"
+                      value={name}
+                      onChange={(e) => {
+                        setName(e.target.value)
+                        if (e.target.value.trim()) setErrors((x) => ({ ...x, name: undefined }))
+                      }}
+                      aria-invalid={!!errors.name}
+                      aria-describedby={errors.name ? 'err-name' : undefined}
+                    />
+                    {errors.name && (
+                      <p className="field__error" id="err-name">
+                        {errors.name}
+                      </p>
+                    )}
+                  </div>
+                  <div className="sm__field">
+                    <label htmlFor="demo-company">{demo.fields.company}</label>
+                    <input
+                      id="demo-company"
+                      name="organization"
+                      autoComplete="organization"
+                      placeholder="اسم الشركة أو النشاط"
+                      value={company}
+                      onChange={(e) => {
+                        setCompany(e.target.value)
+                        if (e.target.value.trim()) setErrors((x) => ({ ...x, company: undefined }))
+                      }}
+                      aria-invalid={!!errors.company}
+                      aria-describedby={errors.company ? 'err-company' : undefined}
+                    />
+                    {errors.company && (
+                      <p className="field__error" id="err-company">
+                        {errors.company}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* 3. what we understood, as real controls the visitor can change */}
+                <div className="sm__got">
+                  <span className="sm__got-label">فهمنا:</span>
+                  <label className="sr-only" htmlFor="demo-system">
+                    {demo.fields.system}
+                  </label>
+                  <span className="sm__pick" style={{ ['--c' as string]: sys?.color ?? '#0a1916' }}>
+                    <select id="demo-system" value={system} onChange={(e) => setSystem(e.target.value)}>
+                      {systems.map((x) => (
+                        <option key={x.id} value={x.id}>
+                          {x.name}
+                        </option>
+                      ))}
+                      <option value={OTHER}>{demo.other}</option>
+                    </select>
+                  </span>
+                  <span className="sm__office" role="group" aria-label={demo.fields.market}>
+                    {markets.regions.map((r) => (
+                      <button key={r.id} type="button" aria-pressed={r.id === market} onClick={() => setMarket(r.id)}>
+                        {r.name}
+                      </button>
+                    ))}
+                  </span>
+                  <button className="sm__send" type="submit" aria-disabled={!ready}>
+                    {ready ? 'أرسل عبر واتساب' : !name.trim() ? 'اكتب اسمك' : 'اكتب اسم الشركة'}
+                  </button>
+                </div>
               </div>
             </div>
-            <p className="sm__fine">نفهم من كلامك النظام والبلد، وتقدر تغيّرهم بالضغط على الوسم.</p>
+            <p className="sm__fine">نفهم من كلامك النظام والبلد تلقائيًا، وتقدر تغيّرهم من القائمة والأزرار.</p>
           </form>
         )}
       </div>

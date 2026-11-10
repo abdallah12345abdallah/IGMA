@@ -851,7 +851,7 @@
 }
 .sm__box {
   max-width: 860px;
-  margin: 36px auto 0;
+  margin: 16px auto 0;
   padding: 3px;
   border-radius: 28px;
   background: conic-gradient(from var(--sm-a), #8fd3b6, #c9d6f5, #f6d2bd, #8fd3b6);
@@ -956,7 +956,7 @@ button.sm__tag:hover {
   opacity: 0.5;
 }
 .sm__prompts {
-  margin: 18px auto 0;
+  margin: 26px auto 0;
   max-width: 900px;
   display: flex;
   flex-wrap: wrap;
@@ -974,13 +974,115 @@ button.sm__tag:hover {
 .sm__prompts button:hover {
   border-color: var(--green);
 }
+.sm__label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
 .sm__who {
-  max-width: 860px;
-  margin: 24px auto 0;
+  margin-top: 10px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(10, 25, 22, 0.12);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  text-align: right;
+}
+.sm__field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.sm__field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.sm__field input {
+  width: 100%;
+  min-height: 50px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(10, 25, 22, 0.16);
+  background: #f7f5f0;
+  color: var(--ink);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+}
+.sm__field input:focus {
+  outline: none;
+  background: #fff;
+  border-color: var(--green);
+  box-shadow: 0 0 0 4px rgba(8, 88, 63, 0.12);
+}
+.sm__field input[aria-invalid='true'] {
+  border-color: #a4221a;
+  border-width: 2px;
+}
+.sm__got {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(10, 25, 22, 0.12);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.sm__got-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+/* the system list looks like a coloured pill with a clear arrow */
+.sm__pick {
+  position: relative;
+  display: inline-flex;
+}
+.sm__pick select {
+  appearance: none;
+  min-height: 44px;
+  padding: 0 16px 0 36px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c) 35%, transparent);
+  background: color-mix(in srgb, var(--c) 10%, #fff);
+  color: var(--c);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+.sm__pick::after {
+  content: '▾';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--c);
+  pointer-events: none;
+}
+.sm__office {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid rgba(10, 25, 22, 0.16);
+  background: #fff;
+}
+.sm__office button {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-2);
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.sm__office button[aria-pressed='true'] {
+  background: var(--ink);
+  color: #fff;
 }
 .sm__fine {
   margin-top: 14px;
@@ -1023,6 +1125,11 @@ button.sm__tag:hover {
 @media (max-width: 700px) {
   .sm__who {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .sm__got .sm__send {
+    width: 100%;
+    justify-content: center;
+    margin-inline-start: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
