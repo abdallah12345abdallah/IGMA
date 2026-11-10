@@ -156,16 +156,15 @@ function buildStation(index: number, scenes: Record<string, THREE.Object3D>) {
   return outer
 }
 
-/** Spots stand in one line, alternating slightly forward and back. */
-/** The shared platform all systems stand on: one company, one floor. */
-const PLATFORM = {
-  w: (STATIONS.length - 1) * GALLERY.gap + GALLERY.zone + 0.9,
-  d: 2 * GALLERY.stagger + GALLERY.zone + 0.9,
-  h: 0.12,
-}
+/**
+ * The systems stand on slim floating tiles that nest in a two-row brick pattern,
+ * seen from above at an angle: separate products, one cluster, one company.
+ */
+const TILE = { size: GALLERY.tile, gap: GALLERY.tileGap, h: GALLERY.tileHeight }
+const HALF = (TILE.size + TILE.gap) / 2
 
 function spotPos(i: number) {
-  return { x: (i - (STATIONS.length - 1) / 2) * GALLERY.gap, z: i % 2 ? -GALLERY.stagger : GALLERY.stagger }
+  return { x: (i - (STATIONS.length - 1) / 2) * HALF * 1.0, z: i % 2 ? HALF : -HALF, ry: 0 }
 }
 
 /* ---------- camera choreography ---------- */
@@ -176,7 +175,7 @@ interface View {
 }
 
 const FOV = 30
-const HALF_ROW = PLATFORM.w / 2
+const HALF_ROW = ((STATIONS.length - 1) / 2) * HALF + TILE.size / 2
 
 function viewFor(stop: number, mobile: boolean, aspect: number): View {
   if (stop === 0) {
@@ -191,7 +190,8 @@ function viewFor(stop: number, mobile: boolean, aspect: number): View {
   const shot = STATIONS[stop - 1].shot
   const d = shot.dist * (mobile ? 1.5 : 1)
   return {
-    pos: new THREE.Vector3(p.x + Math.sin(shot.az) * d, shot.height * (mobile ? 1.15 : 1), p.z + Math.cos(shot.az) * d),
+    // the shot angle is measured from the front of the station, which faces outward
+    pos: new THREE.Vector3(p.x + Math.sin(shot.az + p.ry) * d, shot.height * (mobile ? 1.15 : 1), p.z + Math.cos(shot.az + p.ry) * d),
     look: new THREE.Vector3(p.x, shot.look, p.z),
     layout: shot.layout,
   }
@@ -207,7 +207,6 @@ function shiftFor(layout: View['layout'], mobile: boolean): [number, number] {
 }
 
 const ease = (t: number) => t * t * (3 - 2 * t)
-const PLATFORM_TINT = new THREE.Color('#ffffff')
 
 /* ---------- the lamp that hangs over the gallery and follows the visitor ---------- */
 function useLamp(scenes: Record<string, THREE.Object3D>) {
@@ -341,8 +340,6 @@ function CameraRig({ fixedStop, reduced, mobile, centered, sun, hemi, lamp, intr
     if (scene.background instanceof THREE.Color) scene.background.copy(bg)
     if (scene.fog) scene.fog.color.copy(bg)
     scene.userData.floor?.color.copy(bg)
-    // the platform is the stop colour, a shade lighter, so it reads as one floor
-    scene.userData.platform?.color.copy(bg).lerp(PLATFORM_TINT, a === 0 && t < 0.5 ? 0.25 : 0.07)
 
     if (sun.current) {
       sun.current.intensity = SUN * room
@@ -424,56 +421,28 @@ const SHADOW_TEX = (() => {
   return new THREE.CanvasTexture(c)
 })()
 
-/** Each system's zone on the shared platform: a rounded tile in its colour with a fine outline. */
-const ZONE_TEX = (() => {
-  const c = document.createElement('canvas')
-  c.width = c.height = 256
-  const x = c.getContext('2d')!
-  x.beginPath()
-  x.roundRect(6, 6, 244, 244, 34)
-  x.fillStyle = 'rgba(255,255,255,.3)'
-  x.fill()
-  x.lineWidth = 4
-  x.strokeStyle = 'rgba(255,255,255,.95)'
-  x.stroke()
-  const t = new THREE.CanvasTexture(c)
-  t.colorSpace = THREE.SRGBColorSpace
-  t.anisotropy = 4
-  return t
-})()
-
-function Platform() {
-  const mesh = useMemo(() => {
-    const m = new THREE.Mesh(new RoundedBoxGeometry(PLATFORM.w, PLATFORM.h, PLATFORM.d, 4, 0.05), new THREE.MeshStandardMaterial({ color: '#d9d4c9', roughness: 0.6, metalness: 0.05 }))
-    m.position.y = PLATFORM.h / 2
+/** A floating tile: a slab in the system colour with a light top, and a soft contact shadow. */
+const TILE_TOP = new THREE.MeshStandardMaterial({ color: '#f4f1eb', roughness: 0.55 })
+function tile(color: string) {
+  const g = new THREE.Group()
+  const base = new THREE.Mesh(new RoundedBoxGeometry(TILE.size, TILE.h, TILE.size, 4, 0.06), new THREE.MeshStandardMaterial({ color, roughness: 0.5 }))
+  base.position.y = TILE.h / 2
+  const top = new THREE.Mesh(new RoundedBoxGeometry(TILE.size - 0.05, 0.03, TILE.size - 0.05, 3, 0.012), TILE_TOP)
+  top.position.y = TILE.h + 0.005
+  ;[base, top].forEach((m) => {
     m.receiveShadow = true
     m.castShadow = true
-    return m
-  }, [])
-  const { scene } = useThree()
-  useEffect(() => {
-    scene.userData.platform = mesh.material
-  }, [scene, mesh])
-  return <primitive object={mesh} />
-}
-
-function pool(color: string) {
-  const g = new THREE.Group()
-  const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(GALLERY.zone, GALLERY.zone).rotateX(-Math.PI / 2),
-    new THREE.MeshStandardMaterial({ color, map: ZONE_TEX, transparent: true, roughness: 0.9, depthWrite: false }),
-  )
-  m.position.y = 0.004
-  m.receiveShadow = true
-  // A soft contact shadow so each group sits on the floor instead of floating.
+  })
   const contact = new THREE.Mesh(
-    new THREE.CircleGeometry(GALLERY.stationSize * 0.55, 48).rotateX(-Math.PI / 2),
+    new THREE.PlaneGeometry(TILE.size * 0.92, TILE.size * 0.92).rotateX(-Math.PI / 2),
     new THREE.MeshBasicMaterial({ map: SHADOW_TEX, transparent: true, depthWrite: false }),
   )
-  contact.position.y = 0.008
-  g.add(m, contact)
+  contact.position.y = TILE.h + 0.025
+  g.add(base, top, contact)
   return g
 }
+/** Height of a tile's top surface, where the station stands. */
+const TILE_TOP_Y = TILE.h + 0.022
 
 function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: boolean; fixedStop?: number; reduced: boolean; onLamp: (l: ReturnType<typeof useLamp>) => void }) {
   const gltfs = useGLTF(MODEL_FILES.map(url))
@@ -486,23 +455,27 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
   const lamp = useLamp(scenes)
   useEffect(() => onLamp(lamp), [lamp, onLamp])
 
-  const { groups, outers, zones } = useMemo(() => {
+  const { groups, outers, floats } = useMemo(() => {
     const groups: THREE.Group[] = []
-    const zones: THREE.Group[] = []
+    const floats: THREE.Group[] = []
     const outers = STATIONS.map((_, i) => {
       const g = buildStation(i, scenes)
       groups.push(g)
       const outer = new THREE.Group()
       const p = spotPos(i)
-      outer.position.set(p.x, PLATFORM.h, p.z)
-      const zone = pool(tourStops[i].color)
-      const contact = zone.children[1]
-      outer.add(contact, g)
-      zone.position.set(p.x, PLATFORM.h, p.z)
-      zones.push(zone)
+      outer.position.set(p.x, 0.35, p.z)
+      outer.rotation.y = p.ry
+      // the tile and its station float together
+      const float = new THREE.Group()
+      const holder = new THREE.Group()
+      holder.position.y = TILE_TOP_Y
+      holder.add(g)
+      float.add(tile(tourStops[i].color), holder)
+      outer.add(float)
+      floats.push(float)
       return outer
     })
-    return { groups, outers, zones }
+    return { groups, outers, floats }
   }, [scenes])
   const shown = useRef(STATIONS.map(() => 1))
 
@@ -519,7 +492,8 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
       const e = v * v * (3 - 2 * v)
       outers[i].scale.setScalar(Math.max(0.001, e))
       outers[i].visible = e > 0.01
-      ;((zones[i].children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial).opacity = e
+      // tiles drift gently, each on its own beat
+      floats[i].position.y = reduced ? 0 : Math.sin(time * 0.8 + i * 0.9) * 0.05
       const lift = interactive && hover === i && tour.pos < 0.3 ? 0.22 : 0
       g.position.y += (lift - g.position.y) * k
       const focus = Math.max(0, 1 - Math.abs(pos - (i + 1)))
@@ -537,10 +511,6 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
 
   return (
     <>
-      <Platform />
-      {zones.map((z, i) => (
-        <primitive key={'z' + i} object={z} />
-      ))}
       <primitive object={lamp.rig} />
       <primitive object={lamp.beam} />
       <primitive object={lamp.spot} />

@@ -842,12 +842,21 @@ html.is-locked body {
 /* the proof line shares the bottom row with the stop list */
 @media (min-width: 768px) {
   .stop--hero .s-work {
-    bottom: 50px;
+    bottom: 16px;
+    height: 40px;
+    display: flex;
+    align-items: center;
     width: auto;
     max-width: calc(100vw - 2 * var(--gutter) - 640px);
   }
   .stop--hero .proof {
     border-top: 0;
     padding-top: 0;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+  .stop--hero .proof ul {
+    flex-wrap: nowrap;
   }
 }
