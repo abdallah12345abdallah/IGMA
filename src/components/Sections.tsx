@@ -2,18 +2,61 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { clients, company, contact, footer, markets, nav, plans, services, systems } from '../content/site'
 import { MarketsMap } from './MarketsMap'
 
-/** Each service's colour, and the little live drawing shown when its panel opens (x, y, w, h). */
+/** Each service's colour. */
 const SVC_COLOR = ['#18306F', '#A5370A', '#0B4246', '#860F30']
-const SVC_VIZ: [number, number, number, number][][] = [
-  // automation: three steps in a row
-  [[0, 40, 40, 22], [55, 40, 40, 22], [110, 40, 40, 22]],
-  // custom software: lines of code
-  [[0, 0, 120, 10], [0, 18, 90, 10], [0, 36, 140, 10], [0, 54, 70, 10], [0, 72, 110, 10]],
-  // integrations: a hub and four systems
-  [[60, 34, 30, 30], [0, 0, 26, 26], [124, 0, 26, 26], [0, 74, 26, 26], [124, 74, 26, 26]],
-  // websites: a page
-  [[0, 0, 150, 18], [0, 26, 100, 30], [0, 64, 46, 30], [52, 64, 46, 30], [104, 64, 46, 30]],
-]
+const AUTO_MS = 3400
+
+/** A small live drawing of what each service does, shown when its panel opens. */
+function ServiceArt({ i }: { i: number }) {
+  if (i === 0)
+    // automation: a task moving through three steps
+    return (
+      <svg viewBox="0 0 160 100" className="sa sa--flow">
+        <path d="M36 50h24M96 50h24" className="sa__line" />
+        {[0, 60, 120].map((x, k) => (
+          <rect key={x} x={x} y="36" width="40" height="28" rx="8" className="sa__box" style={{ animationDelay: `${k * 0.8}s` }} />
+        ))}
+        <circle cx="20" cy="50" r="5" className="sa__dot" />
+      </svg>
+    )
+  if (i === 1)
+    // custom software: code being written line by line
+    return (
+      <svg viewBox="0 0 160 100" className="sa sa--code">
+        {[120, 86, 140, 64, 104].map((w, k) => (
+          <rect key={k} x={k % 2 ? 14 : 0} y={k * 18 + 4} width={w} height="9" rx="4.5" className="sa__ln" style={{ animationDelay: `${k * 0.35}s` }} />
+        ))}
+        <rect x="146" y="76" width="3" height="13" className="sa__caret" />
+      </svg>
+    )
+  if (i === 2)
+    // integrations: data flowing between a hub and four systems
+    return (
+      <svg viewBox="0 0 160 100" className="sa sa--hub">
+        {[[14, 14], [146, 14], [14, 86], [146, 86]].map(([x, y]) => (
+          <g key={`${x}${y}`}>
+            <path d={`M80 50L${x} ${y}`} className="sa__wire" />
+            <rect x={x - 12} y={y - 12} width="24" height="24" rx="7" className="sa__box" />
+          </g>
+        ))}
+        <circle cx="80" cy="50" r="22" className="sa__ring" />
+        <circle cx="80" cy="50" r="14" className="sa__core" />
+      </svg>
+    )
+  // websites: a page assembling itself
+  return (
+    <svg viewBox="0 0 160 100" className="sa sa--web">
+      <rect x="0" y="0" width="160" height="100" rx="10" className="sa__frame" />
+      {[12, 22, 32].map((x) => (
+        <circle key={x} cx={x} cy="11" r="3" className="sa__core" />
+      ))}
+      <rect x="10" y="26" width="90" height="24" rx="6" className="sa__part" />
+      {[10, 58, 106].map((x, k) => (
+        <rect key={x} x={x} y="60" width="44" height="30" rx="6" className="sa__part" style={{ animationDelay: `${0.3 + k * 0.2}s` }} />
+      ))}
+    </svg>
+  )
+}
 
 export function Services() {
   const [open, setOpen] = useState(0)
@@ -21,15 +64,28 @@ export function Services() {
   // panels take turns opening by themselves until the visitor points at one
   useEffect(() => {
     if (held || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const id = window.setInterval(() => setOpen((n) => (n + 1) % services.items.length), 3400)
+    const id = window.setInterval(() => setOpen((n) => (n + 1) % services.items.length), AUTO_MS)
     return () => window.clearInterval(id)
   }, [held])
   const pick = (i: number) => {
     setOpen(i)
     setHeld(true)
   }
+  // a soft light that follows the pointer inside a panel
+  const glow = (e: React.PointerEvent<HTMLLIElement>) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`)
+    e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`)
+  }
   return (
     <section className="section sv" id="services" data-nav="light" aria-labelledby="services-title">
+      <div className="sv__float" aria-hidden="true">
+        <i className="f1" />
+        <i className="f2" />
+        <i className="f3" />
+        <i className="f4" />
+        <i className="f5" />
+      </div>
       <div className="container">
         <header className="sv__head">
           <div>
@@ -47,17 +103,17 @@ export function Services() {
               tabIndex={0}
               onMouseEnter={() => pick(i)}
               onFocus={() => pick(i)}
+              onPointerMove={glow}
             >
               <span className="sv__num" aria-hidden="true">
                 0{i + 1}
               </span>
               <span className="sv__viz" aria-hidden="true">
-                {SVC_VIZ[i].map(([x, y, w, h], k) => (
-                  <i key={k} style={{ left: x, top: y, width: w, height: h, animationDelay: `${k * 0.3}s` }} />
-                ))}
+                <ServiceArt i={i} />
               </span>
               <h3>{item.title}</h3>
               <p>{item.body}</p>
+              {i === open && !held && <span key={open} className="sv__timer" style={{ animationDuration: `${AUTO_MS}ms` }} aria-hidden="true" />}
             </li>
           ))}
         </ul>

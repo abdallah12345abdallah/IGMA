@@ -129,6 +129,8 @@
 
 /* services: four panels in each service's colour; the one in focus widens and shows a small live drawing */
 .sv {
+  position: relative;
+  overflow: hidden;
   background: #efebe3;
   padding-block: clamp(56px, 7vw, 88px);
 }
@@ -169,6 +171,7 @@
   border-radius: 22px;
   overflow: hidden;
   background: color-mix(in srgb, var(--c) 85%, #000);
+  color: #fff;
   cursor: pointer;
   transition: flex 0.7s var(--ease-out);
 }
@@ -216,17 +219,6 @@
   opacity: 1;
   transform: none;
 }
-.sv__viz i {
-  position: absolute;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.22);
-  animation: sv-pulse 2.4s ease-in-out infinite;
-}
-@keyframes sv-pulse {
-  50% {
-    background: rgba(255, 255, 255, 0.42);
-  }
-}
 @media (max-width: 860px) {
   .sv__num {
     font-size: 48px;
@@ -254,8 +246,255 @@
   .sv__viz {
     transition: none;
   }
-  .sv__viz i {
-    animation: none;
+}
+
+.sv > .container {
+  position: relative;
+}
+/* floating shapes in the service colours, drifting slowly behind the content */
+.sv__float i {
+  position: absolute;
+  display: block;
+  animation: sv-drift 14s ease-in-out infinite alternate;
+}
+.sv__float .f1 {
+  top: 12%;
+  left: 6%;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid #18306f;
+  opacity: 0.25;
+}
+.sv__float .f2 {
+  top: 8%;
+  left: 38%;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: #a5370a;
+  opacity: 0.35;
+  animation-duration: 11s;
+}
+.sv__float .f3 {
+  top: 30%;
+  left: 52%;
+  width: 26px;
+  height: 26px;
+  background:
+    linear-gradient(#0b4246, #0b4246) center / 100% 4px no-repeat,
+    linear-gradient(#0b4246, #0b4246) center / 4px 100% no-repeat;
+  opacity: 0.3;
+  animation-duration: 17s;
+}
+.sv__float .f4 {
+  bottom: 6%;
+  right: 4%;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(134, 15, 48, 0.4) 0 2px, transparent 2.5px) 0 0 / 10px 10px;
+  opacity: 0.6;
+  animation-duration: 19s;
+}
+.sv__float .f5 {
+  top: 6%;
+  right: 46%;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(10, 25, 22, 0.18);
+  animation: sv-spin 40s linear infinite;
+}
+@keyframes sv-drift {
+  to {
+    transform: translate(24px, -18px) rotate(40deg);
+  }
+}
+@keyframes sv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* light following the pointer */
+.sv__row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.14), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+.sv__row:hover::before {
+  opacity: 1;
+}
+.sv__num {
+  transition:
+    color 0.6s,
+    transform 0.7s var(--ease-out);
+}
+.sv__row.is-open .sv__num {
+  color: rgba(255, 255, 255, 0.22);
+  transform: translateY(4px) scale(1.08);
+  transform-origin: top right;
+}
+/* timer showing when the next panel opens */
+.sv__timer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 3px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.55);
+  transform-origin: right;
+  animation: sv-timer linear both;
+}
+@keyframes sv-timer {
+  from {
+    transform: scaleX(0);
+  }
+}
+/* the drawings */
+.sv__viz {
+  width: 160px;
+}
+.sa {
+  width: 160px;
+  height: 100px;
+  overflow: visible;
+}
+.sa * {
+  transform-box: fill-box;
+}
+.sv__row:not(.is-open) .sa * {
+  animation-play-state: paused;
+}
+.sa__box,
+.sa__part,
+.sa__frame {
+  fill: rgba(255, 255, 255, 0.16);
+}
+.sa__frame {
+  stroke: rgba(255, 255, 255, 0.3);
+}
+.sa__line,
+.sa__wire {
+  stroke: rgba(255, 255, 255, 0.4);
+  stroke-width: 2;
+  fill: none;
+}
+.sa__core {
+  fill: rgba(255, 255, 255, 0.6);
+}
+.sa__dot {
+  fill: #fff;
+  animation: sa-flow 2.4s ease-in-out infinite;
+}
+@keyframes sa-flow {
+  0% {
+    transform: translateX(0);
+  }
+  45%,
+  55% {
+    transform: translateX(60px);
+  }
+  100% {
+    transform: translateX(120px);
+  }
+}
+.sa--flow .sa__box {
+  animation: sa-lit 2.4s ease-in-out infinite;
+}
+@keyframes sa-lit {
+  0%,
+  30%,
+  100% {
+    fill: rgba(255, 255, 255, 0.16);
+  }
+  12% {
+    fill: rgba(255, 255, 255, 0.45);
+  }
+}
+.sa__ln {
+  fill: rgba(255, 255, 255, 0.35);
+  transform-origin: left;
+  animation: sa-type 2.6s ease-out infinite;
+}
+@keyframes sa-type {
+  0% {
+    transform: scaleX(0);
+  }
+  35%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+.sa__caret {
+  fill: #fff;
+  animation: sa-blink 0.9s steps(1) infinite;
+}
+@keyframes sa-blink {
+  50% {
+    opacity: 0;
+  }
+}
+.sa__wire {
+  stroke-dasharray: 4 6;
+  animation: sa-data 1s linear infinite;
+}
+@keyframes sa-data {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+.sa__ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 2;
+  transform-origin: center;
+  animation: sa-ping 1.8s ease-out infinite;
+}
+@keyframes sa-ping {
+  from {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+.sa__part {
+  animation: sa-build 3s var(--ease-out) infinite;
+}
+@keyframes sa-build {
+  0% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  25%,
+  85% {
+    transform: none;
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (max-width: 860px) {
+  .sv__float .f3,
+  .sv__float .f5 {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sv__float i,
+  .sa * {
+    animation: none !important;
+  }
+  .sv__timer {
+    display: none;
   }
 }
 
