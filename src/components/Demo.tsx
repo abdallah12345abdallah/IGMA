@@ -1,27 +1,33 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { contact, demo, markets, systems, type SystemId } from '../content/site'
 import { onDemoRequest } from '../demoEvents'
 
 type Market = 'egypt' | 'saudi'
 const OTHER = 'other'
 
-function useOfficeClock(tz: string) {
-  const fmt = () => new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit', timeZone: tz }).format(new Date())
-  const [t, setT] = useState(fmt)
-  useEffect(() => {
-    setT(fmt())
-    const id = window.setInterval(() => setT(fmt()), 30000)
-    return () => window.clearInterval(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tz])
-  return t
-}
+/** Times we offer for a demo (about 45 minutes each), in the office's own time zone. */
+const SLOTS = ['١٠:٠٠ ص', '١١:٣٠ ص', '١:٠٠ م', '٢:٣٠ م', '٤:٠٠ م', '٥:٣٠ م', '٧:٠٠ م', '٨:٣٠ م']
 
-const clock = () => new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit' }).format(new Date())
+/** The next five working days: Friday is off in both markets, Saturday too in Egypt. */
+function workdays(market: Market) {
+  const out: Date[] = []
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  while (out.length < 5) {
+    const wd = d.getDay()
+    if (!(wd === 5 || (market === 'egypt' && wd === 6))) out.push(new Date(d))
+    d.setDate(d.getDate() + 1)
+  }
+  return out
+}
+const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('ar-EG', o)
+const dayShort = fmt({ weekday: 'short' })
+const dayNum = fmt({ day: 'numeric' })
+const dayLong = fmt({ weekday: 'long', day: 'numeric', month: 'long' })
 
 /**
- * Demo request. There is no server: the form prepares a WhatsApp message to the right office,
- * and a phone beside it shows that message being written as the visitor types.
+ * Demo request as a booking: the visitor picks a day and a time, and the form prepares a
+ * WhatsApp message to the right office with that suggested slot. There is no server.
  */
 export function Demo({ initial, title }: { initial?: SystemId; title?: string }) {
   const [name, setName] = useState('')
@@ -29,53 +35,16 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
   const [system, setSystem] = useState<string>(initial ?? systems[0].id)
   const [market, setMarket] = useState<Market>('egypt')
   const [message, setMessage] = useState('')
+  const [day, setDay] = useState(0)
+  const [slot, setSlot] = useState(SLOTS[2])
   const [errors, setErrors] = useState<{ name?: string; company?: string }>({})
   const [link, setLink] = useState<string | null>(null)
-  const [time] = useState(clock)
-  const [typing, setTyping] = useState(false)
-  const [bump, setBump] = useState(0)
-  const typingTimer = useRef(0)
-  const phoneRef = useRef<HTMLDivElement>(null)
-  const stageRef = useRef<HTMLDivElement>(null)
-  // every keystroke: the chat header says "typing", and the bubble pops when the text settles
-  const touched = () => {
-    setTyping(true)
-    window.clearTimeout(typingTimer.current)
-    typingTimer.current = window.setTimeout(() => {
-      setTyping(false)
-      setBump((n) => n + 1)
-    }, 700)
-  }
-  // the phone leans slightly toward the pointer
-  useEffect(() => {
-    const stage = stageRef.current
-    const phone = phoneRef.current
-    if (!stage || !phone || window.matchMedia('(hover: none), (prefers-reduced-motion: reduce)').matches) return
-    const move = (e: PointerEvent) => {
-      const r = stage.getBoundingClientRect()
-      const x = (e.clientX - r.left) / r.width - 0.5
-      const y = (e.clientY - r.top) / r.height - 0.5
-      phone.style.transform = `rotateY(${x * 14}deg) rotateX(${-y * 10}deg)`
-    }
-    const leave = () => (phone.style.transform = '')
-    stage.addEventListener('pointermove', move)
-    stage.addEventListener('pointerleave', leave)
-    return () => {
-      stage.removeEventListener('pointermove', move)
-      stage.removeEventListener('pointerleave', leave)
-    }
-  }, [])
-  const officeTime = useOfficeClock(market === 'egypt' ? 'Africa/Cairo' : 'Asia/Riyadh')
-  const sysIndex = systems.findIndex((x) => x.id === system)
-  const ready = !!name.trim() && !!company.trim()
 
   useEffect(() => onDemoRequest((id) => setSystem(id)), [])
 
-  const sysLabel = systems.find((s) => s.id === system)?.name ?? demo.other
-  const text = [`طلب عرض توضيحي: ${sysLabel}`, name.trim() && `الاسم: ${name.trim()}`, company.trim() && `الشركة: ${company.trim()}`, message.trim() && `التفاصيل: ${message.trim()}`]
-    .filter(Boolean)
-    .join('\n')
+  const days = useMemo(() => workdays(market), [market])
   const office = markets.regions.find((r) => r.id === market)?.name ?? ''
+  const when = `${dayLong.format(days[day])}، ${slot} (بتوقيت ${office})`
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -87,6 +56,10 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
       document.getElementById(next.name ? 'demo-name' : 'demo-company')?.focus()
       return
     }
+    const sysLabel = systems.find((s) => s.id === system)?.name ?? demo.other
+    const text = [`طلب عرض توضيحي: ${sysLabel}`, `الاسم: ${name.trim()}`, `الشركة: ${company.trim()}`, `الموعد المقترح: ${when}`, message.trim() ? `التفاصيل: ${message.trim()}` : '']
+      .filter(Boolean)
+      .join('\n')
     const url = `https://wa.me/${contact[market].whatsapp}?text=${encodeURIComponent(text)}`
     setLink(url)
     window.open(url, '_blank', 'noopener')
@@ -94,41 +67,87 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
 
   return (
     <section className="demo" id="demo" data-nav="light" aria-labelledby="demo-title">
-      <div className="demo__drift" aria-hidden="true">
-        {Array.from({ length: 7 }, (_, i) => (
-          <i key={i} style={{ ['--i' as string]: i }} />
-        ))}
-      </div>
-      <div className="container demo__grid">
-        <div className="demo__main">
-          <header className="head">
-            <p className="kicker">{demo.kicker}</p>
-            <h2 id="demo-title">{title ?? demo.title}</h2>
-            <p className="head__body">{demo.body}</p>
-          </header>
+      <div className="container">
+        <header className="head">
+          <p className="kicker">{demo.kicker}</p>
+          <h2 id="demo-title">{title ?? 'اختر موعدًا يناسبك، ونتواصل لتأكيده.'}</h2>
+          <p className="head__body">{demo.body}</p>
+        </header>
 
-          {link ? (
-            <div className="form form--done" role="status">
-              <h3>{demo.sentTitle}</h3>
-              <p>{demo.sentBody}</p>
-              <div className="actions">
-                <a className="demo__send" href={link} target="_blank" rel="noreferrer">
-                  {demo.sentLink}
-                </a>
-                <button type="button" className="demo__again" onClick={() => setLink(null)}>
-                  {demo.again}
-                </button>
+        {link ? (
+          <div className="bk__panel bk__done" role="status">
+            <h3>{demo.sentTitle}</h3>
+            <p>{demo.sentBody}</p>
+            <p className="bk__when">
+              <small>الموعد المقترح</small>
+              <b>{when}</b>
+            </p>
+            <div className="bk__actions">
+              <a className="bk__send" href={link} target="_blank" rel="noreferrer">
+                {demo.sentLink}
+              </a>
+              <button type="button" className="bk__again" onClick={() => setLink(null)}>
+                {demo.again}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form className="bk" onSubmit={submit} noValidate>
+            <div className="bk__panel">
+              <h3 id="bk-day">اليوم</h3>
+              <p className="bk__sub">أيام العمل القادمة</p>
+              <div className="bk__days" role="group" aria-labelledby="bk-day">
+                {days.map((d, i) => (
+                  <button key={d.toDateString()} type="button" aria-pressed={i === day} aria-label={dayLong.format(d)} onClick={() => setDay(i)}>
+                    <small>{dayShort.format(d)}</small>
+                    <b>{dayNum.format(d)}</b>
+                  </button>
+                ))}
+              </div>
+              <h3 id="bk-time" className="bk__gap">
+                الوقت
+              </h3>
+              <p className="bk__sub">مدة العرض حوالي ٤٥ دقيقة</p>
+              <div className="bk__slots" role="group" aria-labelledby="bk-time">
+                {SLOTS.map((t) => (
+                  <button key={t} type="button" aria-pressed={t === slot} onClick={() => setSlot(t)}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+              <div className="bk__tz" role="group" aria-label={demo.fields.market}>
+                {markets.regions.map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    aria-pressed={r.id === market}
+                    onClick={() => {
+                      setMarket(r.id)
+                      setDay(0)
+                    }}
+                  >
+                    بتوقيت {r.name}
+                  </button>
+                ))}
               </div>
             </div>
-          ) : (
-            <form className="form" onSubmit={submit} noValidate>
+
+            <div className="bk__panel bk__summary">
+              <h3>تفاصيلك</h3>
               <div className="field">
                 <label htmlFor="demo-name">{demo.fields.name}</label>
-                <input id="demo-name" name="name" autoComplete="name" value={name} onChange={(e) => {
+                <input
+                  id="demo-name"
+                  name="name"
+                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => {
                     setName(e.target.value)
-                    touched()
                     if (e.target.value.trim()) setErrors((x) => ({ ...x, name: undefined }))
-                  }} aria-invalid={!!errors.name} aria-describedby={errors.name ? 'err-name' : undefined} />
+                  }}
+                  aria-invalid={!!errors.name}
+                  aria-describedby={errors.name ? 'err-name' : undefined}
+                />
                 {errors.name && (
                   <p className="field__error" id="err-name">
                     {errors.name}
@@ -137,11 +156,18 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
               </div>
               <div className="field">
                 <label htmlFor="demo-company">{demo.fields.company}</label>
-                <input id="demo-company" name="organization" autoComplete="organization" value={company} onChange={(e) => {
+                <input
+                  id="demo-company"
+                  name="organization"
+                  autoComplete="organization"
+                  value={company}
+                  onChange={(e) => {
                     setCompany(e.target.value)
-                    touched()
                     if (e.target.value.trim()) setErrors((x) => ({ ...x, company: undefined }))
-                  }} aria-invalid={!!errors.company} aria-describedby={errors.company ? 'err-company' : undefined} />
+                  }}
+                  aria-invalid={!!errors.company}
+                  aria-describedby={errors.company ? 'err-company' : undefined}
+                />
                 {errors.company && (
                   <p className="field__error" id="err-company">
                     {errors.company}
@@ -150,10 +176,7 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
               </div>
               <div className="field">
                 <label htmlFor="demo-system">{demo.fields.system}</label>
-                <select id="demo-system" name="system" value={system} onChange={(e) => {
-                    setSystem(e.target.value)
-                    setBump((n) => n + 1)
-                  }}>
+                <select id="demo-system" name="system" value={system} onChange={(e) => setSystem(e.target.value)}>
                   {systems.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -163,81 +186,20 @@ export function Demo({ initial, title }: { initial?: SystemId; title?: string })
                 </select>
               </div>
               <div className="field">
-                <span className="field__label" id="demo-market-label">
-                  {demo.fields.market}
-                </span>
-                <div className="demo__seg" role="group" aria-labelledby="demo-market-label">
-                  {markets.regions.map((r) => (
-                    <button key={r.id} type="button" aria-pressed={r.id === market} onClick={() => {
-                        setMarket(r.id)
-                        setBump((n) => n + 1)
-                      }}>
-                      {r.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="field field--wide">
                 <label htmlFor="demo-message">{demo.fields.message}</label>
-                <textarea id="demo-message" name="message" rows={3} value={message} onChange={(e) => {
-                    setMessage(e.target.value)
-                    touched()
-                  }} />
+                <textarea id="demo-message" name="message" rows={2} value={message} onChange={(e) => setMessage(e.target.value)} />
               </div>
-              <button className="demo__send field--wide" type="submit">
-                {demo.submit}
+              <p className="bk__when" aria-live="polite">
+                <small>الموعد المقترح</small>
+                <b key={when}>{when}</b>
+              </p>
+              <button className="bk__send" type="submit">
+                احجز عبر واتساب
               </button>
-            </form>
-          )}
-        </div>
-
-        {/* the message as it will arrive, written live, with a few cards floating around it */}
-        <div className="demo__stage" ref={stageRef} aria-hidden="true">
-          <div className="demo__float demo__float--sys" key={'s' + system}>
-            {sysIndex >= 0 ? <img src={`/stops/d-${sysIndex + 1}.webp`} alt="" /> : <span className="demo__plus">+</span>}
-            <span>
-              <small>النظام</small>
-              <b>{sysIndex >= 0 ? systems[sysIndex].short : 'نظام خاص'}</b>
-            </span>
-          </div>
-          <div className="demo__float demo__float--office" key={'o' + market}>
-            <i />
-            <span>
-              <small>مكتب {office}</small>
-              <b>{officeTime}</b>
-            </span>
-          </div>
-          <div className={`demo__float demo__float--ready ${ready ? 'is-ready' : ''}`}>{ready ? 'جاهزة للإرسال ✓' : 'اكتب اسمك وشركتك'}</div>
-          <div className="phone" ref={phoneRef}>
-          <div className="phone__screen">
-            <div className="phone__top">
-              <span className="phone__avatar" dir="ltr">
-                IGMA
-              </span>
-              <div>
-                <b>IGMA · {office}</b>
-                <small>{typing ? 'يكتب الآن…' : 'متصل'}</small>
-              </div>
+              <p className="bk__legal">الموعد اقتراح منك، ونؤكده معك على واتساب.</p>
             </div>
-            <div className="phone__chat">
-              <div className="bubble bubble--in">
-                أهلًا بك في IGMA. احكِ لنا عن شركتك ونرتب لك عرضًا توضيحيًا.
-                <span className="bubble__time">{time}</span>
-              </div>
-              <div className="bubble bubble--out" key={bump}>
-                {text}
-                <span className="bubble__time">
-                  {time} {link ? '✓✓' : ''}
-                </span>
-              </div>
-            </div>
-            <div className="phone__input">
-              <span>اكتب رسالة</span>
-              <i>➤</i>
-            </div>
-          </div>
-          </div>
-        </div>
+          </form>
+        )}
       </div>
     </section>
   )

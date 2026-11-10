@@ -819,10 +819,8 @@
 }
 
 /* ========== DEMO ========== */
-/* demo: the form beside a phone that shows the WhatsApp message being written */
+/* demo: book a slot. Day and time on one panel, the visitor's details and the suggested slot on the other */
 .demo {
-  position: relative;
-  overflow: hidden;
   background: #e4dfd5;
   color: var(--ink);
   padding-block: clamp(72px, 10vw, 128px);
@@ -833,38 +831,127 @@
 .demo .head__body {
   color: var(--ink-2);
 }
-.demo__grid {
+.bk {
+  margin-top: 32px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 460px;
-  gap: 40px 48px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
 }
-.form {
-  margin-top: 30px;
+.bk__panel {
+  background: #fff;
+  border-radius: 24px;
+  padding: clamp(20px, 2.4vw, 30px);
+  box-shadow: 0 30px 50px -40px rgba(10, 25, 22, 0.5);
+}
+.bk__panel h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 19px;
+}
+.bk__gap {
+  margin-top: 24px;
+}
+.bk__sub {
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.bk__days {
+  margin-top: 14px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 14px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.bk__days button,
+.bk__slots button {
+  border: 1px solid rgba(10, 25, 22, 0.16);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  transition:
+    background 0.25s,
+    color 0.25s,
+    border-color 0.25s,
+    transform 0.3s var(--ease-out);
+}
+.bk__days button {
+  padding: 12px 4px;
+}
+.bk__days small {
+  display: block;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.bk__days b {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 24px;
+}
+.bk__slots {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.bk__slots button {
+  padding: 12px 4px;
+  font-weight: 600;
+}
+.bk__days button:hover,
+.bk__slots button:hover {
+  border-color: var(--green);
+}
+.bk__days button[aria-pressed='true'],
+.bk__slots button[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+  transform: translateY(-2px);
+}
+.bk__days button[aria-pressed='true'] small {
+  color: rgba(255, 255, 255, 0.7);
+}
+.bk__tz {
+  margin-top: 16px;
+  display: flex;
+  gap: 6px;
+}
+.bk__tz button {
+  flex: 1;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(10, 25, 22, 0.16);
+  font-weight: 600;
+  font-size: 15px;
+  transition:
+    background 0.25s,
+    color 0.25s,
+    border-color 0.25s;
+}
+.bk__tz button[aria-pressed='true'] {
+  background: #d9eadf;
+  border-color: var(--green);
+  color: var(--green);
+}
+.bk__summary {
+  display: grid;
+  gap: 12px;
 }
 .field {
   display: grid;
   gap: 6px;
   min-width: 0;
 }
-.field--wide {
-  grid-column: 1 / -1;
-}
-.field label,
-.field__label {
+.field label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--ink);
 }
 .field input,
 .field select,
 .field textarea {
   width: 100%;
-  min-height: 50px;
-  padding: 12px 16px;
+  min-height: 48px;
+  padding: 11px 14px;
   background: #fff;
   border: 1px solid rgba(10, 25, 22, 0.16);
   border-radius: 14px;
@@ -881,9 +968,6 @@
   border-color: var(--green);
   box-shadow: 0 0 0 4px rgba(8, 88, 63, 0.12);
 }
-.field select option {
-  color: var(--ink);
-}
 .field [aria-invalid='true'] {
   border-color: #a4221a;
   border-width: 2px;
@@ -893,29 +977,35 @@
   font-weight: 500;
   color: #a4221a;
 }
-.demo__seg {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: #fff;
-  border: 1px solid rgba(10, 25, 22, 0.16);
-  border-radius: 14px;
+.bk__when {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #d9eadf;
 }
-.demo__seg button {
-  flex: 1;
-  min-height: 40px;
-  border-radius: 10px;
+.bk__when small {
+  display: block;
+  font-size: 12.5px;
   font-weight: 600;
-  color: var(--ink-2);
-  transition:
-    background 0.2s,
-    color 0.2s;
+  color: var(--green);
 }
-.demo__seg button[aria-pressed='true'] {
-  background: var(--ink);
-  color: #fff;
+.bk__when b {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1.45;
+  animation: bk-in 0.45s var(--ease-out);
 }
-.demo__send {
+@keyframes bk-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.bk__send {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -930,363 +1020,55 @@
   font-size: 17px;
   transition: transform 0.2s var(--ease-out);
 }
-.demo__send::before {
+.bk__send::before {
   content: '✆';
   font-size: 19px;
 }
-.demo__send:hover {
+.bk__send:hover {
   transform: translateY(-2px);
 }
-.demo__again {
+.bk__legal {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.bk__done {
+  margin-top: 32px;
+  max-width: 640px;
+}
+.bk__done h3 {
+  font-size: 26px;
+}
+.bk__done p {
+  margin-top: 6px;
+  color: var(--ink-2);
+}
+.bk__done .bk__when {
+  margin-top: 16px;
+}
+.bk__actions {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.bk__again {
   min-height: 54px;
   padding: 0 20px;
   border-radius: 14px;
   border: 1px solid rgba(10, 25, 22, 0.25);
   font-weight: 600;
 }
-.form--done {
-  display: block;
-}
-.form--done h3 {
-  font-weight: 800;
-  font-size: 28px;
-  line-height: 1.45;
-}
-.form--done p {
-  margin-top: 6px;
-  color: var(--ink-2);
-}
-.form--done .actions {
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-/* bubbles drifting up behind everything */
-.demo__drift {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.demo__drift i {
-  position: absolute;
-  bottom: -80px;
-  left: calc(6% + var(--i) * 13%);
-  width: calc(46px + var(--i) * 6px);
-  height: calc(30px + var(--i) * 4px);
-  border-radius: 16px 16px 16px 4px;
-  background: rgba(37, 211, 102, 0.12);
-  animation: demo-drift calc(16s + var(--i) * 2s) linear infinite;
-  animation-delay: calc(var(--i) * -3.1s);
-}
-.demo__drift i:nth-child(even) {
-  border-radius: 16px 16px 4px 16px;
-  background: rgba(8, 88, 63, 0.08);
-}
-@keyframes demo-drift {
-  from {
-    transform: translateY(0) rotate(-4deg);
-    opacity: 0;
+@media (max-width: 900px) {
+  .bk {
+    grid-template-columns: minmax(0, 1fr);
   }
-  10% {
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-900px) rotate(6deg);
-    opacity: 0;
-  }
-}
-.demo .container {
-  position: relative;
-}
-.demo__stage {
-  position: relative;
-  justify-self: center;
-  perspective: 1000px;
-  padding: 20px 60px;
-}
-/* cards floating around the phone */
-.demo__float {
-  position: absolute;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px 10px 10px;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 18px 30px -18px rgba(10, 25, 22, 0.45);
-  font-size: 14px;
-  animation:
-    demo-in 0.6s var(--ease-out),
-    demo-bob 5s ease-in-out infinite 0.6s;
-}
-.demo__float small {
-  display: block;
-  font-size: 11.5px;
-  color: var(--ink-2);
-}
-.demo__float b {
-  font-family: var(--font-display);
-  font-weight: 800;
-}
-.demo__float--sys {
-  top: 190px;
-  right: -6px;
-}
-.demo__float--sys img {
-  width: 54px;
-  height: 40px;
-  border-radius: 10px;
-  object-fit: cover;
-  object-position: 50% 62%;
-}
-.demo__plus {
-  width: 54px;
-  height: 40px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: var(--ink);
-  color: #fff;
-  font-weight: 800;
-}
-.demo__float--office {
-  bottom: 150px;
-  left: -14px;
-  animation-delay: 0s, 1.6s;
-}
-.demo__float--office i {
-  position: relative;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #25d366;
-}
-.demo__float--office i::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 1px solid #25d366;
-  animation: demo-ping 2.2s var(--ease-out) infinite;
-}
-@keyframes demo-ping {
-  from {
-    transform: scale(0.4);
-    opacity: 1;
-  }
-  to {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-}
-.demo__float--ready {
-  bottom: 40px;
-  right: 0;
-  padding: 10px 16px;
-  font-weight: 700;
-  color: var(--ink-2);
-  animation-delay: 0s, 0.8s;
-  transition:
-    background 0.4s,
-    color 0.4s;
-}
-.demo__float--ready.is-ready {
-  background: #25d366;
-  color: #06311b;
-}
-@keyframes demo-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.92);
-  }
-}
-@keyframes demo-bob {
-  50% {
-    transform: translateY(-8px);
-  }
-}
-.bubble--out {
-  animation: demo-pop 0.45s var(--ease-out);
-  transform-origin: bottom left;
-}
-@keyframes demo-pop {
-  from {
-    transform: scale(0.94);
-  }
-  60% {
-    transform: scale(1.02);
-  }
-}
-.demo__send {
-  position: relative;
-  overflow: hidden;
-}
-.demo__send::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
-  transform: translateX(-120%);
-  animation: demo-shine 3.2s ease-in-out infinite;
-}
-@keyframes demo-shine {
-  60%,
-  100% {
-    transform: translateX(120%);
+  .bk__slots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .demo__drift i,
-  .demo__float,
-  .bubble--out,
-  .demo__send::after,
-  .demo__float--office i::after {
+  .bk__when b {
     animation: none;
-  }
-}
-
-/* the phone */
-.phone {
-  justify-self: center;
-  position: relative;
-  transition: transform 0.4s var(--ease-out);
-  transform-style: preserve-3d;
-  width: 330px;
-  height: 640px;
-  padding: 12px;
-  border-radius: 46px;
-  background: #0d1412;
-  box-shadow: 0 40px 70px -40px rgba(0, 0, 0, 0.7);
-}
-.phone::before {
-  content: '';
-  position: absolute;
-  top: 18px;
-  left: 50%;
-  z-index: 2;
-  width: 110px;
-  height: 26px;
-  margin-left: -55px;
-  border-radius: 20px;
-  background: #000;
-}
-.phone__screen {
-  height: 100%;
-  border-radius: 36px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background: #e5ddd5 radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px) 0 0 / 16px 16px;
-}
-.phone__top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 50px 16px 12px;
-  background: #075e54;
-  color: #fff;
-}
-.phone__top b {
-  display: block;
-  font-size: 15px;
-}
-.phone__top small {
-  font-size: 12px;
-  opacity: 0.8;
-}
-.phone__avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--green);
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 11px;
-}
-.phone__chat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 16px 12px;
-  overflow: hidden;
-}
-.bubble {
-  position: relative;
-  align-self: flex-start;
-  max-width: 86%;
-  padding: 9px 12px 20px;
-  border-radius: 12px 12px 12px 2px;
-  background: #dcf8c6;
-  font-size: 14px;
-  line-height: 1.55;
-  white-space: pre-wrap;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
-}
-.bubble--in {
-  align-self: flex-end;
-  border-radius: 12px 12px 2px 12px;
-  background: #fff;
-}
-.bubble__time {
-  position: absolute;
-  bottom: 4px;
-  left: 10px;
-  font-size: 10.5px;
-  color: #667;
-}
-.phone__input {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px;
-  background: #f0f0f0;
-}
-.phone__input span {
-  flex: 1;
-  padding: 10px 14px;
-  border-radius: 20px;
-  background: #fff;
-  font-size: 13px;
-  color: #888;
-}
-.phone__input i {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #128c7e;
-  color: #fff;
-  font-style: normal;
-}
-@media (max-width: 900px) {
-  .demo__grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .demo__stage {
-    padding-inline: 20px;
-  }
-  .demo__float--sys {
-    right: 0;
-  }
-  .demo__float--office {
-    left: 0;
-  }
-  .phone {
-    width: 290px;
-    height: 540px;
-  }
-}
-@media (max-width: 480px) {
-  .form {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 
