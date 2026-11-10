@@ -1264,6 +1264,7 @@
     grid-area: side;
     align-self: end;
     padding-bottom: 0.6vh;
+    top: 8vh; /* sits a little below the headline */
   }
   .stop--hero .s-side .s-copy {
     font-size: clamp(16px, 1.15vw, 19px);
