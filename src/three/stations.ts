@@ -109,7 +109,7 @@ export const STATIONS: Station[] = [
       { dev: 'kiosk', x: -0.98, z: -0.15, ry: 0.4 },
     ],
     shot: { az: -0.25, dist: 7, height: 2.6, look: 0.95, layout: 't', shift: [0, -0.16] },
-    heroScale: 0.72,
+    heroScale: 0.84,
   },
   {
     // Gym: an adjustable bench, a dumbbell rack, competition kettlebells, a medicine ball, a yoga mat, and the check-in kiosk
