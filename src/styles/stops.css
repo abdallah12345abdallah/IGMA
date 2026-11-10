@@ -1247,10 +1247,10 @@
   .stop.stop--hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr) min(29vw, 430px);
-    grid-template-rows: auto auto 1fr auto;
-    grid-template-areas: 'meta .' 'title .' '. side' 'work .';
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas: 'meta .' 'title .' '. side';
     gap: 14px 6vw;
-    padding: calc(var(--nav-h) + 3.5vh) var(--gutter) 16px;
+    padding: calc(var(--nav-h) + 3.5vh) var(--gutter) 76px; /* room for the pinned bottom row */
   }
   .stop.stop--hero > * {
     position: relative;
@@ -1263,14 +1263,18 @@
   .stop.stop--hero > .s-side {
     grid-area: side;
     align-self: end;
-    margin-bottom: 27vh; /* well above the bottom line */
+    /* well above the bottom line, but less on short screens so nothing is pushed off */
+    margin-bottom: max(16px, min(27vh, 100vh - 620px));
   }
   .stop--hero .s-side .s-copy {
     font-size: clamp(16px, 1.15vw, 19px);
     line-height: 1.8;
   }
+  /* the bottom row is pinned to the bottom of the screen, so it can never be pushed off */
   .stop.stop--hero > .s-work {
-    grid-area: work;
+    position: absolute;
+    right: var(--gutter);
+    bottom: 16px;
     justify-self: start;
     max-width: calc(100vw - 2 * var(--gutter) - 620px);
   }
