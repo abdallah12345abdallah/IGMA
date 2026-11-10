@@ -322,69 +322,184 @@
   .sv-blk, .sv-pulse { animation: none; transform: none; opacity: 1; }
 }
 
-.markets {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 40px 72px;
-  align-items: start;
+/* markets: a dotted map of the region with a card beside each country */
+.mk {
+  --eg: #a5370a;
+  --sa: #0b5a3e;
+  --sea: #2f7fa3;
+  background: #efebe3;
 }
-.switch {
-  display: inline-flex;
-  gap: 6px;
-  margin-top: 26px;
+.mk__head h2 {
+  margin-top: 10px;
+  font-weight: 800;
+  font-size: clamp(32px, 3.8vw, 52px);
+  line-height: 1.25;
 }
-.switch button {
-  min-height: 46px;
-  padding: 0 24px;
-  border: 1px solid var(--on-line);
-  border-radius: var(--radius);
-  font-family: var(--font-display);
-  font-weight: 700;
-  transition:
-    background-color 0.2s,
-    color 0.2s;
+.mk__map {
+  position: relative;
+  margin-top: 28px;
 }
-.switch button[aria-pressed='true'] {
-  background: var(--on);
-  color: var(--ink);
+.mm {
+  display: block;
+  width: 100%;
+  height: auto;
 }
-.market {
-  animation: fade 0.45s var(--ease-out);
+.mm__sea-dot {
+  fill: rgba(10, 25, 22, 0.13);
 }
-@keyframes fade {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+.mm__eg {
+  fill: var(--eg);
+  opacity: 0.88;
+}
+.mm__sa {
+  fill: var(--sa);
+  opacity: 0.88;
+}
+.mm__route {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-dasharray: 6 8;
+  animation: mk-dash 1.4s linear infinite;
+}
+@keyframes mk-dash {
+  to {
+    stroke-dashoffset: -28;
   }
 }
-.market__who {
+.mm__traveller {
+  fill: var(--ink);
+}
+.mm__ring {
+  fill: none;
+  stroke-width: 2;
+  stroke: currentColor;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mm-ping 2.2s var(--ease-out) infinite;
+}
+.mm__ring.mm__eg {
+  color: var(--eg);
+  fill: none;
+}
+.mm__ring.mm__sa {
+  color: var(--sa);
+  fill: none;
+}
+@keyframes mm-ping {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(3.4);
+    opacity: 0;
+  }
+}
+.mm__city {
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(20px, 2.1vw, 27px);
-  line-height: 1.55;
+  font-weight: 800;
+  font-size: 20px;
+  fill: var(--ink);
 }
-.market ul {
-  margin-top: 20px;
-  border-top: 1px solid var(--on-line);
+.mm__sea {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  fill: var(--sea);
 }
-.market li {
-  padding-block: 11px;
-  border-bottom: 1px solid var(--on-line);
+.mk__card {
+  position: absolute;
+  width: min(360px, 38%);
+  padding: 20px 22px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 44px -28px rgba(10, 25, 22, 0.5);
 }
-.market__how {
-  margin-top: 18px;
-  color: var(--on-70);
+.mk__card--egypt {
+  --c: var(--eg);
+  left: 0;
+  bottom: 2%;
 }
-.market__office {
-  margin-top: 12px;
+.mk__card--saudi {
+  --c: var(--sa);
+  right: 0;
+  top: 2%;
+}
+.mk__card h3 {
+  font-weight: 800;
+  font-size: 32px;
+  line-height: 1.15;
+  color: var(--c);
+}
+.mk__meta {
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.mk__time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
+}
+.mk__who {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.mk__focus {
+  margin-top: 10px;
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.mk__focus li::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--c);
+  margin-inline-end: 8px;
+}
+.mk__how {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.mk__office {
+  margin-top: 10px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 4px 24px;
+  align-items: baseline;
+  gap: 2px 12px;
+  font-size: 13px;
+  color: var(--ink-2);
 }
-.market__office a {
+.mk__office a {
   font-family: var(--font-display);
   font-weight: 700;
+  font-size: 15px;
+  color: var(--c);
+  border-bottom: 1px solid currentColor;
+}
+@media (max-width: 900px) {
+  .mk__card {
+    position: static;
+    width: auto;
+    margin-top: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mm__route,
+  .mm__ring {
+    animation: none;
+  }
 }
 
 .models {

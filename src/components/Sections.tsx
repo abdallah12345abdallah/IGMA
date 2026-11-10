@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { clients, company, contact, footer, markets, nav, plans, services, systems } from '../content/site'
 import { ServiceVisual, type ServiceKind } from './ServiceVisual'
+import { MarketsMap } from './MarketsMap'
 
 /** Each service's live illustration and its accent from the system palette. */
 const SVC_LOOK: { kind: ServiceKind; color: string }[] = [
@@ -37,38 +38,63 @@ export function Services() {
   )
 }
 
+/** Each market's office city and time zone, for the route and the live clock. */
+const MARKET_CITY = {
+  egypt: { city: 'الجيزة', tz: 'Africa/Cairo' },
+  saudi: { city: 'الرياض', tz: 'Asia/Riyadh' },
+} as const
+
+function useClock(tz: string) {
+  const fmt = () => new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit', timeZone: tz }).format(new Date())
+  const [t, setT] = useState(fmt)
+  useEffect(() => {
+    const id = window.setInterval(() => setT(fmt()), 30000)
+    return () => window.clearInterval(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tz])
+  return t
+}
+
+function MarketClock({ tz }: { tz: string }) {
+  return <span className="mk__time">{useClock(tz)}</span>
+}
+
 export function Markets() {
-  const [id, setId] = useState<'egypt' | 'saudi'>('egypt')
-  const region = markets.regions.find((r) => r.id === id) ?? markets.regions[0]
-  const office = contact[id]
   return (
-    <section className="section section--ink" id="markets" aria-labelledby="markets-title">
-      <div className="container markets">
-        <header className="head">
+    <section className="section mk" id="markets" data-nav="light" aria-labelledby="markets-title">
+      <div className="container">
+        <header className="mk__head">
           <p className="kicker">{markets.kicker}</p>
           <h2 id="markets-title">{markets.title}</h2>
-          <div className="switch" role="group" aria-label="اختر السوق">
-            {markets.regions.map((r) => (
-              <button key={r.id} type="button" aria-pressed={r.id === id} onClick={() => setId(r.id)}>
-                {r.name}
-              </button>
-            ))}
-          </div>
         </header>
-        <div className="market" key={id}>
-          <p className="market__who">{region.audience}</p>
-          <ul>
-            {region.focus.map((f) => (
-              <li key={f}>{f}</li>
-            ))}
-          </ul>
-          <p className="market__how">{region.delivery}</p>
-          <p className="market__office">
-            {office.address}
-            <a href={`tel:+${office.whatsapp}`} dir="ltr">
-              {office.phone}
-            </a>
-          </p>
+        <div className="mk__map">
+          <MarketsMap />
+          {markets.regions.map((r) => {
+            const office = contact[r.id]
+            const city = MARKET_CITY[r.id]
+            return (
+              <article key={r.id} className={`mk__card mk__card--${r.id}`} aria-labelledby={`mk-${r.id}`}>
+                <h3 id={`mk-${r.id}`}>{r.name}</h3>
+                <p className="mk__meta">
+                  <span>{city.city}</span>
+                  <MarketClock tz={city.tz} />
+                </p>
+                <p className="mk__who">{r.audience}</p>
+                <ul className="mk__focus">
+                  {r.focus.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+                <p className="mk__how">{r.delivery}</p>
+                <p className="mk__office">
+                  <span>{office.address}</span>
+                  <a href={`https://wa.me/${office.whatsapp}`} target="_blank" rel="noopener noreferrer" dir="ltr">
+                    {office.phone}
+                  </a>
+                </p>
+              </article>
+            )
+          })}
         </div>
       </div>
     </section>
