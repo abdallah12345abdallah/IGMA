@@ -216,7 +216,7 @@ const ease = (t: number) => t * t * (3 - 2 * t)
 /** Seconds a system takes to gather (or scatter) in the opening view. */
 const SWAP_S = 1.5
 /** How much bigger the single system is in the opening view than at its stop. */
-const HERO_SCALE = 3 // size of the system shown alone in the opening view
+const HERO_SCALE = 2.8 // size of the system shown alone in the opening view
 /** Every system sits on the same tinted ground, in the site's main colour. */
 const GROUND_COLOR = '#5e1a2c'
 
@@ -565,11 +565,14 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
       return outer
     })
     const sizes = groups.map((g) => {
-      const v = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3())
+      // positions must be settled before measuring, or the box comes out wrong
+      g.updateMatrixWorld(true)
+      const v = new THREE.Box3().setFromObject(g, true).getSize(new THREE.Vector3())
       return Math.max(v.x, v.z, v.y * 1.1)
     })
     const avg = sizes.slice(0, tourStops.length - 1).reduce((a, b) => a + b, 0) / (tourStops.length - 1)
-    const norms = sizes.map((sz) => avg / Math.max(0.01, sz))
+    // never more than 30% larger or smaller than drawn, whatever the measurement says
+    const norms = sizes.map((sz) => THREE.MathUtils.clamp(avg / Math.max(0.01, sz), 0.7, 1.3))
     // every piece of every station remembers its resting place, so it can fly off and come back
     const parts = groups.map((g) =>
       g.children[0].children.map((o, k, all) => {
@@ -615,7 +618,8 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
       const e = v * v * (3 - 2 * v)
       const sp = spotPos(i)
       outers[i].position.set(sp.x * (1 - b), 0, sp.z * (1 - b))
-      const hs = HERO_SCALE * norms[i]
+      // measured to the same size, then adjusted by eye: wide desks and counters read larger than racks and pallets
+      const hs = HERO_SCALE * norms[i] * (STATIONS[i].heroScale ?? 1)
       outers[i].scale.setScalar(Math.max(0.001, e * (1 + (hs - 1) * b)))
       outers[i].visible = e > 0.01 && a > 0.001
       outers[i].children[0].scale.setScalar(Math.max(0.001, a))
