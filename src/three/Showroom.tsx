@@ -527,7 +527,8 @@ function Stations({ interactive, fixedStop, reduced, onLamp }: { interactive: bo
       const e = v * v * (3 - 2 * v)
       const sp = spotPos(i)
       outers[i].position.set(sp.x * (1 - b), 0, sp.z * (1 - b))
-      outers[i].scale.setScalar(Math.max(0.001, e * (1 + (HERO_SCALE - 1) * b)))
+      const hs = HERO_SCALE * (STATIONS[i].heroScale ?? 1)
+      outers[i].scale.setScalar(Math.max(0.001, e * (1 + (hs - 1) * b)))
       outers[i].visible = e > 0.01 && a > 0.001
       outers[i].children[0].scale.setScalar(Math.max(0.001, a))
       for (const q of parts[i]) {

@@ -49,6 +49,8 @@ export interface Station {
   screen?: ScreenKind
   items: Item[]
   shot: Shot
+  /** Size in the opening view relative to the others (1 = default), for stations that read too large */
+  heroScale?: number
 }
 
 /** One entry per tour stop, in the same order as `tourStops` in content/site.ts. */
@@ -146,6 +148,7 @@ export const STATIONS: Station[] = [
       { file: 'binder_notebook', on: 'desk', x: 0.12, z: 0.18, ry: 0.15, s: 0.55 },
     ],
     shot: { az: 0.3, dist: 10.5, height: 4.2, look: 0.8, layout: 'b' },
+    heroScale: 0.72,
   },
   {
     // Your next system: a blueprint that keeps building itself
