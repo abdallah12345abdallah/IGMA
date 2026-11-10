@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { clients, company, contact, footer, markets, nav, plans, services, systems } from '../content/site'
 import { ServiceVisual, type ServiceKind } from './ServiceVisual'
 import { MarketsMap } from './MarketsMap'
@@ -165,30 +165,43 @@ export function Plans() {
   )
 }
 
-/** Short code shown on each client's tile, by system. */
-const CLIENT_MARK: Record<string, string> = { erp: 'ERP', logistics: 'LOG', gym: 'GYM', restaurant: 'RES', learning: 'EDU' }
-
-function ClientTile({ c }: { c: (typeof clients.items)[number] }) {
-  const sys = systems.find((s) => s.id === c.id)
-  return (
-    <a className="cl__tile" href={`#/systems/${c.id}`} tabIndex={-1} style={{ ['--c' as string]: sys?.color }}>
-      <span className="cl__mark" dir="ltr">
-        {CLIENT_MARK[c.id]}
-      </span>
-      <span>
-        <b>{c.sector}</b>
-        <small>
-          {c.system} · {c.place}
-        </small>
-      </span>
-    </a>
-  )
-}
+/** Where each polaroid hangs on the board (right %, top %) and how it tilts. */
+const PIN_SPOTS = [
+  { right: 4, top: 7, r: -6 },
+  { right: 36, top: 3, r: 4 },
+  { right: 70, top: 8, r: -3 },
+  { right: 8, top: 57, r: 5 },
+  { right: 68, top: 58, r: -4 },
+]
 
 export function Clients() {
-  // each ribbon repeats the list so the loop never shows a gap
-  const forward = [...clients.items, ...clients.items, ...clients.items, ...clients.items]
-  const back = [...forward].reverse()
+  const boardRef = useRef<HTMLDivElement>(null)
+  const [strings, setStrings] = useState<string[]>([])
+  // Red strings run from each pin to IGMA in the middle; redrawn whenever the board changes size.
+  useLayoutEffect(() => {
+    const bd = boardRef.current
+    if (!bd) return
+    const draw = () => {
+      const b = bd.getBoundingClientRect()
+      const hub = bd.querySelector('.cl__hub')?.getBoundingClientRect()
+      if (!hub) return
+      const hx = hub.left + hub.width / 2 - b.left
+      const hy = hub.top + hub.height / 2 - b.top
+      setStrings(
+        [...bd.querySelectorAll('.cl__pol')].map((p) => {
+          const r = p.getBoundingClientRect()
+          const x = r.left + r.width / 2 - b.left
+          const y = r.top + 4 - b.top
+          return `M${x} ${y} Q ${(x + hx) / 2} ${Math.max(y, hy) + 40} ${hx} ${hy}`
+        }),
+      )
+    }
+    draw()
+    const ro = new ResizeObserver(draw)
+    ro.observe(bd)
+    return () => ro.disconnect()
+  }, [])
+
   return (
     <section className="section cl" id="clients" data-nav="light" aria-labelledby="clients-title">
       <div className="container">
@@ -196,44 +209,39 @@ export function Clients() {
           <p className="kicker">{clients.kicker}</p>
           <h2 id="clients-title">{clients.title}</h2>
         </header>
-        {/* the readable list, for keyboards and screen readers */}
-        <ul className="sr-only">
-          {clients.items.map((c) => (
-            <li key={c.sector}>
-              <a href={`#/systems/${c.id}`}>
-                {c.sector}: {c.system}، {c.place}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-      {/* two ribbons crossing in an X, each running its own way; they pause under the pointer */}
-      <div className="cl__ribbons" aria-hidden="true">
-        <div className="cl__ribbon cl__ribbon--light">
-          <div className="cl__track">
-            {back.map((c, i) => (
-              <ClientTile key={i} c={c} />
+        <div className="cl__board" ref={boardRef}>
+          <svg className="cl__strings" aria-hidden="true">
+            {strings.map((d, i) => (
+              <path key={i} d={d} />
             ))}
+          </svg>
+          <div className="cl__hub">
+            <b dir="ltr">IGMA</b>
+            <small>نظام واحد، عملاء حقيقيون</small>
           </div>
+          <ul className="cl__pols">
+            {clients.items.map((c, i) => {
+              const k = systems.findIndex((s) => s.id === c.id)
+              const spot = PIN_SPOTS[i % PIN_SPOTS.length]
+              return (
+                <li
+                  key={c.sector}
+                  className="cl__pol"
+                  style={{ ['--c' as string]: systems[k]?.color, ['--r' as string]: `${spot.r}deg`, ['--x' as string]: `${spot.right}%`, ['--y' as string]: `${spot.top}%` }}
+                >
+                  <a href={`#/systems/${c.id}`}>
+                    {/* the system's own scene from the 3D tour */}
+                    <img src={`/stops/d-${k + 1}.webp`} alt={`بيئة عمل ${c.sector}`} loading="lazy" decoding="async" />
+                    <b>{c.sector}</b>
+                    <small>
+                      {c.system} · {c.place}
+                    </small>
+                  </a>
+                </li>
+              )
+            })}
+          </ul>
         </div>
-        <div className="cl__ribbon cl__ribbon--dark">
-          <div className="cl__track">
-            {forward.map((c, i) => (
-              <ClientTile key={i} c={c} />
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="container cl__stats">
-        <span>
-          <b>{clients.items.length}</b>أنظمة تعمل لدى عملاء
-        </span>
-        <span>
-          <b>{markets.regions.length}</b>سوقان: مصر والسعودية
-        </span>
-        <span>
-          <b>{systems.length}</b>أنظمة جاهزة، ونبني السابع حسب طلبك
-        </span>
       </div>
     </section>
   )
