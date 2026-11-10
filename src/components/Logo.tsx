@@ -45,7 +45,7 @@ export function Logo({ className, title = 'IGMA', live = false }: { className?: 
         </defs>
         <g className="logo__one">{ring}</g>
         <g className="logo__two">
-          <rect x="43" y="17" width="50" height="50" rx="14" fill="none" stroke="var(--logo-accent, #e9a23b)" strokeWidth="13" />
+          <rect x="43" y="17" width="50" height="50" rx="14" fill="none" stroke="var(--logo-accent, #f2b25c)" strokeWidth="13" />
           {live && <rect className="logo__spark" x="43" y="17" width="50" height="50" rx="14" fill="none" strokeWidth="13" pathLength={100} />}
         </g>
         <g className="logo__one" clipPath={`url(#over-${id})`}>

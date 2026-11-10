@@ -432,7 +432,7 @@ function ParticleMark() {
       ctx.clearRect(0, 0, W, H)
       for (const p of pts) {
         const sp = Math.min(1, Math.hypot(p.vx, p.vy) / 6)
-        ctx.fillStyle = sp > 0.15 ? `rgba(255, 214, 140, ${0.65 + sp * 0.35})` : p.a ? 'rgba(255, 196, 110, 0.9)' : 'rgba(246, 226, 196, 0.6)'
+        ctx.fillStyle = sp > 0.15 ? `rgba(242, 178, 92, ${0.65 + sp * 0.35})` : p.a ? 'rgba(242, 178, 92, 0.9)' : 'rgba(246, 226, 196, 0.6)'
         ctx.fillRect(p.x, p.y, p.s, p.s)
       }
     }

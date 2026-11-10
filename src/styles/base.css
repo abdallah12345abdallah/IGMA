@@ -203,7 +203,7 @@ h3 {
 
 /* ---------- scrollbar: thin, widens on hover; takes the colour of the system on screen in the tour ---------- */
 :root {
-  --sb: #7a3a12;
+  --sb: #1a5a4f;
   scrollbar-color: var(--sb) color-mix(in srgb, var(--sb) 14%, #efebe3);
   scrollbar-width: thin;
 }
@@ -218,14 +218,14 @@ h3 {
 ::-webkit-scrollbar-thumb {
   border: 3px solid transparent;
   border-radius: 7px;
-  background: linear-gradient(var(--sb), color-mix(in srgb, var(--sb) 75%, #ffd68c)) padding-box;
+  background: linear-gradient(var(--sb), color-mix(in srgb, var(--sb) 75%, #f2b25c)) padding-box;
   min-height: 60px;
 }
 ::-webkit-scrollbar-thumb:hover {
   border-width: 1px;
 }
 ::-webkit-scrollbar-thumb:active {
-  background: #ffd68c padding-box;
+  background: #f2b25c padding-box;
 }
 ::-webkit-scrollbar-corner {
   background: transparent;
@@ -233,8 +233,8 @@ h3 {
 
 /* ---------- text selection: amber with burnt-brown text ---------- */
 ::selection {
-  background: #ffd68c;
-  color: #4a2008;
+  background: #f2b25c;
+  color: #0b2c27;
   text-shadow: none;
 }
 
@@ -276,10 +276,10 @@ h3 {
   stroke-width: 1.5;
 }
 .totop__track {
-  stroke: rgba(90, 42, 12, 0.22);
+  stroke: rgba(15, 59, 52, 0.22);
 }
 .totop__fill {
-  stroke: #d98a2b;
+  stroke: #c98a2e;
   stroke-linecap: round;
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
@@ -291,8 +291,8 @@ h3 {
   width: 52px;
   height: 52px;
   border-radius: 9px;
-  background: linear-gradient(160deg, #7a3a12, #5a2a0c 60%, #4a2008);
-  color: #fff3e2;
+  background: linear-gradient(160deg, #1a5a4f, #0f3b34 60%, #0b2c27);
+  color: #f3f1e8;
   overflow: hidden;
   translate: var(--mx) var(--my);
   transition:
@@ -309,10 +309,10 @@ h3 {
   stroke-linejoin: round;
 }
 .totop:hover .totop__box {
-  background: linear-gradient(160deg, #c2501a, #a5370a 60%, #8a2d08);
+  background: linear-gradient(160deg, #d69a45, #c98a2e 60%, #a8701f);
 }
 .totop:hover .totop__fill {
-  stroke: #ffd68c;
+  stroke: #f2b25c;
 }
 .totop:hover .totop__box svg {
   animation: totop-shoot 0.75s cubic-bezier(0.6, 0, 0.3, 1);
@@ -324,7 +324,7 @@ h3 {
   outline: none;
 }
 .totop:focus-visible .totop__box {
-  outline: 2px solid #ffd68c;
+  outline: 2px solid #f2b25c;
   outline-offset: 2px;
 }
 @keyframes totop-shoot {

@@ -114,16 +114,16 @@
 /* ---------- islands: two pieces of burnt-brown glass, in the same place from the hero to the footer.
    No shadows; a thin amber light runs along the top edge of each. ---------- */
 .nav {
-  --glass: rgba(90, 42, 12, 0.34);
-  --edge: rgba(255, 214, 140, 0.55);
-  --text: #fff3e2;
-  --amber: #ffd68c;
+  --glass: rgba(15, 59, 52, 0.34);
+  --edge: rgba(242, 178, 92, 0.55);
+  --text: #f3f1e8;
+  --amber: #f2b25c;
   color: var(--text);
   gap: 12px;
 }
 /* over the light sections the glass gets denser so the text stays readable */
 .nav--ink {
-  --glass: rgba(90, 42, 12, 0.84);
+  --glass: rgba(15, 59, 52, 0.84);
   color: var(--text);
 }
 .nav__island {
@@ -141,9 +141,9 @@
 /* the opening view on the light sand: barely tinted glass with brown text */
 .nav--top {
   --glass: transparent;
-  --edge: rgba(90, 42, 12, 0.35);
-  --text: #4a2008;
-  --amber: #a5370a;
+  --edge: rgba(15, 59, 52, 0.35);
+  --text: #0b2c27;
+  --amber: #b7792a;
 }
 .nav--top .nav__island::before {
   display: none;
@@ -160,18 +160,18 @@
   border-inline-end-color: transparent;
 }
 .nav--top .nav__links a:hover {
-  background: rgba(90, 42, 12, 0.08);
+  background: rgba(15, 59, 52, 0.08);
 }
 .nav--top .nav__cta {
-  background: #4a2008;
-  color: #fff3e2;
+  background: #0b2c27;
+  color: #f3f1e8;
 }
 .nav--top .nav__cta:hover {
-  background: #a5370a;
+  background: #1a5a4f;
 }
 .nav--top .nav__arrow {
-  background: #fff3e2;
-  color: #4a2008;
+  background: #f3f1e8;
+  color: #0b2c27;
 }
 .nav--top .nav__talk i {
   background: #1e9e64;
@@ -184,7 +184,7 @@
 .nav__brand {
   display: flex;
   align-items: center;
-  --logo-accent: #ffd68c;
+  --logo-accent: #f2b25c;
 }
 .nav__brand svg {
   display: block;
@@ -192,7 +192,7 @@
   width: auto;
 }
 .nav--top .nav__brand {
-  --logo-accent: #d98a2b;
+  --logo-accent: #c98a2e;
 }
 
 /* the light along the top edge, fading out towards the ends */
@@ -203,7 +203,7 @@
   border-radius: inherit;
   padding: 1px;
   background: linear-gradient(90deg, transparent 4%, var(--edge) 50%, transparent 96%) top / 100% 1px no-repeat,
-    linear-gradient(rgba(255, 214, 140, 0.16), rgba(255, 214, 140, 0.06));
+    linear-gradient(rgba(242, 178, 92, 0.16), rgba(242, 178, 92, 0.06));
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -225,7 +225,7 @@
   font-size: 22px;
   padding-inline-end: 16px;
   margin-inline-end: 4px;
-  border-inline-end: 1px solid rgba(255, 214, 140, 0.25);
+  border-inline-end: 1px solid rgba(242, 178, 92, 0.25);
 }
 .nav__links {
   position: relative;
@@ -257,7 +257,7 @@
   height: 38px;
   margin-top: -19px;
   border-radius: 6px;
-  background: rgba(255, 214, 140, 0.14);
+  background: rgba(242, 178, 92, 0.14);
   transition:
     transform 0.5s cubic-bezier(0.3, 1.3, 0.5, 1),
     width 0.5s cubic-bezier(0.3, 1.3, 0.5, 1);
@@ -317,7 +317,7 @@
   border: 0;
   border-radius: 6px;
   background: var(--text);
-  color: #5a2a0c;
+  color: #0f3b34;
   transition: background-color 0.25s;
 }
 .nav__cta:hover {
@@ -329,7 +329,7 @@
   width: 26px;
   height: 26px;
   border-radius: 4px;
-  background: #5a2a0c;
+  background: #0f3b34;
   color: var(--text);
   transition: transform 0.35s var(--ease-out);
 }
@@ -1913,7 +1913,7 @@ button.sm__tag:hover {
 
 /* ========== FOOTER: burnt brown, with the IGMA wordmark drawn from points ========== */
 .ft {
-  background: #5a2a0c;
+  background: #0f3b34;
   color: #f6eadc;
   padding-block: 30px 24px;
 }
@@ -1947,21 +1947,21 @@ button.sm__tag:hover {
   gap: 1px;
 }
 .ft__offices b {
-  color: #fff3e2;
+  color: #f3f1e8;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 15px;
 }
 .ft__offices a {
   font-family: ui-monospace, Consolas, monospace;
-  color: #fff3e2;
+  color: #f3f1e8;
 }
 .ft__offices a:hover {
-  color: #ffd68c;
+  color: #f2b25c;
 }
 .ft__offices small {
   font-size: 12.5px;
-  color: #ffd68c;
+  color: #f2b25c;
 }
 .ft__nav {
   display: flex;
@@ -1971,7 +1971,7 @@ button.sm__tag:hover {
   color: rgba(246, 234, 220, 0.75);
 }
 .ft__nav a:hover {
-  color: #ffd68c;
+  color: #f2b25c;
 }
 .ft__legal {
   margin-top: auto;
@@ -2096,7 +2096,7 @@ button.sm__tag:hover {
 }
 @keyframes logo-dot {
   50% {
-    fill: var(--logo-accent, #e9a23b);
+    fill: var(--logo-accent, #f2b25c);
   }
 }
 @media (prefers-reduced-motion: reduce) {

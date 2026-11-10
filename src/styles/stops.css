@@ -1215,22 +1215,22 @@
 }
 /* burnt brown is the main colour of the opening view */
 .tour__pin[data-tone='light'] .stop--hero .btn--solid {
-  background: #5a2a0c;
-  border-color: #5a2a0c;
-  color: #fff3e2;
+  background: #0f3b34;
+  border-color: #0f3b34;
+  color: #f3f1e8;
 }
 .tour__pin[data-tone='light'] .stop--hero .btn--solid:hover {
-  background: #a5370a;
-  border-color: #a5370a;
-  color: #fff3e2;
+  background: #1a5a4f;
+  border-color: #1a5a4f;
+  color: #f3f1e8;
 }
 .tour__pin[data-tone='light'] .stop--hero .btn--line {
-  border-color: rgba(90, 42, 12, 0.45);
-  color: #5a2a0c;
+  border-color: rgba(15, 59, 52, 0.45);
+  color: #0f3b34;
 }
 .tour__pin[data-tone='light'] .stop--hero .btn--line:hover {
-  background: rgba(90, 42, 12, 0.08);
-  border-color: #5a2a0c;
+  background: rgba(15, 59, 52, 0.08);
+  border-color: #0f3b34;
 }
 .stop--hero .s-meta {
   align-items: center;
@@ -1240,7 +1240,7 @@
   content: '';
   width: 26px;
   height: 2px;
-  background: #a5370a;
+  background: #c98a2e;
 }
 
 @media (min-width: 768px) {
@@ -1286,7 +1286,7 @@
     right: var(--gutter);
     bottom: 60px;
     height: 1px;
-    background: rgba(90, 42, 12, 0.18);
+    background: rgba(15, 59, 52, 0.18);
     opacity: 0;
     transition: opacity 0.6s 0.5s;
   }
@@ -1325,9 +1325,9 @@
 /* main: burnt orange spreads in a circle from where the pointer enters; an arrow slides in after the words */
 .tour__pin[data-tone='light'] .stop--hero .btn--roll,
 .tour__pin[data-tone='light'] .stop--hero .btn--roll:hover {
-  background: #5a2a0c;
-  border-color: #5a2a0c;
-  color: #fff3e2;
+  background: #0f3b34;
+  border-color: #0f3b34;
+  color: #f3f1e8;
 }
 .stop--hero .btn--roll {
   display: inline-flex;
@@ -1346,7 +1346,7 @@
   height: 320px;
   margin: -160px 0 0 -160px;
   border-radius: 50%;
-  background: #a5370a;
+  background: #1a5a4f;
   transform: scale(0);
   transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
   z-index: -1;
@@ -1401,12 +1401,12 @@
 /* secondary: brown rises from the bottom like liquid, the words turn cream */
 .tour__pin[data-tone='light'] .stop--hero .btn--rise,
 .tour__pin[data-tone='light'] .stop--hero .btn--rise:hover {
-  background: linear-gradient(#5a2a0c, #5a2a0c) bottom / 100% 0% no-repeat;
+  background: linear-gradient(#0f3b34, #0f3b34) bottom / 100% 0% no-repeat;
 }
 .tour__pin[data-tone='light'] .stop--hero .btn--rise:hover {
   background-size: 100% 100%;
-  border-color: #5a2a0c;
-  color: #fff3e2;
+  border-color: #0f3b34;
+  color: #f3f1e8;
 }
 .stop--hero .btn--rise:hover span {
   transform: translateY(-1px);

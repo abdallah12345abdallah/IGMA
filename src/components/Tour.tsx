@@ -31,7 +31,7 @@ const fillFrom = (e: React.PointerEvent<HTMLElement>) => {
   e.currentTarget.style.setProperty('--fx', `${e.clientX - r.left}px`)
   e.currentTarget.style.setProperty('--fy', `${e.clientY - r.top}px`)
 }
-const SCROLL_BROWN = '#7a3a12' // the scrollbar outside the tour
+const SCROLL_BROWN = '#1a5a4f' // the scrollbar outside the tour
 
 export function Tour() {
   const reduced = useReducedMotion()
