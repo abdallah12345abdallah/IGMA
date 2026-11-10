@@ -67,7 +67,7 @@ export function Nav() {
   const close = () => setOpen(false)
 
   return (
-    <header className={`nav ${light ? 'nav--ink' : ''} ${docked ? 'nav--docked' : ''}`}>
+    <header className={`nav ${light ? 'nav--ink' : ''} ${docked ? 'nav--docked' : ''} ${light && !docked ? 'nav--top' : ''}`}>
       <div className="nav__island nav__island--main">
         <a className="nav__brand" href="#top" aria-label={`${company.name}، الصفحة الرئيسية`} onClick={close} dir="ltr">
           {company.name}

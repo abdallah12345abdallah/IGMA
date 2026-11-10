@@ -138,6 +138,41 @@
   -webkit-backdrop-filter: blur(18px) saturate(1.5);
   transition: background-color 0.5s;
 }
+/* the opening view on the light sand: barely tinted glass with brown text */
+.nav--top {
+  --glass: rgba(90, 42, 12, 0.08);
+  --edge: rgba(90, 42, 12, 0.35);
+  --text: #4a2008;
+  --amber: #a5370a;
+}
+.nav--top .nav__island::before {
+  background: linear-gradient(90deg, transparent 4%, var(--edge) 50%, transparent 96%) top / 100% 1px no-repeat,
+    linear-gradient(rgba(90, 42, 12, 0.18), rgba(90, 42, 12, 0.08));
+}
+.nav--top .nav__brand {
+  border-inline-end-color: rgba(90, 42, 12, 0.2);
+}
+.nav--top .nav__links a:hover {
+  background: rgba(90, 42, 12, 0.08);
+}
+.nav--top .nav__cta {
+  background: #4a2008;
+  color: #fff3e2;
+}
+.nav--top .nav__cta:hover {
+  background: #a5370a;
+}
+.nav--top .nav__arrow {
+  background: #fff3e2;
+  color: #4a2008;
+}
+.nav--top .nav__talk i {
+  background: #1e9e64;
+}
+.nav--top .nav__talk i::after {
+  border-color: #1e9e64;
+}
+
 /* the light along the top edge, fading out towards the ends */
 .nav__island::before {
   content: '';
