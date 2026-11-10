@@ -49,7 +49,7 @@ THREE.DefaultLoadingManager.onProgress = (_url, loaded, total) => {
 MODEL_FILES.forEach((f) => useGLTF.preload(url(f)))
 
 /** Background colour per stop: sand for the overview, then each system's colour. */
-const SAND = new THREE.Color('#C6C0B2')
+const SAND = new THREE.Color('#c3cac0')
 const STOP_COLORS = [SAND, ...tourStops.map((s) => new THREE.Color(s.color))]
 
 /* ---------- one shader for (nearly) everything ----------
@@ -259,6 +259,7 @@ function useLamp(scenes: Record<string, THREE.Object3D>) {
     spot.shadow.mapSize.set(2048, 2048)
     spot.shadow.bias = -0.0003
     spot.shadow.normalBias = 0.03
+    spot.shadow.intensity = 0.5 // softer shadows under the objects
     return { rig, beam, spot, bottom, bulbMat }
   }, [scenes])
 }
@@ -498,9 +499,9 @@ const SHADOW_TEX = (() => {
   c.width = c.height = 256
   const x = c.getContext('2d')!
   const g = x.createRadialGradient(128, 128, 0, 128, 128, 128)
-  g.addColorStop(0, 'rgba(0,0,0,.55)')
-  g.addColorStop(0.35, 'rgba(0,0,0,.38)')
-  g.addColorStop(0.7, 'rgba(0,0,0,.1)')
+  g.addColorStop(0, 'rgba(0,0,0,.26)')
+  g.addColorStop(0.35, 'rgba(0,0,0,.17)')
+  g.addColorStop(0.7, 'rgba(0,0,0,.05)')
   g.addColorStop(1, 'rgba(0,0,0,0)')
   x.fillStyle = g
   x.fillRect(0, 0, 256, 256)
@@ -738,6 +739,7 @@ export default function Showroom({ reduced, mobile, fixedStop, interactive = fal
         shadow-mapSize={[mobile ? 1024 : 2048, mobile ? 1024 : 2048]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.03}
+        shadow-intensity={0.5}
         shadow-camera-left={-12}
         shadow-camera-right={12}
         shadow-camera-top={12}

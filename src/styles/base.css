@@ -204,7 +204,7 @@ h3 {
 /* ---------- scrollbar: thin, widens on hover; takes the colour of the system on screen in the tour ---------- */
 :root {
   --sb: #1a5a4f;
-  scrollbar-color: var(--sb) color-mix(in srgb, var(--sb) 14%, #efebe3);
+  scrollbar-color: var(--sb) color-mix(in srgb, var(--sb) 14%, #e8ece5);
   scrollbar-width: thin;
 }
 ::-webkit-scrollbar {
@@ -212,7 +212,7 @@ h3 {
   height: 14px;
 }
 ::-webkit-scrollbar-track {
-  background: color-mix(in srgb, var(--sb) 12%, #efebe3);
+  background: color-mix(in srgb, var(--sb) 12%, #e8ece5);
   border-inline-start: 1px solid color-mix(in srgb, var(--sb) 22%, transparent);
 }
 ::-webkit-scrollbar-thumb {
@@ -309,7 +309,7 @@ h3 {
   stroke-linejoin: round;
 }
 .totop:hover .totop__box {
-  background: linear-gradient(160deg, #d69a45, #c98a2e 60%, #a8701f);
+  background: linear-gradient(160deg, #23705f, #1a5a4f 60%, #134a41);
 }
 .totop:hover .totop__fill {
   stroke: #f2b25c;

@@ -3,8 +3,8 @@
   Design tokens. Chapter colours live with each system in content/site.ts.
 */
 :root {
-  --sand: #d9d5cb;
-  --sand-2: #cac5b9;
+  --sand: #d5dbd2;
+  --sand-2: #c3cbc1;
   --ink: #0a1916;
   --ink-2: #3b4945;
   --green: #08583f;

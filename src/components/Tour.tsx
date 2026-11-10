@@ -25,7 +25,7 @@ const smooth = (v: number) => {
   const c = clamp(v, 0, 1)
   return c * c * (3 - 2 * c)
 }
-const SAND = '#C6C0B2'
+const SAND = '#c3cac0'
 const fillFrom = (e: React.PointerEvent<HTMLElement>) => {
   const r = e.currentTarget.getBoundingClientRect()
   e.currentTarget.style.setProperty('--fx', `${e.clientX - r.left}px`)

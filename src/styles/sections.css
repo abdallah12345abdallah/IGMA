@@ -395,7 +395,7 @@
 .sv {
   position: relative;
   overflow: hidden;
-  background: #efebe3;
+  background: #e8ece5;
   padding-block: clamp(56px, 7vw, 88px);
 }
 .sv__head {
@@ -767,7 +767,7 @@
   --eg: #a5370a;
   --sa: #0b5a3e;
   --sea: #2f7fa3;
-  background: #efebe3;
+  background: #e8ece5;
 }
 .mk__head h2 {
   margin-top: 10px;
@@ -946,7 +946,7 @@
 .pl {
   position: relative;
   overflow: hidden;
-  background: #efebe3; /* same ground as the markets section, so the two run together */
+  background: #e8ece5; /* same ground as the markets section, so the two run together */
 }
 /* soft colour pools drawn as radial gradients (no blur filter, so no clipped edges),
    kept clear of the section's top and bottom so nothing stops abruptly */
@@ -1034,7 +1034,7 @@
 .pl__card.is-main {
   padding-block: 40px;
   background: rgba(10, 25, 22, 0.86);
-  color: #f4f1ea;
+  color: #eef1eb;
   border-color: rgba(255, 255, 255, 0.15);
 }
 .pl__card h3 {
@@ -1120,7 +1120,7 @@
 /* clients: a cork board of polaroids (each the client's system scene from the tour),
    pinned and tied to IGMA in the middle with red string */
 .cl {
-  background: #efebe3;
+  background: #e8ece5;
 }
 .cl__board {
   position: relative;
@@ -1261,7 +1261,7 @@
 /* ========== DEMO ========== */
 /* demo: book a slot. Day and time on one panel, the visitor's details and the suggested slot on the other */
 .demo {
-  background: #e4dfd5;
+  background: #dfe4db;
   color: var(--ink);
   padding-block: clamp(72px, 10vw, 128px);
 }
@@ -1273,7 +1273,7 @@
 }
 /* demo, smart line: one big box with a slowly turning gradient frame; tags show what was understood */
 .sm {
-  background: radial-gradient(70% 60% at 50% 0%, #ffffff, #e4dfd5);
+  background: radial-gradient(70% 60% at 50% 0%, #ffffff, #dfe4db);
   text-align: center;
 }
 .sm__head h2 {

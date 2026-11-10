@@ -14,7 +14,7 @@ html.is-locked body {
   position: absolute;
 }
 .tour__pin {
-  --c: #c6c0b2;
+  --c: #c3cac0;
   --fg: var(--on);
   --fg-70: var(--on-70);
   --fg-line: var(--on-line);
