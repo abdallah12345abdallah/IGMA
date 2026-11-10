@@ -849,10 +849,9 @@
   font-size: 13px;
   line-height: 1.4;
   box-shadow: 0 12px 28px rgba(5, 12, 40, 0.28);
-  opacity: 0.32;
-  transform: translateX(calc(var(--k) * -14px)) scale(0.94);
+  transform: translateX(calc(var(--k) * -14px)) scale(0.96);
   transition:
-    opacity 0.5s,
+    box-shadow 0.4s,
     transform 0.6s var(--ease-out);
 }
 .toast:nth-child(2) { --dc: #0b4246; }
@@ -878,8 +877,8 @@
 .stop--erp:has(.stop-steps li:nth-child(2).is-lit) .toast:nth-child(2),
 .stop--erp:has(.stop-steps li:nth-child(3).is-lit) .toast:nth-child(3),
 .stop--erp:has(.stop-steps li:nth-child(4).is-lit) .toast:nth-child(4) {
-  opacity: 1;
-  transform: translateX(calc(var(--k) * -14px));
+  transform: translateX(calc(var(--k) * -14px - 10px));
+  box-shadow: 0 0 0 2px var(--dc), 0 16px 34px rgba(5, 12, 40, 0.32);
 }
 
 /* logistics: a live route above the cartons and a tracking card */
@@ -1004,10 +1003,9 @@
   font-size: 13px;
   line-height: 1.4;
   box-shadow: 0 14px 30px rgba(60, 20, 0, 0.28);
-  opacity: 0.35;
-  transform: translateY(10px) scale(0.95);
+  transform: scale(0.96);
   transition:
-    opacity 0.5s,
+    box-shadow 0.4s,
     transform 0.6s var(--ease-out);
 }
 .lc b {
@@ -1100,8 +1098,8 @@
 .stop--learning:has(.stop-steps li:nth-child(2).is-lit) .lc--students,
 .stop--learning:has(.stop-steps li:nth-child(3).is-lit) .lc--quiz,
 .stop--learning:has(.stop-steps li:nth-child(4).is-lit) .lc--cert {
-  opacity: 1;
-  transform: none;
+  transform: translateY(-8px);
+  box-shadow: 0 0 0 2px var(--c), 0 18px 36px rgba(60, 20, 0, 0.32);
 }
 .stop--learning:has(.stop-steps li:nth-child(1).is-lit) .lc__bar i {
   width: 100%;
