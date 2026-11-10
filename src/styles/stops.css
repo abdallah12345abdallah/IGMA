@@ -564,10 +564,11 @@
     font-size: 13.5px;
     padding-top: 4px;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
-    opacity: 0.35;
+    color: #7d8a74;
   }
   .idcard .stop-steps li.is-lit {
-    opacity: 1;
+    color: #233a09;
+    font-weight: 600;
   }
   .idcard em {
     font-style: normal;
