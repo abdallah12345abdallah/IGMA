@@ -127,199 +127,140 @@
   color: var(--sand-2);
 }
 
-/* services: all four always visible, each opening with a small live illustration */
-.svc__head {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  gap: 16px 72px;
-  align-items: end;
+/* services: four panels in each service's colour; the one in focus widens and shows a small live drawing */
+.sv {
+  background: var(--ink);
+  color: #f4f1ea;
+  padding-block: clamp(56px, 7vw, 88px);
 }
-.svc__head h2 {
-  margin-top: 10px;
+.sv .kicker {
+  color: #8fd3b6;
+}
+.sv__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px 40px;
+}
+.sv__head h2 {
+  margin-top: 8px;
+  max-width: 22ch;
   font-weight: 800;
-  font-size: clamp(32px, 3.8vw, 52px);
-  line-height: 1.25;
+  font-size: clamp(28px, 3.4vw, 46px);
+  line-height: 1.2;
   text-wrap: balance;
 }
-.svc__lede {
-  font-size: 18px;
-  color: var(--ink-2);
-  max-width: 48ch;
-}
-.svc__grid {
-  margin-top: clamp(40px, 5vw, 64px);
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 40px 24px;
-}
-.svc__item h3 {
-  margin-top: 20px;
-  font-weight: 800;
-  font-size: 22px;
-  line-height: 1.35;
-}
-.svc__item p {
-  margin-top: 8px;
+.sv__lede {
+  max-width: 46ch;
   font-size: 16px;
-  line-height: 1.7;
-  color: var(--ink-2);
+  color: rgba(244, 241, 234, 0.7);
 }
-.svc__vis {
+.sv__rows {
+  margin-top: 28px;
+  display: flex;
+  gap: 10px;
+  height: 340px;
+}
+.sv__row {
   position: relative;
-  aspect-ratio: 4 / 3;
-  border-radius: 16px;
-  overflow: hidden;
-  background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--c) 55%, #0a1916), #0a1916 70%);
-  color: #fffbf2;
-  box-shadow: 0 24px 40px -28px rgba(10, 25, 22, 0.7);
-  transition: transform 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out);
-}
-.svc__item:hover .svc__vis {
-  transform: translateY(-6px);
-  box-shadow: 0 34px 50px -30px rgba(10, 25, 22, 0.75);
-}
-@media (max-width: 1100px) {
-  .svc__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (max-width: 760px) {
-  .svc__head,
-  .svc__grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-/* the illustrations */
-.sv {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.sv-line {
-  stroke: rgba(255, 251, 242, 0.3);
-  stroke-width: 1.5;
-  fill: none;
-}
-.sv-dot {
-  fill: #8fd3b6;
-}
-.sv-node {
-  fill: #10211d;
-  stroke: rgba(255, 251, 242, 0.45);
-}
-.sv-hub {
-  fill: color-mix(in srgb, var(--c) 70%, #8fd3b6);
-}
-.sv-lbl {
-  font-family: var(--font-body);
-  font-size: 14px;
-  fill: #fffbf2;
-}
-.sv-lbl--b {
-  font-weight: 700;
-}
-.sv-lbl--dim {
-  opacity: 0.55;
-}
-.sv-pulse {
-  fill: #8fd3b6;
-  animation: sv-pulse 2.7s ease-in-out infinite;
-}
-@keyframes sv-pulse {
-  0%,
-  100% {
-    opacity: 0.25;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-.sv--code {
-  padding: 13% 9%;
-  font: 13px/1.95 ui-monospace, Consolas, monospace;
-  direction: ltr;
-  text-align: left;
-}
-.sv--code i {
-  display: block;
-  font-style: normal;
-  white-space: nowrap;
-  overflow: hidden;
-  width: 0;
-  animation: sv-type 7s steps(30) infinite;
-}
-.sv--code i:nth-child(2) { animation-delay: 0.6s; }
-.sv--code i:nth-child(3) { animation-delay: 1.2s; }
-.sv--code i:nth-child(4) { animation-delay: 1.8s; }
-.sv--code i:nth-child(5) { animation-delay: 2.4s; }
-.sv--code b { color: #f0b46b; font-weight: 400; }
-.sv--code em { color: #8fd3b6; font-style: normal; }
-.sv--code u { color: rgba(255, 251, 242, 0.5); text-decoration: none; }
-@keyframes sv-type {
-  0% { width: 0; }
-  30%, 88% { width: 100%; }
-  100% { width: 0; }
-}
-.sv-browser {
-  position: absolute;
-  inset: 13% 11%;
-  background: #fffbf2;
-  border-radius: 8px;
-  overflow: hidden;
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-bottom: 10px;
+  justify-content: flex-end;
+  padding: 22px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--c) 85%, #000);
+  cursor: pointer;
+  transition: flex 0.7s var(--ease-out);
 }
-.sv-top {
-  height: 20px;
-  background: #e5e0d4;
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  padding-inline: 9px;
+.sv__row.is-open {
+  flex: 2.6;
 }
-.sv-top span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #b9b2a2;
+.sv__row:focus-visible {
+  outline: 2px solid #8fd3b6;
+  outline-offset: 3px;
 }
-.sv-blk {
-  margin-inline: 10px;
-  height: 10px;
-  border-radius: 3px;
-  background: #d9d2c4;
-  transform-origin: right;
-  animation: sv-grow 6s var(--ease-out) infinite;
+.sv__num {
+  position: absolute;
+  top: 16px;
+  right: 22px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 64px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.12);
 }
-.sv-blk--hero {
-  height: 34px;
-  background: var(--c);
+.sv__row h3 {
+  font-weight: 800;
+  font-size: 21px;
+  line-height: 1.3;
 }
-.sv-browser > .sv-blk:nth-of-type(2) { width: 70%; animation-delay: 0.3s; }
-.sv-browser > .sv-blk:nth-of-type(3) { width: 50%; animation-delay: 0.6s; }
-.sv-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-inline: 10px;
+.sv__row p {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.86);
 }
-.sv-row .sv-blk {
-  margin: 0;
-  height: 26px;
-  animation-delay: 0.9s;
+.sv__viz {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 150px;
+  height: 100px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.5s 0.2s,
+    transform 0.6s 0.2s var(--ease-out);
 }
-@keyframes sv-grow {
-  0% { transform: scaleX(0); }
-  22%, 86% { transform: scaleX(1); }
-  100% { transform: scaleX(0); }
+.sv__row.is-open .sv__viz {
+  opacity: 1;
+  transform: none;
+}
+.sv__viz i {
+  position: absolute;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.22);
+  animation: sv-pulse 2.4s ease-in-out infinite;
+}
+@keyframes sv-pulse {
+  50% {
+    background: rgba(255, 255, 255, 0.42);
+  }
+}
+@media (max-width: 860px) {
+  .sv__num {
+    font-size: 48px;
+  }
+  .sv__viz {
+    transform: scale(0.7);
+    transform-origin: top left;
+  }
+  .sv__row.is-open .sv__viz {
+    transform: scale(0.7);
+  }
+  .sv__rows {
+    flex-direction: column;
+    height: auto;
+  }
+  .sv__row,
+  .sv__row.is-open {
+    flex: none;
+    min-height: 160px;
+    padding-top: 74px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sv--code i { width: 100%; animation: none; }
-  .sv-blk, .sv-pulse { animation: none; transform: none; opacity: 1; }
+  .sv__row,
+  .sv__viz {
+    transition: none;
+  }
+  .sv__viz i {
+    animation: none;
+  }
 }
 
 /* markets: a dotted map of the region with a card beside each country */

@@ -1,35 +1,63 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { clients, company, contact, footer, markets, nav, plans, services, systems } from '../content/site'
-import { ServiceVisual, type ServiceKind } from './ServiceVisual'
 import { MarketsMap } from './MarketsMap'
 
-/** Each service's live illustration and its accent from the system palette. */
-const SVC_LOOK: { kind: ServiceKind; color: string }[] = [
-  { kind: 'flow', color: '#18306F' },
-  { kind: 'code', color: '#A5370A' },
-  { kind: 'nodes', color: '#0B4246' },
-  { kind: 'web', color: '#860F30' },
+/** Each service's colour, and the little live drawing shown when its panel opens (x, y, w, h). */
+const SVC_COLOR = ['#18306F', '#A5370A', '#0B4246', '#860F30']
+const SVC_VIZ: [number, number, number, number][][] = [
+  // automation: three steps in a row
+  [[0, 40, 40, 22], [55, 40, 40, 22], [110, 40, 40, 22]],
+  // custom software: lines of code
+  [[0, 0, 120, 10], [0, 18, 90, 10], [0, 36, 140, 10], [0, 54, 70, 10], [0, 72, 110, 10]],
+  // integrations: a hub and four systems
+  [[60, 34, 30, 30], [0, 0, 26, 26], [124, 0, 26, 26], [0, 74, 26, 26], [124, 74, 26, 26]],
+  // websites: a page
+  [[0, 0, 150, 18], [0, 26, 100, 30], [0, 64, 46, 30], [52, 64, 46, 30], [104, 64, 46, 30]],
 ]
 
 export function Services() {
+  const [open, setOpen] = useState(0)
+  const [held, setHeld] = useState(false)
+  // panels take turns opening by themselves until the visitor points at one
+  useEffect(() => {
+    if (held || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const id = window.setInterval(() => setOpen((n) => (n + 1) % services.items.length), 3400)
+    return () => window.clearInterval(id)
+  }, [held])
+  const pick = (i: number) => {
+    setOpen(i)
+    setHeld(true)
+  }
   return (
-    <section className="section svc" id="services" data-nav="light" aria-labelledby="services-title">
+    <section className="section sv" id="services" aria-labelledby="services-title">
       <div className="container">
-        <header className="svc__head">
+        <header className="sv__head">
           <div>
             <p className="kicker">{services.kicker}</p>
             <h2 id="services-title">{services.title}</h2>
           </div>
-          <p className="svc__lede">{company.summary}</p>
+          <p className="sv__lede">{company.summary}</p>
         </header>
-        <ul className="svc__grid">
-          {services.items.map((s, k) => (
-            <li key={s.title} className="svc__item" style={{ ['--c' as string]: SVC_LOOK[k].color }}>
-              <div className="svc__vis">
-                <ServiceVisual kind={SVC_LOOK[k].kind} />
-              </div>
-              <h3>{s.title}</h3>
-              <p>{s.body}</p>
+        <ul className="sv__rows" onMouseLeave={() => setHeld(false)}>
+          {services.items.map((item, i) => (
+            <li
+              key={item.title}
+              className={`sv__row ${i === open ? 'is-open' : ''}`}
+              style={{ ['--c' as string]: SVC_COLOR[i] }}
+              tabIndex={0}
+              onMouseEnter={() => pick(i)}
+              onFocus={() => pick(i)}
+            >
+              <span className="sv__num" aria-hidden="true">
+                0{i + 1}
+              </span>
+              <span className="sv__viz" aria-hidden="true">
+                {SVC_VIZ[i].map(([x, y, w, h], k) => (
+                  <i key={k} style={{ left: x, top: y, width: w, height: h, animationDelay: `${k * 0.3}s` }} />
+                ))}
+              </span>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
             </li>
           ))}
         </ul>
