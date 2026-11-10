@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { clients, company, contact, footer, markets, nav, plans, services, systems } from '../content/site'
 import { ServiceVisual, type ServiceKind } from './ServiceVisual'
 import { MarketsMap } from './MarketsMap'
@@ -101,62 +101,88 @@ export function Markets() {
   )
 }
 
+/** Accent per contract model, and a small mark per contract rule. */
+const MODEL_COLOR = ['#18306F', '#0B5A3E', '#A5370A']
+const RULE_MARK = ['✎', '⚙', '٪', '⛨']
+const isNone = (v: string) => v === '—'
+
 export function Plans() {
+  const grid = useRef<HTMLDivElement>(null)
+  // A soft light follows the cursor along the edges of every tile.
+  useEffect(() => {
+    const el = grid.current
+    if (!el || window.matchMedia('(hover: none)').matches) return
+    let raf = 0
+    let ev: PointerEvent | null = null
+    const paint = () => {
+      raf = 0
+      if (!ev) return
+      el.querySelectorAll<HTMLElement>('.pl__cell').forEach((c) => {
+        const r = c.getBoundingClientRect()
+        c.style.setProperty('--x', `${ev!.clientX - r.left}px`)
+        c.style.setProperty('--y', `${ev!.clientY - r.top}px`)
+      })
+    }
+    const onMove = (e: PointerEvent) => {
+      ev = e
+      if (!raf) raf = requestAnimationFrame(paint)
+    }
+    el.addEventListener('pointermove', onMove)
+    return () => {
+      el.removeEventListener('pointermove', onMove)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+
   return (
-    <section className="section" id="plans" data-nav="light" aria-labelledby="plans-title">
+    <section className="section pl" id="plans" data-nav="light" aria-labelledby="plans-title">
       <div className="container">
         <header className="head">
           <p className="kicker">{plans.kicker}</p>
           <h2 id="plans-title">{plans.title}</h2>
         </header>
-        <ul className="models">
-          {plans.models.map((m) => (
-            <li key={m.name}>
+        <div className="pl__grid" ref={grid}>
+          <div className="pl__cell pl__tiers">
+            <small>الباقات</small>
+            <h3>ثلاث مستويات، نحددها معك.</h3>
+            <div className="pl__tierrow">
+              {plans.columns.map((c, j) => (
+                <div key={c} className={j === 1 ? 'is-main' : ''}>
+                  <b dir="ltr">{c}</b>
+                  <small>{plans.columnNotes[j]}</small>
+                  <ul>
+                    {plans.rows.map((r) => (
+                      <li key={r.label} className={isNone(r.values[j]) ? 'no' : ''}>
+                        <span>{r.label}</span>
+                        <span>{isNone(r.values[j]) ? 'غير متاح' : r.values[j]}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+          {plans.models.map((m, i) => (
+            <div key={m.name} className="pl__cell pl__model" style={{ ['--c' as string]: MODEL_COLOR[i] }}>
+              <small>نموذج تعاقد</small>
               <h3>{m.name}</h3>
               <p>
-                <b>مناسب لـ</b> {m.fits}
+                {m.fits}
+                <b>{m.billing}</b>
               </p>
-              <p>
-                <b>التحصيل</b> {m.billing}
-              </p>
-            </li>
+            </div>
           ))}
-        </ul>
-        <div className="table-wrap" tabIndex={0} role="region" aria-labelledby="plans-title">
-          <table className="table">
-            <thead>
-              <tr>
-                <th scope="col">
-                  <span className="sr-only">البند</span>
-                </th>
-                {plans.columns.map((c, i) => (
-                  <th scope="col" key={c} dir="auto" className={i === 1 ? 'is-main' : ''}>
-                    {c}
-                    <small>{plans.columnNotes[i]}</small>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {plans.rows.map((r) => (
-                <tr key={r.label}>
-                  <th scope="row">{r.label}</th>
-                  {r.values.map((v, i) => (
-                    <td key={i} className={i === 1 ? 'is-main' : ''}>
-                      {v}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {plans.rules.map((r, i) => (
+            <div key={r} className="pl__cell pl__rule">
+              <i aria-hidden="true">{RULE_MARK[i]}</i>
+              <b>{r}</b>
+            </div>
+          ))}
+          <div className="pl__cell pl__note">
+            <small>ملاحظة</small>
+            <p>{plans.note}</p>
+          </div>
         </div>
-        <p className="plans__note">{plans.note}</p>
-        <ul className="rules">
-          {plans.rules.map((r) => (
-            <li key={r}>{r}</li>
-          ))}
-        </ul>
       </div>
     </section>
   )
