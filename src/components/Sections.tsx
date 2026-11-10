@@ -29,7 +29,7 @@ export function Services() {
     setHeld(true)
   }
   return (
-    <section className="section sv" id="services" aria-labelledby="services-title">
+    <section className="section sv" id="services" data-nav="light" aria-labelledby="services-title">
       <div className="container">
         <header className="sv__head">
           <div>
